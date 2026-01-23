@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(command -v:*)"
+      "Bash(command -v:*)",
+      "Bash(python3:*)",
+      "Bash(open:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(ls:*)"
     ]
   }
 }
