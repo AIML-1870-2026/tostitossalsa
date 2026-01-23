@@ -261,13 +261,22 @@
             }
 
             draw() {
-                // Calculate color with blue shift
-                const blueShift = settings.color;
-                const r = Math.round(255 - blueShift * 85);
-                const g = Math.round(255 - blueShift * 51);
-                const b = 255;
+                // Calculate rainbow color based on time and particle angle
+                const colorIntensity = settings.color;
 
-                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${this.opacity})`;
+                if (colorIntensity === 0) {
+                    // Pure white when color shift is off
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                } else {
+                    // Rainbow cycling based on time and particle angle for variety
+                    const time = performance.now() / 1000;
+                    const hue = ((time * 50) + (this.angle * 180 / Math.PI)) % 360;
+                    const saturation = colorIntensity * 100;
+                    const lightness = 50 + (1 - colorIntensity) * 50;
+
+                    ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${this.opacity})`;
+                }
+
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
