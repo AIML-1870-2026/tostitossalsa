@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to My Galaxy</title>
+    <title>My Cozy Galaxy</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='6' y='0' width='4' height='2' fill='%23ff6b9d'/><rect x='4' y='2' width='8' height='2' fill='%23fffffe'/><rect x='4' y='4' width='8' height='6' fill='%23fffffe'/><rect x='6' y='5' width='4' height='3' fill='%2382aaff'/><rect x='2' y='8' width='2' height='4' fill='%23ff6b9d'/><rect x='12' y='8' width='2' height='4' fill='%23ff6b9d'/><rect x='5' y='12' width='2' height='2' fill='%23ffcb6b'/><rect x='9' y='12' width='2' height='2' fill='%23ffcb6b'/><rect x='7' y='14' width='2' height='2' fill='%23ff6b4a'/></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
+        /* ============================================
+           RESET & VARIABLES
+           ============================================ */
         * {
             margin: 0;
             padding: 0;
@@ -13,17 +17,39 @@
         }
 
         :root {
-            --bg-primary: #0f0e17;
-            --bg-secondary: #1a1626;
+            /* Primary Background - Deep space blues and purples */
+            --bg-deep: #0f0e17;
+            --bg-mid: #1a1626;
             --bg-accent: #2d1b4e;
+
+            /* Accent Colors - Soft pastels */
             --pink: #ff6b9d;
             --purple: #c792ea;
             --cyan: #82aaff;
             --yellow: #ffcb6b;
-            --text-primary: #fffffe;
-            --text-secondary: #f4f4f5;
+            --orange: #ff6b4a;
+
+            /* Text Colors */
+            --text-light: #fffffe;
+            --text-cream: #f4f4f5;
         }
 
+        /* ============================================
+           ACCESSIBILITY - Reduced Motion
+           ============================================ */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ============================================
+           BASE STYLES
+           ============================================ */
         html {
             scroll-behavior: smooth;
         }
@@ -31,446 +57,693 @@
         body {
             font-family: 'VT323', monospace;
             min-height: 100vh;
-            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-accent) 100%);
-            color: var(--text-primary);
+            background: var(--bg-deep);
+            color: var(--text-light);
             overflow-x: hidden;
+            line-height: 1.5;
         }
 
-        /* Reduce motion for accessibility */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        /* ===== STARFIELD BACKGROUND ===== */
-        .starfield {
+        /* ============================================
+           STARFIELD BACKGROUND
+           ============================================ */
+        .galaxy-bg {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(45, 27, 78, 0.4) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(45, 27, 78, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(26, 22, 38, 0.8) 0%, transparent 70%),
+                var(--bg-deep);
             pointer-events: none;
             z-index: 0;
         }
 
-        .star {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: var(--text-primary);
-            animation: twinkle 3s ease-in-out infinite;
+        .stars-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .star.small { width: 1px; height: 1px; opacity: 0.4; }
-        .star.medium { width: 2px; height: 2px; opacity: 0.6; }
-        .star.large { width: 3px; height: 3px; opacity: 0.8; }
+        /* Individual star styles */
+        .star {
+            position: absolute;
+            background: var(--text-light);
+            border-radius: 50%;
+        }
 
-        .star.pink { background: var(--pink); }
-        .star.purple { background: var(--purple); }
-        .star.cyan { background: var(--cyan); }
-        .star.yellow { background: var(--yellow); }
+        .star--xs {
+            width: 1px;
+            height: 1px;
+            opacity: 0.3;
+        }
+
+        .star--sm {
+            width: 2px;
+            height: 2px;
+            opacity: 0.5;
+        }
+
+        .star--md {
+            width: 3px;
+            height: 3px;
+            opacity: 0.7;
+        }
+
+        .star--lg {
+            width: 4px;
+            height: 4px;
+            opacity: 0.9;
+        }
+
+        /* Colored stars */
+        .star--pink { background: var(--pink); }
+        .star--purple { background: var(--purple); }
+        .star--cyan { background: var(--cyan); }
+        .star--yellow { background: var(--yellow); }
+
+        /* Twinkling animation */
+        .star--twinkle {
+            animation: twinkle 4s ease-in-out infinite;
+        }
 
         @keyframes twinkle {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
             50% { opacity: 1; transform: scale(1.2); }
         }
 
         /* Shooting star */
         .shooting-star {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: linear-gradient(45deg, var(--text-primary), transparent);
-            animation: shoot 8s linear infinite;
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--text-light), transparent);
             opacity: 0;
+            animation: shoot 12s ease-in-out infinite;
+        }
+
+        .shooting-star--2 {
+            animation-delay: 6s;
         }
 
         @keyframes shoot {
-            0% { transform: translate(0, 0); opacity: 0; }
-            5% { opacity: 1; }
-            15% { transform: translate(300px, 300px); opacity: 0; }
-            100% { opacity: 0; }
+            0% {
+                transform: translate(0, 0) rotate(-45deg);
+                opacity: 0;
+            }
+            2% {
+                opacity: 1;
+            }
+            8% {
+                transform: translate(400px, 400px) rotate(-45deg);
+                opacity: 0;
+            }
+            100% {
+                opacity: 0;
+            }
         }
 
-        /* Floating planets */
-        .planet {
+        /* ============================================
+           FLOATING PIXEL PLANETS
+           ============================================ */
+        .planets-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .pixel-planet {
             position: absolute;
             image-rendering: pixelated;
-            animation: float 6s ease-in-out infinite;
+            image-rendering: crisp-edges;
         }
 
-        .planet-1 {
-            width: 24px;
-            height: 24px;
-            top: 15%;
-            right: 10%;
+        /* Pink planet */
+        .pixel-planet--pink {
+            width: 32px;
+            height: 32px;
+            top: 12%;
+            right: 8%;
+            animation: float-slow 8s ease-in-out infinite;
             background:
-                linear-gradient(var(--pink) 0 0) 8px 0 / 8px 4px,
-                linear-gradient(var(--pink) 0 0) 4px 4px / 16px 4px,
-                linear-gradient(var(--pink) 0 0) 4px 8px / 16px 4px,
-                linear-gradient(var(--pink) 0 0) 4px 12px / 16px 4px,
-                linear-gradient(var(--pink) 0 0) 4px 16px / 16px 4px,
-                linear-gradient(var(--pink) 0 0) 8px 20px / 8px 4px;
+                linear-gradient(var(--pink) 0 0) 12px 0 / 8px 4px,
+                linear-gradient(var(--pink) 0 0) 8px 4px / 16px 4px,
+                linear-gradient(var(--pink) 0 0) 4px 8px / 24px 4px,
+                linear-gradient(var(--pink) 0 0) 4px 12px / 24px 4px,
+                linear-gradient(var(--pink) 0 0) 4px 16px / 24px 4px,
+                linear-gradient(var(--pink) 0 0) 8px 20px / 16px 4px,
+                linear-gradient(var(--pink) 0 0) 12px 24px / 8px 4px,
+                /* Highlight */
+                linear-gradient(rgba(255,255,255,0.3) 0 0) 8px 8px / 8px 4px;
             background-repeat: no-repeat;
-            animation-delay: 0s;
         }
 
-        .planet-2 {
+        /* Cyan planet with ring */
+        .pixel-planet--cyan {
+            width: 28px;
+            height: 28px;
+            top: 55%;
+            left: 5%;
+            animation: float-slow 10s ease-in-out infinite;
+            animation-delay: -3s;
+            background:
+                /* Ring */
+                linear-gradient(var(--yellow) 0 0) 0 12px / 28px 4px,
+                /* Planet body */
+                linear-gradient(var(--cyan) 0 0) 10px 4px / 8px 4px,
+                linear-gradient(var(--cyan) 0 0) 6px 8px / 16px 4px,
+                linear-gradient(var(--cyan) 0 0) 6px 16px / 16px 4px,
+                linear-gradient(var(--cyan) 0 0) 10px 20px / 8px 4px;
+            background-repeat: no-repeat;
+        }
+
+        /* Small yellow moon */
+        .pixel-planet--yellow {
             width: 16px;
             height: 16px;
-            top: 40%;
-            left: 8%;
+            bottom: 20%;
+            right: 12%;
+            animation: float-slow 6s ease-in-out infinite;
+            animation-delay: -5s;
             background:
-                linear-gradient(var(--cyan) 0 0) 4px 0 / 8px 4px,
-                linear-gradient(var(--cyan) 0 0) 0 4px / 16px 4px,
-                linear-gradient(var(--cyan) 0 0) 0 8px / 16px 4px,
-                linear-gradient(var(--cyan) 0 0) 4px 12px / 8px 4px;
+                linear-gradient(var(--yellow) 0 0) 4px 0 / 8px 4px,
+                linear-gradient(var(--yellow) 0 0) 0 4px / 16px 4px,
+                linear-gradient(var(--yellow) 0 0) 0 8px / 16px 4px,
+                linear-gradient(var(--yellow) 0 0) 4px 12px / 8px 4px,
+                /* Crater */
+                linear-gradient(rgba(0,0,0,0.2) 0 0) 8px 4px / 4px 4px;
             background-repeat: no-repeat;
-            animation-delay: 2s;
         }
 
-        .planet-3 {
-            width: 20px;
-            height: 20px;
-            bottom: 25%;
-            right: 15%;
+        /* Purple asteroid */
+        .pixel-planet--purple {
+            width: 12px;
+            height: 12px;
+            top: 35%;
+            left: 15%;
+            animation: float-slow 7s ease-in-out infinite, spin 20s linear infinite;
+            animation-delay: -2s;
             background:
-                linear-gradient(var(--yellow) 0 0) 8px 0 / 4px 4px,
-                linear-gradient(var(--yellow) 0 0) 4px 4px / 12px 4px,
-                linear-gradient(var(--yellow) 0 0) 0 8px / 20px 4px,
-                linear-gradient(var(--yellow) 0 0) 4px 12px / 12px 4px,
-                linear-gradient(var(--yellow) 0 0) 8px 16px / 4px 4px;
+                linear-gradient(var(--purple) 0 0) 4px 0 / 4px 4px,
+                linear-gradient(var(--purple) 0 0) 0 4px / 12px 4px,
+                linear-gradient(var(--purple) 0 0) 4px 8px / 4px 4px;
             background-repeat: no-repeat;
-            animation-delay: 4s;
         }
 
-        @keyframes float {
+        @keyframes float-slow {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-15px); }
         }
 
-        /* ===== MAIN CONTAINER ===== */
-        .container {
+        @keyframes spin {
+            from { rotate: 0deg; }
+            to { rotate: 360deg; }
+        }
+
+        /* ============================================
+           MAIN CONTENT WRAPPER
+           ============================================ */
+        .page-wrapper {
             position: relative;
-            z-index: 1;
-            max-width: 1000px;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 960px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 24px;
         }
 
-        /* ===== HEADER / HERO ===== */
+        /* ============================================
+           HEADER / HERO SECTION
+           ============================================ */
         .hero {
+            padding: 100px 0 60px;
             text-align: center;
-            padding: 80px 20px 60px;
-            animation: fadeIn 1s ease-out;
+            animation: fadeInUp 1s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .hero-title {
+        .hero__icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 32px;
+            image-rendering: pixelated;
+            background:
+                /* Rocket */
+                linear-gradient(var(--pink) 0 0) 20px 0 / 8px 8px,
+                linear-gradient(var(--text-light) 0 0) 16px 8px / 16px 8px,
+                linear-gradient(var(--text-light) 0 0) 12px 16px / 24px 16px,
+                linear-gradient(var(--cyan) 0 0) 20px 20px / 8px 8px,
+                linear-gradient(var(--pink) 0 0) 4px 24px / 8px 12px,
+                linear-gradient(var(--pink) 0 0) 36px 24px / 8px 12px,
+                linear-gradient(var(--yellow) 0 0) 16px 36px / 16px 8px,
+                linear-gradient(var(--orange) 0 0) 20px 44px / 8px 4px;
+            background-repeat: no-repeat;
+            animation: float-slow 4s ease-in-out infinite;
+        }
+
+        .hero__title {
             font-family: 'Press Start 2P', cursive;
-            font-size: clamp(24px, 5vw, 36px);
-            color: var(--text-primary);
+            font-size: clamp(20px, 5vw, 32px);
+            color: var(--text-light);
+            margin-bottom: 24px;
+            line-height: 1.6;
             text-shadow:
-                0 0 10px var(--purple),
-                0 0 20px var(--purple);
-            margin-bottom: 20px;
-            line-height: 1.4;
+                0 0 20px rgba(199, 146, 234, 0.5),
+                0 4px 0 var(--bg-accent);
         }
 
-        .hero-subtitle {
-            font-size: clamp(20px, 4vw, 28px);
-            color: var(--text-secondary);
+        .hero__subtitle {
+            font-size: clamp(24px, 4vw, 32px);
+            color: var(--text-cream);
             margin-bottom: 16px;
         }
 
-        .hero-tagline {
+        .hero__tagline {
             font-size: 20px;
             color: var(--purple);
-            opacity: 0.8;
         }
 
-        /* ===== ABOUT SECTION ===== */
+        /* ============================================
+           ABOUT / INTRO SECTION
+           ============================================ */
         .about {
+            padding: 40px 0 60px;
             text-align: center;
-            padding: 40px 20px;
-            max-width: 600px;
+            animation: fadeInUp 1s ease-out 0.2s backwards;
+        }
+
+        .about__content {
+            max-width: 580px;
             margin: 0 auto;
         }
 
-        .about p {
-            font-size: 22px;
-            line-height: 1.6;
-            color: var(--text-secondary);
+        .about__text {
+            font-size: clamp(20px, 3vw, 24px);
+            color: var(--text-cream);
+            line-height: 1.7;
         }
 
-        .about .star-divider {
-            margin: 24px 0;
-            font-size: 14px;
-            letter-spacing: 8px;
+        .about__divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 40px;
             color: var(--yellow);
+            font-size: 12px;
         }
 
-        /* ===== PROJECTS SECTION ===== */
+        .about__divider-star {
+            width: 8px;
+            height: 8px;
+            background: var(--yellow);
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        .about__divider-star:nth-child(2) { animation-delay: 0.3s; }
+        .about__divider-star:nth-child(3) { animation-delay: 0.6s; }
+
+        /* ============================================
+           PROJECTS SECTION
+           ============================================ */
         .projects {
-            padding: 60px 20px;
+            padding: 60px 0 80px;
+            animation: fadeInUp 1s ease-out 0.4s backwards;
         }
 
-        .section-title {
+        .projects__title {
             font-family: 'Press Start 2P', cursive;
-            font-size: clamp(16px, 3vw, 20px);
-            text-align: center;
-            margin-bottom: 40px;
+            font-size: clamp(14px, 3vw, 18px);
             color: var(--cyan);
-            text-shadow: 0 0 10px var(--cyan);
+            text-align: center;
+            margin-bottom: 48px;
+            text-shadow: 0 0 15px rgba(130, 170, 255, 0.5);
         }
 
-        .projects-grid {
+        .projects__grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            justify-items: center;
+            gap: 32px;
         }
 
+        /* Project Card - Terminal/Window Style */
         .project-card {
-            background: rgba(26, 22, 38, 0.8);
-            border: 4px solid var(--purple);
-            padding: 24px;
-            width: 100%;
-            max-width: 320px;
-            text-align: center;
-            transition: all 0.3s ease;
+            background: rgba(26, 22, 38, 0.9);
+            border: 3px solid var(--purple);
             position: relative;
-            image-rendering: pixelated;
-        }
-
-        .project-card::before {
-            content: '';
-            position: absolute;
-            top: -4px;
-            left: -4px;
-            right: -4px;
-            bottom: -4px;
-            background: linear-gradient(45deg, var(--pink), var(--purple), var(--cyan));
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .project-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 10px 40px rgba(199, 146, 234, 0.3);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(199, 146, 234, 0.2);
         }
 
-        .project-card:hover::before {
-            opacity: 1;
+        .project-card:focus-within {
+            outline: 3px solid var(--cyan);
+            outline-offset: 2px;
         }
 
-        .project-icon {
+        /* Terminal title bar */
+        .project-card__header {
+            background: var(--purple);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .project-card__dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .project-card__dot--red { background: var(--pink); }
+        .project-card__dot--yellow { background: var(--yellow); }
+        .project-card__dot--green { background: #98c379; }
+
+        .project-card__body {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .project-card__icon {
             width: 64px;
             height: 64px;
             margin: 0 auto 20px;
-            position: relative;
             image-rendering: pixelated;
-        }
-
-        /* Pixel art rocket icon */
-        .project-icon::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
             background:
-                /* Rocket tip */
-                linear-gradient(var(--pink) 0 0) 28px 0 / 8px 8px,
-                /* Rocket body */
-                linear-gradient(var(--text-primary) 0 0) 24px 8px / 16px 8px,
-                linear-gradient(var(--text-primary) 0 0) 20px 16px / 24px 8px,
-                linear-gradient(var(--text-primary) 0 0) 20px 24px / 24px 8px,
-                linear-gradient(var(--text-primary) 0 0) 20px 32px / 24px 8px,
-                /* Window */
-                linear-gradient(var(--cyan) 0 0) 28px 20px / 8px 8px,
-                /* Fins */
-                linear-gradient(var(--pink) 0 0) 12px 32px / 8px 16px,
-                linear-gradient(var(--pink) 0 0) 44px 32px / 8px 16px,
-                /* Flames */
-                linear-gradient(var(--yellow) 0 0) 24px 48px / 8px 8px,
-                linear-gradient(var(--yellow) 0 0) 32px 48px / 8px 8px,
-                linear-gradient(#ff6b4a 0 0) 28px 56px / 8px 8px;
+                /* Globe/world icon */
+                linear-gradient(var(--cyan) 0 0) 24px 4px / 16px 4px,
+                linear-gradient(var(--cyan) 0 0) 16px 8px / 32px 4px,
+                linear-gradient(var(--cyan) 0 0) 12px 12px / 40px 4px,
+                linear-gradient(var(--cyan) 0 0) 8px 16px / 48px 4px,
+                linear-gradient(var(--cyan) 0 0) 8px 20px / 48px 4px,
+                /* Land mass */
+                linear-gradient(#98c379 0 0) 20px 16px / 12px 8px,
+                linear-gradient(#98c379 0 0) 36px 20px / 8px 4px,
+                /* More ocean */
+                linear-gradient(var(--cyan) 0 0) 8px 24px / 48px 4px,
+                linear-gradient(var(--cyan) 0 0) 8px 28px / 48px 4px,
+                linear-gradient(var(--cyan) 0 0) 12px 32px / 40px 4px,
+                /* Land mass bottom */
+                linear-gradient(#98c379 0 0) 16px 32px / 16px 4px,
+                linear-gradient(var(--cyan) 0 0) 16px 36px / 32px 4px,
+                linear-gradient(var(--cyan) 0 0) 24px 40px / 16px 4px;
             background-repeat: no-repeat;
         }
 
-        .project-title {
+        .project-card__title {
             font-family: 'Press Start 2P', cursive;
-            font-size: 14px;
-            color: var(--text-primary);
+            font-size: 12px;
+            color: var(--text-light);
             margin-bottom: 16px;
         }
 
-        .project-desc {
+        .project-card__desc {
             font-size: 18px;
-            color: var(--text-secondary);
-            line-height: 1.5;
+            color: var(--text-cream);
+            line-height: 1.6;
             margin-bottom: 24px;
         }
 
-        .project-link {
+        .project-card__link {
             display: inline-block;
             font-family: 'Press Start 2P', cursive;
             font-size: 10px;
-            color: var(--bg-primary);
+            color: var(--bg-deep);
             background: var(--yellow);
-            padding: 12px 20px;
+            padding: 14px 24px;
             text-decoration: none;
             border: none;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             position: relative;
         }
 
-        .project-link:hover {
+        .project-card__link::after {
+            content: ' →';
+        }
+
+        .project-card__link:hover {
             background: var(--pink);
             transform: scale(1.05);
         }
 
-        .project-link:active {
+        .project-card__link:active {
             transform: scale(0.95);
         }
 
-        /* ===== FOOTER ===== */
+        /* ============================================
+           FOOTER
+           ============================================ */
         .footer {
+            margin-top: auto;
+            padding: 48px 0 32px;
             text-align: center;
-            padding: 60px 20px 40px;
-            border-top: 2px dashed var(--bg-accent);
-            margin-top: 40px;
+            border-top: 2px dashed rgba(199, 146, 234, 0.3);
         }
 
-        .footer-message {
-            font-size: 18px;
+        .footer__message {
+            font-size: 20px;
             color: var(--purple);
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
-        .footer-copy {
-            font-size: 14px;
-            color: var(--text-secondary);
-            opacity: 0.6;
+        .footer__heart {
+            color: var(--pink);
+            display: inline-block;
+            animation: pulse 1.5s ease-in-out infinite;
         }
 
-        .footer-stars {
-            margin-top: 20px;
-            font-size: 12px;
-            letter-spacing: 4px;
-            color: var(--yellow);
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
         }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 640px) {
+        .footer__copy {
+            font-size: 16px;
+            color: var(--text-cream);
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+
+        .footer__stars {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .footer__star {
+            width: 6px;
+            height: 6px;
+            background: var(--yellow);
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        .footer__star:nth-child(2) { animation-delay: 0.5s; background: var(--pink); }
+        .footer__star:nth-child(3) { animation-delay: 1s; background: var(--cyan); }
+        .footer__star:nth-child(4) { animation-delay: 1.5s; background: var(--purple); }
+        .footer__star:nth-child(5) { animation-delay: 2s; }
+
+        /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+
+        /* Mobile - Single column */
+        @media (max-width: 639px) {
             .hero {
-                padding: 60px 16px 40px;
+                padding: 60px 0 40px;
             }
 
-            .projects-grid {
+            .hero__icon {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 24px;
+            }
+
+            .projects__grid {
                 grid-template-columns: 1fr;
             }
 
-            .project-card {
-                max-width: 100%;
-            }
-
-            .planet-1, .planet-2, .planet-3 {
-                display: none;
+            .pixel-planet {
+                opacity: 0.5;
+                transform: scale(0.7);
             }
         }
 
+        /* Tablet - 2 columns */
+        @media (min-width: 640px) and (max-width: 1023px) {
+            .projects__grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Desktop - 3 columns */
         @media (min-width: 1024px) {
-            .projects-grid {
+            .projects__grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
     </style>
 </head>
 <body>
-    <!-- Starfield Background -->
-    <div class="starfield" aria-hidden="true">
-        <!-- Small stars -->
-        <div class="star small" style="top: 5%; left: 10%;"></div>
-        <div class="star small pink" style="top: 12%; left: 25%;"></div>
-        <div class="star small" style="top: 8%; left: 45%;"></div>
-        <div class="star small cyan" style="top: 15%; left: 65%;"></div>
-        <div class="star small" style="top: 3%; left: 80%;"></div>
-        <div class="star small yellow" style="top: 20%; left: 92%;"></div>
-        <div class="star small" style="top: 28%; left: 5%;"></div>
-        <div class="star small purple" style="top: 35%; left: 18%;"></div>
-        <div class="star small" style="top: 42%; left: 38%;"></div>
-        <div class="star small" style="top: 38%; left: 55%;"></div>
-        <div class="star small pink" style="top: 45%; left: 72%;"></div>
-        <div class="star small" style="top: 32%; left: 88%;"></div>
+    <!-- Galaxy Background Layer -->
+    <div class="galaxy-bg" aria-hidden="true"></div>
+
+    <!-- Stars Layer -->
+    <div class="stars-layer" aria-hidden="true">
+        <!-- Extra small stars -->
+        <div class="star star--xs" style="top: 5%; left: 12%;"></div>
+        <div class="star star--xs" style="top: 8%; left: 34%;"></div>
+        <div class="star star--xs" style="top: 12%; left: 67%;"></div>
+        <div class="star star--xs" style="top: 18%; left: 89%;"></div>
+        <div class="star star--xs" style="top: 25%; left: 23%;"></div>
+        <div class="star star--xs" style="top: 32%; left: 56%;"></div>
+        <div class="star star--xs" style="top: 45%; left: 78%;"></div>
+        <div class="star star--xs" style="top: 58%; left: 9%;"></div>
+        <div class="star star--xs" style="top: 67%; left: 45%;"></div>
+        <div class="star star--xs" style="top: 75%; left: 82%;"></div>
+        <div class="star star--xs" style="top: 88%; left: 28%;"></div>
+        <div class="star star--xs" style="top: 92%; left: 61%;"></div>
+
+        <!-- Small twinkling stars -->
+        <div class="star star--sm star--twinkle star--pink" style="top: 7%; left: 22%;"></div>
+        <div class="star star--sm star--twinkle" style="top: 15%; left: 48%; animation-delay: 0.5s;"></div>
+        <div class="star star--sm star--twinkle star--cyan" style="top: 28%; left: 76%; animation-delay: 1s;"></div>
+        <div class="star star--sm star--twinkle star--yellow" style="top: 38%; left: 18%; animation-delay: 1.5s;"></div>
+        <div class="star star--sm star--twinkle" style="top: 52%; left: 42%; animation-delay: 2s;"></div>
+        <div class="star star--sm star--twinkle star--purple" style="top: 63%; left: 88%; animation-delay: 0.3s;"></div>
+        <div class="star star--sm star--twinkle" style="top: 78%; left: 15%; animation-delay: 0.8s;"></div>
+        <div class="star star--sm star--twinkle star--pink" style="top: 85%; left: 52%; animation-delay: 1.2s;"></div>
 
         <!-- Medium stars -->
-        <div class="star medium purple" style="top: 18%; left: 15%; animation-delay: 0.5s;"></div>
-        <div class="star medium" style="top: 25%; left: 42%; animation-delay: 1s;"></div>
-        <div class="star medium cyan" style="top: 50%; left: 28%; animation-delay: 1.5s;"></div>
-        <div class="star medium yellow" style="top: 55%; left: 62%; animation-delay: 0.3s;"></div>
-        <div class="star medium" style="top: 65%; left: 85%; animation-delay: 2s;"></div>
-        <div class="star medium pink" style="top: 72%; left: 12%; animation-delay: 0.8s;"></div>
-        <div class="star medium" style="top: 78%; left: 48%; animation-delay: 1.2s;"></div>
-        <div class="star medium purple" style="top: 85%; left: 75%; animation-delay: 0.6s;"></div>
+        <div class="star star--md star--twinkle star--yellow" style="top: 10%; left: 58%; animation-delay: 0.7s;"></div>
+        <div class="star star--md star--twinkle star--purple" style="top: 35%; left: 92%; animation-delay: 1.3s;"></div>
+        <div class="star star--md star--twinkle star--cyan" style="top: 55%; left: 25%; animation-delay: 0.4s;"></div>
+        <div class="star star--md star--twinkle" style="top: 72%; left: 68%; animation-delay: 1.8s;"></div>
 
-        <!-- Large stars -->
-        <div class="star large yellow" style="top: 10%; left: 35%; animation-delay: 0.7s;"></div>
-        <div class="star large cyan" style="top: 60%; left: 8%; animation-delay: 1.8s;"></div>
-        <div class="star large pink" style="top: 48%; left: 90%; animation-delay: 0.4s;"></div>
-        <div class="star large" style="top: 88%; left: 30%; animation-delay: 1.1s;"></div>
+        <!-- Large bright stars -->
+        <div class="star star--lg star--twinkle star--yellow" style="top: 20%; left: 5%; animation-delay: 0.9s;"></div>
+        <div class="star star--lg star--twinkle star--pink" style="top: 48%; left: 95%; animation-delay: 0.2s;"></div>
+        <div class="star star--lg star--twinkle star--cyan" style="top: 82%; left: 38%; animation-delay: 1.6s;"></div>
 
         <!-- Shooting stars -->
-        <div class="shooting-star" style="top: 10%; left: 20%;"></div>
-        <div class="shooting-star" style="top: 30%; left: 60%; animation-delay: 4s;"></div>
-
-        <!-- Floating planets -->
-        <div class="planet planet-1" aria-hidden="true"></div>
-        <div class="planet planet-2" aria-hidden="true"></div>
-        <div class="planet planet-3" aria-hidden="true"></div>
+        <div class="shooting-star" style="top: 15%; left: 10%;"></div>
+        <div class="shooting-star shooting-star--2" style="top: 40%; left: 50%;"></div>
     </div>
 
-    <div class="container">
-        <!-- Hero Section -->
-        <header class="hero">
-            <h1 class="hero-title">Welcome to My Galaxy</h1>
-            <p class="hero-subtitle">A cozy corner of the cosmos</p>
-            <p class="hero-tagline">where pixels meet stars</p>
-        </header>
+    <!-- Floating Pixel Planets -->
+    <div class="planets-layer" aria-hidden="true">
+        <div class="pixel-planet pixel-planet--pink"></div>
+        <div class="pixel-planet pixel-planet--cyan"></div>
+        <div class="pixel-planet pixel-planet--yellow"></div>
+        <div class="pixel-planet pixel-planet--purple"></div>
+    </div>
 
-        <!-- About Section -->
-        <section class="about">
-            <p>Hey there, traveler! Pull up a chair and stay a while. This is my little space on the internet where I share things I create and explore.</p>
-            <div class="star-divider" aria-hidden="true">* * *</div>
-        </section>
+    <!-- Main Page Content -->
+    <div class="page-wrapper">
+        <div class="container">
+            <!-- Hero Section -->
+            <header class="hero">
+                <div class="hero__icon" role="img" aria-label="Pixel art rocket ship"></div>
+                <h1 class="hero__title">Welcome to My Galaxy</h1>
+                <p class="hero__subtitle">A cozy corner of the cosmos</p>
+                <p class="hero__tagline">~ where pixels meet stars ~</p>
+            </header>
 
-        <!-- Projects Section -->
-        <section class="projects">
-            <h2 class="section-title">Projects</h2>
-            <div class="projects-grid">
-                <article class="project-card">
-                    <div class="project-icon" aria-hidden="true"></div>
-                    <h3 class="project-title">Hello World</h3>
-                    <p class="project-desc">A retro-styled greeting from across the digital universe. My first creation in this cosmic portfolio.</p>
-                    <a href="hello-world.html" class="project-link">View Project</a>
-                </article>
-            </div>
-        </section>
+            <!-- About Section -->
+            <section class="about" aria-labelledby="about-heading">
+                <div class="about__content">
+                    <h2 id="about-heading" class="visually-hidden">About</h2>
+                    <p class="about__text">
+                        Hey there, space traveler! Welcome to my little corner of the universe.
+                        Pull up a comet and stay awhile. This is where I share the things I create
+                        and the adventures I embark on through code.
+                    </p>
+                    <div class="about__divider" aria-hidden="true">
+                        <div class="about__divider-star"></div>
+                        <div class="about__divider-star"></div>
+                        <div class="about__divider-star"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section class="projects" aria-labelledby="projects-heading">
+                <h2 id="projects-heading" class="projects__title">~ Projects ~</h2>
+                <div class="projects__grid">
+                    <!-- Hello World Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon" role="img" aria-label="Pixel art Earth"></div>
+                            <h3 class="project-card__title">Hello World</h3>
+                            <p class="project-card__desc">
+                                A friendly greeting from across the digital cosmos.
+                                My first creation in this stellar portfolio.
+                            </p>
+                            <a href="hello-world.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
 
         <!-- Footer -->
         <footer class="footer">
-            <p class="footer-message">Made with love in the galaxy</p>
-            <p class="footer-copy">&copy; 2025 My Cosmic Corner</p>
-            <div class="footer-stars" aria-hidden="true">. * . * . * .</div>
+            <div class="container">
+                <p class="footer__message">
+                    Made with <span class="footer__heart" aria-label="love">&#10084;</span> in the galaxy
+                </p>
+                <p class="footer__copy">&copy; 2025 My Cosmic Corner</p>
+                <div class="footer__stars" aria-hidden="true">
+                    <span class="footer__star"></span>
+                    <span class="footer__star"></span>
+                    <span class="footer__star"></span>
+                    <span class="footer__star"></span>
+                    <span class="footer__star"></span>
+                </div>
+            </div>
         </footer>
     </div>
+
+    <style>
+        /* Visually hidden but accessible */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
 </body>
 </html>
