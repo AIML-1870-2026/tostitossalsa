@@ -2,13 +2,13 @@
 
 ## Objective
 
-Create an interactive webpage featuring a particle system that generates a "Stellar Web" - a dynamic network of connected particles floating in 3D space. Your implementation should include interactive sliders that allow users to control various attributes of the animation in real-time.
+Create an interactive webpage featuring a particle system that generates a "Stellar Web" - a dynamic network of connected particles floating in 2D space. Your implementation should include interactive sliders that allow users to control various attributes of the animation in real-time.
 
 ## What is a Stellar Web?
 
 A Stellar Web is a particle network visualization where:
 
-- **Nodes** (particles) move freely through 3D space
+- **Nodes** (particles) move freely through 2D space
 - **Edges** (connections) automatically form between nodes within a certain distance
 - The connectivity creates an ever-changing web-like structure
 - Visual properties like thickness, transparency, and opacity affect the aesthetic
@@ -19,7 +19,7 @@ A Stellar Web is a particle network visualization where:
 ### Core Features
 
 1. **Particle System**
-   - Create multiple nodes that move through 3D space
+   - Create multiple nodes that move through 2D space
    - Each node should have position, velocity, and directional movement
    - Nodes should bounce off boundaries or wrap around the canvas
 
@@ -111,8 +111,6 @@ Consider including controls for:
 - **Edge Thickness**: 0.5-5.0 pixels
 - **Edge Opacity**: 0.0-1.0 (or 0-100%)
 - **Attraction Strength** (if implementing mouse interaction)
-
-## Success Criteria
 
 
 
