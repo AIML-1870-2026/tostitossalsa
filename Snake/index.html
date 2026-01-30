@@ -207,6 +207,7 @@
         <div id="hud">
             <div>Level: <span id="level-display">1</span></div>
             <div>Length: <span id="length-display">3</span> / <span id="target-display">10</span></div>
+            <div>Speed: <span id="speed-display">5</span> c/s</div>
             <div id="boss-hud" class="boss-hud hidden">
                 <div>FOREST SPIRIT</div>
                 <div>Stage: <span id="boss-stage">1</span>/3</div>
@@ -795,6 +796,7 @@
             document.getElementById('level-display').textContent = gameState.level;
             document.getElementById('length-display').textContent = gameState.snake.length;
             document.getElementById('target-display').textContent = LEVEL_TARGETS[gameState.level];
+            document.getElementById('speed-display').textContent = CONFIG.baseSpeed;
         }
 
         // Game over
