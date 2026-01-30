@@ -272,23 +272,33 @@
             maxLevel: 15
         };
 
-        // Speed per level range (cells/sec)
-        const LEVEL_SPEEDS = {
-            1: 5, 2: 5, 3: 5, 4: 5, 5: 5,
-            6: 6, 7: 6, 8: 6, 9: 6, 10: 6,
-            11: 8, 12: 8, 13: 8, 14: 8, 15: 8
-        };
+        // Speed per level range (cells/sec) - using array (index 0 unused)
+        const LEVEL_SPEEDS = [0, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 8, 8, 8, 8, 8];
 
-        // Level requirements
-        const LEVEL_TARGETS = {
-            1: 10, 2: 15, 3: 20, 4: 25, 5: 30,
-            6: 35, 7: 40, 8: 45, 9: 48, 10: 50,
-            11: 50, 12: 50, 13: 50, 14: 50, 15: 50
-        };
+        // Level requirements - using array (index 0 unused)
+        const LEVEL_TARGETS = [0, 10, 15, 20, 25, 30, 35, 40, 45, 48, 50, 50, 50, 50, 50, 50];
+
+        // Get speed for a level
+        function getLevelSpeed(level) {
+            const lvl = Number(level);
+            if (lvl >= 1 && lvl <= 5) return 5;
+            if (lvl >= 6 && lvl <= 10) return 6;
+            if (lvl >= 11 && lvl <= 15) return 8;
+            return 5;
+        }
+
+        // Get target length for a level
+        function getLevelTarget(level) {
+            const lvl = Number(level);
+            if (lvl <= 0) return 10;
+            if (lvl > 15) return 50;
+            return LEVEL_TARGETS[lvl];
+        }
 
         // Obstacles per level (cycles within biome)
         function getObstacleCount(level) {
-            const posInCycle = ((level - 1) % 5);
+            const lvl = Number(level);
+            const posInCycle = ((lvl - 1) % 5);
             if (posInCycle === 4) return 0; // Boss level
             return posInCycle;
         }
@@ -355,25 +365,29 @@
         };
 
         function getBiome(level) {
-            if (level <= 5) return BIOMES.forest;
-            if (level <= 10) return BIOMES.volcanic;
+            const lvl = Number(level);
+            if (lvl <= 5) return BIOMES.forest;
+            if (lvl <= 10) return BIOMES.volcanic;
             return BIOMES.frozen;
         }
 
         function getBiomeKey(level) {
-            if (level <= 5) return 'forest';
-            if (level <= 10) return 'volcanic';
+            const lvl = Number(level);
+            if (lvl <= 5) return 'forest';
+            if (lvl <= 10) return 'volcanic';
             return 'frozen';
         }
 
         function getBossLevel(level) {
-            return level % 5 === 0;
+            const lvl = Number(level);
+            return lvl % 5 === 0;
         }
 
         function getBossType(level) {
-            if (level === 5) return 'forestSpirit';
-            if (level === 10) return 'volcanoDragon';
-            if (level === 15) return 'iceGiant';
+            const lvl = Number(level);
+            if (lvl === 5) return 'forestSpirit';
+            if (lvl === 10) return 'volcanoDragon';
+            if (lvl === 15) return 'iceGiant';
             return null;
         }
 
@@ -682,7 +696,7 @@
                 spawnFood();
                 updateHUD();
 
-                if (gameState.snake.length >= LEVEL_TARGETS[gameState.level]) {
+                if (gameState.snake.length >= getLevelTarget(gameState.level)) {
                     levelComplete();
                     return;
                 }
@@ -850,7 +864,7 @@
         function updateBoss(deltaTime) {
             if (!gameState.isBossLevel) return;
 
-            const progress = gameState.snake.length / LEVEL_TARGETS[gameState.level];
+            const progress = gameState.snake.length / getLevelTarget(gameState.level);
             gameState.bossStage = progress < 0.33 ? 1 : progress < 0.66 ? 2 : 3;
             document.getElementById('boss-stage').textContent = gameState.bossStage;
 
@@ -1207,7 +1221,7 @@
         function updateHUD() {
             document.getElementById('level-display').textContent = gameState.level;
             document.getElementById('length-display').textContent = gameState.snake.length;
-            document.getElementById('target-display').textContent = LEVEL_TARGETS[gameState.level];
+            document.getElementById('target-display').textContent = getLevelTarget(gameState.level);
             document.getElementById('speed-display').textContent = gameState.currentSpeed;
         }
 
@@ -1245,11 +1259,12 @@
         }
 
         function startLevel(level) {
-            gameState.level = Math.min(Math.max(1, level), CONFIG.maxLevel);
+            const lvl = Number(level) || 1;
+            gameState.level = Math.min(Math.max(1, lvl), CONFIG.maxLevel);
             gameState.gameStatus = 'playing';
 
             // Set speed based on level
-            gameState.currentSpeed = LEVEL_SPEEDS[gameState.level];
+            gameState.currentSpeed = getLevelSpeed(gameState.level);
             gameState.moveInterval = 1000 / gameState.currentSpeed;
 
             // Boss setup
@@ -1336,7 +1351,7 @@
         // ============================================
         document.getElementById('start-btn').addEventListener('click', () => startLevel(1));
         document.getElementById('go-btn').addEventListener('click', () => {
-            const level = parseInt(document.getElementById('level-input').value) || 1;
+            const level = parseInt(document.getElementById('level-input').value, 10) || 1;
             startLevel(level);
         });
         document.getElementById('restart-btn').addEventListener('click', () => startLevel(1));
