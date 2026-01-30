@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNAKE - Enchanted Forest</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a1f0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #game-canvas {
+            border: 4px solid #2d5a27;
+            box-shadow: 0 0 20px rgba(50, 205, 50, 0.3), inset 0 0 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 2;
+            image-rendering: pixelated;
+        }
+
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #7cfc00;
+            font-size: 10px;
+            z-index: 10;
+            text-shadow: 2px 2px 0 #0a1f0a;
+            line-height: 1.8;
+        }
+
+        #start-screen, #game-over-screen, #level-complete-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(10, 31, 10, 0.95);
+            z-index: 100;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            color: #7cfc00;
+            font-size: 48px;
+            text-shadow: 4px 4px 0 #2d5a27, 0 0 30px rgba(124, 252, 0, 0.5);
+            margin-bottom: 40px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 4px 4px 0 #2d5a27, 0 0 20px rgba(124, 252, 0, 0.3); }
+            to { text-shadow: 4px 4px 0 #2d5a27, 0 0 40px rgba(124, 252, 0, 0.7); }
+        }
+
+        .btn {
+            background: linear-gradient(180deg, #3d8b37 0%, #2d5a27 100%);
+            color: #7cfc00;
+            border: 3px solid #7cfc00;
+            padding: 15px 40px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.2s;
+            text-shadow: 2px 2px 0 #0a1f0a;
+        }
+
+        .btn:hover {
+            background: linear-gradient(180deg, #4da347 0%, #3d8b37 100%);
+            box-shadow: 0 0 20px rgba(124, 252, 0, 0.5);
+            transform: scale(1.05);
+        }
+
+        .level-select {
+            display: flex;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .level-select input {
+            width: 60px;
+            padding: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            background: #1a3a1a;
+            border: 2px solid #7cfc00;
+            color: #7cfc00;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .level-select .btn {
+            padding: 10px 20px;
+            font-size: 12px;
+        }
+
+        .level-select label {
+            color: #7cfc00;
+            font-size: 10px;
+            margin-right: 10px;
+        }
+
+        #game-over-screen h2 {
+            color: #ff4444;
+            font-size: 32px;
+            text-shadow: 3px 3px 0 #660000;
+            margin-bottom: 30px;
+        }
+
+        #level-complete-screen h2 {
+            color: #7cfc00;
+            font-size: 24px;
+            text-shadow: 3px 3px 0 #2d5a27;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            color: #90ee90;
+            font-size: 12px;
+            margin: 10px 0;
+            text-shadow: 2px 2px 0 #0a1f0a;
+        }
+
+        #boss-warning {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff6600;
+            font-size: 20px;
+            text-shadow: 3px 3px 0 #330000, 0 0 30px rgba(255, 102, 0, 0.8);
+            z-index: 50;
+            animation: pulse 0.5s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            from { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            to { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+
+        .boss-hud {
+            color: #ff6600;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        #boss-sprite {
+            position: absolute;
+            top: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .victory-text {
+            color: #ffd700;
+            font-size: 28px;
+            text-shadow: 3px 3px 0 #8b6914;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="particles"></canvas>
+        <div id="boss-sprite"></div>
+        <canvas id="game-canvas"></canvas>
+        <div id="hud">
+            <div>Level: <span id="level-display">1</span></div>
+            <div>Length: <span id="length-display">3</span> / <span id="target-display">10</span></div>
+            <div id="boss-hud" class="boss-hud hidden">
+                <div>FOREST SPIRIT</div>
+                <div>Stage: <span id="boss-stage">1</span>/3</div>
+            </div>
+        </div>
+        <div id="boss-warning" class="hidden">BOSS INCOMING!</div>
+
+        <div id="start-screen">
+            <h1>SNAKE</h1>
+            <p class="stats">Enchanted Forest</p>
+            <button class="btn" id="start-btn">START</button>
+            <div class="level-select">
+                <label>Level:</label>
+                <input type="number" id="level-input" min="1" max="5" value="1">
+                <button class="btn" id="go-btn">GO</button>
+            </div>
+        </div>
+
+        <div id="game-over-screen" class="hidden">
+            <h2>GAME OVER</h2>
+            <p class="stats">Level: <span id="final-level">1</span></p>
+            <p class="stats">Length: <span id="final-length">3</span></p>
+            <button class="btn" id="restart-btn">RESTART</button>
+            <button class="btn" id="menu-btn">MENU</button>
+        </div>
+
+        <div id="level-complete-screen" class="hidden">
+            <h2 id="level-complete-title">LEVEL COMPLETE!</h2>
+            <p class="stats">Level <span id="completed-level">1</span> cleared!</p>
+            <button class="btn" id="next-level-btn">NEXT LEVEL</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Configuration
+        const CONFIG = {
+            gridSize: 20,
+            cellSize: 24,
+            baseSpeed: 10,
+            maxLevel: 5
+        };
+
+        // Level requirements
+        const LEVEL_TARGETS = {
+            1: 10,
+            2: 15,
+            3: 20,
+            4: 25,
+            5: 30  // Boss level
+        };
+
+        // Obstacles per level (within cycle)
+        const LEVEL_OBSTACLES = {
+            1: 0,
+            2: 1,
+            3: 2,
+            4: 3,
+            5: 0  // Boss level - no regular obstacles
+        };
+
+        // Game State
+        let gameState = {
+            level: 1,
+            snake: [],
+            direction: { x: 1, y: 0 },
+            nextDirection: { x: 1, y: 0 },
+            food: null,
+            obstacles: [],
+            gameStatus: 'menu',
+            lastMoveTime: 0,
+            moveInterval: 1000 / CONFIG.baseSpeed,
+            isBossLevel: false,
+            bossStage: 1,
+            bossAcorns: [],
+            bossWarnings: [],
+            bossDropTimer: 0,
+            particles: []
+        };
+
+        // Canvas setup
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const particleCanvas = document.getElementById('particles');
+        const particleCtx = particleCanvas.getContext('2d');
+
+        canvas.width = CONFIG.gridSize * CONFIG.cellSize;
+        canvas.height = CONFIG.gridSize * CONFIG.cellSize;
+        particleCanvas.width = canvas.width;
+        particleCanvas.height = canvas.height + 150;
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const levelCompleteScreen = document.getElementById('level-complete-screen');
+        const bossWarning = document.getElementById('boss-warning');
+        const bossHud = document.getElementById('boss-hud');
+        const bossSprite = document.getElementById('boss-sprite');
+
+        // Biome colors - Enchanted Forest
+        const COLORS = {
+            background: '#0d2818',
+            grass1: '#1a4d2e',
+            grass2: '#163d26',
+            snakeHead: '#7cfc00',
+            snakeBody: '#32cd32',
+            snakeTail: '#228b22',
+            food: '#ff69b4',
+            foodGlow: '#ff1493',
+            obstacle: '#4a3728',
+            obstacleMoss: '#3d6b4f',
+            warning: '#ff4444',
+            acorn: '#8b4513'
+        };
+
+        // Initialize particles (fireflies)
+        function initParticles() {
+            gameState.particles = [];
+            for (let i = 0; i < 30; i++) {
+                gameState.particles.push({
+                    x: Math.random() * particleCanvas.width,
+                    y: Math.random() * particleCanvas.height,
+                    size: Math.random() * 3 + 1,
+                    speedX: (Math.random() - 0.5) * 0.5,
+                    speedY: (Math.random() - 0.5) * 0.5,
+                    brightness: Math.random(),
+                    brightnessDir: Math.random() > 0.5 ? 1 : -1
+                });
+            }
+        }
+
+        // Update and draw particles
+        function updateParticles() {
+            particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+            gameState.particles.forEach(p => {
+                // Update position
+                p.x += p.speedX;
+                p.y += p.speedY;
+
+                // Wrap around
+                if (p.x < 0) p.x = particleCanvas.width;
+                if (p.x > particleCanvas.width) p.x = 0;
+                if (p.y < 0) p.y = particleCanvas.height;
+                if (p.y > particleCanvas.height) p.y = 0;
+
+                // Update brightness
+                p.brightness += p.brightnessDir * 0.02;
+                if (p.brightness > 1) { p.brightness = 1; p.brightnessDir = -1; }
+                if (p.brightness < 0.2) { p.brightness = 0.2; p.brightnessDir = 1; }
+
+                // Draw
+                const alpha = p.brightness * 0.8;
+                particleCtx.beginPath();
+                particleCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                particleCtx.fillStyle = `rgba(144, 238, 144, ${alpha})`;
+                particleCtx.fill();
+
+                // Glow effect
+                particleCtx.beginPath();
+                particleCtx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+                const gradient = particleCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
+                gradient.addColorStop(0, `rgba(144, 238, 144, ${alpha * 0.5})`);
+                gradient.addColorStop(1, 'rgba(144, 238, 144, 0)');
+                particleCtx.fillStyle = gradient;
+                particleCtx.fill();
+            });
+        }
+
+        // Initialize snake
+        function initSnake() {
+            const startX = Math.floor(CONFIG.gridSize / 4);
+            const startY = Math.floor(CONFIG.gridSize / 2);
+            gameState.snake = [
+                { x: startX, y: startY },
+                { x: startX - 1, y: startY },
+                { x: startX - 2, y: startY }
+            ];
+            gameState.direction = { x: 1, y: 0 };
+            gameState.nextDirection = { x: 1, y: 0 };
+        }
+
+        // Generate obstacles
+        function generateObstacles() {
+            gameState.obstacles = [];
+            const count = LEVEL_OBSTACLES[gameState.level] || 0;
+
+            for (let i = 0; i < count; i++) {
+                let pos;
+                let attempts = 0;
+                do {
+                    pos = {
+                        x: Math.floor(Math.random() * (CONFIG.gridSize - 4)) + 2,
+                        y: Math.floor(Math.random() * (CONFIG.gridSize - 4)) + 2
+                    };
+                    attempts++;
+                } while (attempts < 100 && (
+                    isPositionOccupied(pos) ||
+                    isNearSnakeStart(pos) ||
+                    isNearOtherObstacle(pos)
+                ));
+
+                if (attempts < 100) {
+                    gameState.obstacles.push(pos);
+                }
+            }
+        }
+
+        function isPositionOccupied(pos) {
+            // Check snake
+            if (gameState.snake.some(s => s.x === pos.x && s.y === pos.y)) return true;
+            // Check food
+            if (gameState.food && gameState.food.x === pos.x && gameState.food.y === pos.y) return true;
+            // Check obstacles
+            if (gameState.obstacles.some(o => o.x === pos.x && o.y === pos.y)) return true;
+            return false;
+        }
+
+        function isNearSnakeStart(pos) {
+            const startX = Math.floor(CONFIG.gridSize / 4);
+            const startY = Math.floor(CONFIG.gridSize / 2);
+            return Math.abs(pos.x - startX) < 5 && Math.abs(pos.y - startY) < 3;
+        }
+
+        function isNearOtherObstacle(pos) {
+            return gameState.obstacles.some(o =>
+                Math.abs(o.x - pos.x) < 2 && Math.abs(o.y - pos.y) < 2
+            );
+        }
+
+        // Spawn food
+        function spawnFood() {
+            let pos;
+            let attempts = 0;
+            do {
+                pos = {
+                    x: Math.floor(Math.random() * (CONFIG.gridSize - 2)) + 1,
+                    y: Math.floor(Math.random() * (CONFIG.gridSize - 2)) + 1
+                };
+                attempts++;
+            } while (attempts < 100 && (
+                gameState.snake.some(s => s.x === pos.x && s.y === pos.y) ||
+                gameState.obstacles.some(o => o.x === pos.x && o.y === pos.y) ||
+                gameState.bossAcorns.some(a => a.x === pos.x && a.y === pos.y)
+            ));
+
+            gameState.food = pos;
+        }
+
+        // Draw background
+        function drawBackground() {
+            // Base color
+            ctx.fillStyle = COLORS.background;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grass pattern
+            for (let x = 0; x < CONFIG.gridSize; x++) {
+                for (let y = 0; y < CONFIG.gridSize; y++) {
+                    if ((x + y) % 2 === 0) {
+                        ctx.fillStyle = COLORS.grass1;
+                    } else {
+                        ctx.fillStyle = COLORS.grass2;
+                    }
+                    ctx.fillRect(
+                        x * CONFIG.cellSize,
+                        y * CONFIG.cellSize,
+                        CONFIG.cellSize,
+                        CONFIG.cellSize
+                    );
+                }
+            }
+        }
+
+        // Draw snake
+        function drawSnake() {
+            gameState.snake.forEach((segment, index) => {
+                const x = segment.x * CONFIG.cellSize;
+                const y = segment.y * CONFIG.cellSize;
+                const size = CONFIG.cellSize - 2;
+
+                if (index === 0) {
+                    // Head
+                    ctx.fillStyle = COLORS.snakeHead;
+                    ctx.fillRect(x + 1, y + 1, size, size);
+
+                    // Eyes
+                    ctx.fillStyle = '#000';
+                    const eyeSize = 4;
+                    const eyeOffset = 5;
+                    if (gameState.direction.x === 1) {
+                        ctx.fillRect(x + size - eyeOffset, y + 5, eyeSize, eyeSize);
+                        ctx.fillRect(x + size - eyeOffset, y + size - 7, eyeSize, eyeSize);
+                    } else if (gameState.direction.x === -1) {
+                        ctx.fillRect(x + eyeOffset - 2, y + 5, eyeSize, eyeSize);
+                        ctx.fillRect(x + eyeOffset - 2, y + size - 7, eyeSize, eyeSize);
+                    } else if (gameState.direction.y === 1) {
+                        ctx.fillRect(x + 5, y + size - eyeOffset, eyeSize, eyeSize);
+                        ctx.fillRect(x + size - 7, y + size - eyeOffset, eyeSize, eyeSize);
+                    } else {
+                        ctx.fillRect(x + 5, y + eyeOffset - 2, eyeSize, eyeSize);
+                        ctx.fillRect(x + size - 7, y + eyeOffset - 2, eyeSize, eyeSize);
+                    }
+                } else if (index === gameState.snake.length - 1) {
+                    // Tail
+                    ctx.fillStyle = COLORS.snakeTail;
+                    ctx.fillRect(x + 3, y + 3, size - 4, size - 4);
+                } else {
+                    // Body
+                    ctx.fillStyle = COLORS.snakeBody;
+                    ctx.fillRect(x + 1, y + 1, size, size);
+                }
+            });
+        }
+
+        // Draw food (glowing berry)
+        function drawFood() {
+            if (!gameState.food) return;
+
+            const x = gameState.food.x * CONFIG.cellSize + CONFIG.cellSize / 2;
+            const y = gameState.food.y * CONFIG.cellSize + CONFIG.cellSize / 2;
+            const time = Date.now() / 500;
+            const pulseSize = Math.sin(time) * 2 + 8;
+
+            // Glow
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, pulseSize * 2);
+            gradient.addColorStop(0, 'rgba(255, 105, 180, 0.6)');
+            gradient.addColorStop(1, 'rgba(255, 105, 180, 0)');
+            ctx.beginPath();
+            ctx.arc(x, y, pulseSize * 2, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Berry
+            ctx.beginPath();
+            ctx.arc(x, y, pulseSize, 0, Math.PI * 2);
+            ctx.fillStyle = COLORS.food;
+            ctx.fill();
+
+            // Highlight
+            ctx.beginPath();
+            ctx.arc(x - 2, y - 2, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+        }
+
+        // Draw obstacles (mossy rocks)
+        function drawObstacles() {
+            gameState.obstacles.forEach(obs => {
+                const x = obs.x * CONFIG.cellSize;
+                const y = obs.y * CONFIG.cellSize;
+                const size = CONFIG.cellSize - 2;
+
+                // Rock base
+                ctx.fillStyle = COLORS.obstacle;
+                ctx.fillRect(x + 1, y + 1, size, size);
+
+                // Moss patches
+                ctx.fillStyle = COLORS.obstacleMoss;
+                ctx.fillRect(x + 2, y + 2, 8, 6);
+                ctx.fillRect(x + size - 10, y + size - 8, 8, 6);
+
+                // Texture
+                ctx.fillStyle = '#3d2b1f';
+                ctx.fillRect(x + 5, y + 10, 4, 4);
+                ctx.fillRect(x + 12, y + 6, 3, 3);
+            });
+        }
+
+        // Boss: Forest Spirit
+        function drawBossSprite() {
+            if (!gameState.isBossLevel) {
+                bossSprite.innerHTML = '';
+                return;
+            }
+
+            const time = Date.now() / 1000;
+            const bob = Math.sin(time * 2) * 5;
+
+            bossSprite.innerHTML = `
+                <svg width="200" height="120" style="transform: translateY(${bob}px)">
+                    <!-- Tree trunk body -->
+                    <rect x="80" y="40" width="40" height="80" fill="#4a3728" rx="5"/>
+                    <rect x="70" y="60" width="60" height="50" fill="#3d2b1f" rx="8"/>
+
+                    <!-- Branches/Arms -->
+                    <path d="M70 70 Q40 50 30 70" stroke="#4a3728" stroke-width="12" fill="none" stroke-linecap="round"/>
+                    <path d="M130 70 Q160 50 170 70" stroke="#4a3728" stroke-width="12" fill="none" stroke-linecap="round"/>
+
+                    <!-- Leaves/Crown -->
+                    <ellipse cx="100" cy="30" rx="45" ry="30" fill="#2d5a27"/>
+                    <ellipse cx="80" cy="25" rx="25" ry="20" fill="#3d8b37"/>
+                    <ellipse cx="120" cy="25" rx="25" ry="20" fill="#3d8b37"/>
+                    <ellipse cx="100" cy="15" rx="20" ry="15" fill="#4da347"/>
+
+                    <!-- Glowing eyes -->
+                    <ellipse cx="85" cy="75" rx="8" ry="10" fill="#7cfc00" opacity="${0.5 + Math.sin(time * 3) * 0.3}">
+                        <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+                    </ellipse>
+                    <ellipse cx="115" cy="75" rx="8" ry="10" fill="#7cfc00" opacity="${0.5 + Math.sin(time * 3) * 0.3}">
+                        <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+                    </ellipse>
+
+                    <!-- Eye pupils -->
+                    <ellipse cx="85" cy="78" rx="3" ry="5" fill="#0a1f0a"/>
+                    <ellipse cx="115" cy="78" rx="3" ry="5" fill="#0a1f0a"/>
+
+                    <!-- Mouth -->
+                    <path d="M90 95 Q100 105 110 95" stroke="#0a1f0a" stroke-width="3" fill="none"/>
+                </svg>
+            `;
+        }
+
+        // Boss mechanics
+        function updateBoss(deltaTime) {
+            if (!gameState.isBossLevel) return;
+
+            // Calculate boss stage based on progress
+            const progress = gameState.snake.length / LEVEL_TARGETS[gameState.level];
+            if (progress < 0.33) {
+                gameState.bossStage = 1;
+            } else if (progress < 0.66) {
+                gameState.bossStage = 2;
+            } else {
+                gameState.bossStage = 3;
+            }
+            document.getElementById('boss-stage').textContent = gameState.bossStage;
+
+            // Drop rate based on stage
+            const dropRates = { 1: 3000, 2: 2000, 3: 1200 };
+            gameState.bossDropTimer += deltaTime;
+
+            if (gameState.bossDropTimer >= dropRates[gameState.bossStage]) {
+                gameState.bossDropTimer = 0;
+                createAcornWarning();
+            }
+
+            // Update warnings
+            gameState.bossWarnings = gameState.bossWarnings.filter(warning => {
+                warning.timer -= deltaTime;
+                if (warning.timer <= 0) {
+                    // Convert warning to acorn
+                    gameState.bossAcorns.push({
+                        x: warning.x,
+                        y: warning.y,
+                        timer: 3000
+                    });
+                    return false;
+                }
+                return true;
+            });
+
+            // Update acorns (temporary obstacles)
+            gameState.bossAcorns = gameState.bossAcorns.filter(acorn => {
+                acorn.timer -= deltaTime;
+                return acorn.timer > 0;
+            });
+        }
+
+        function createAcornWarning() {
+            let pos;
+            let attempts = 0;
+            do {
+                pos = {
+                    x: Math.floor(Math.random() * (CONFIG.gridSize - 2)) + 1,
+                    y: Math.floor(Math.random() * (CONFIG.gridSize - 2)) + 1
+                };
+                attempts++;
+            } while (attempts < 50 && (
+                gameState.snake.some(s => s.x === pos.x && s.y === pos.y) ||
+                gameState.bossAcorns.some(a => a.x === pos.x && a.y === pos.y) ||
+                gameState.bossWarnings.some(w => w.x === pos.x && w.y === pos.y) ||
+                (gameState.food && gameState.food.x === pos.x && gameState.food.y === pos.y)
+            ));
+
+            if (attempts < 50) {
+                gameState.bossWarnings.push({
+                    x: pos.x,
+                    y: pos.y,
+                    timer: 2000
+                });
+            }
+        }
+
+        function drawBossElements() {
+            // Draw warnings
+            gameState.bossWarnings.forEach(warning => {
+                const x = warning.x * CONFIG.cellSize;
+                const y = warning.y * CONFIG.cellSize;
+                const alpha = 0.3 + Math.sin(Date.now() / 100) * 0.2;
+
+                ctx.fillStyle = `rgba(255, 68, 68, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(
+                    x + CONFIG.cellSize / 2,
+                    y + CONFIG.cellSize / 2,
+                    CONFIG.cellSize / 2 - 2,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+
+                ctx.strokeStyle = COLORS.warning;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+
+            // Draw acorns
+            gameState.bossAcorns.forEach(acorn => {
+                const x = acorn.x * CONFIG.cellSize + CONFIG.cellSize / 2;
+                const y = acorn.y * CONFIG.cellSize + CONFIG.cellSize / 2;
+
+                // Acorn body
+                ctx.fillStyle = COLORS.acorn;
+                ctx.beginPath();
+                ctx.ellipse(x, y + 2, 8, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Acorn cap
+                ctx.fillStyle = '#654321';
+                ctx.beginPath();
+                ctx.ellipse(x, y - 6, 10, 5, 0, 0, Math.PI);
+                ctx.fill();
+
+                // Cap texture
+                ctx.fillStyle = '#4a3728';
+                ctx.fillRect(x - 2, y - 12, 4, 4);
+            });
+        }
+
+        // Move snake
+        function moveSnake() {
+            gameState.direction = { ...gameState.nextDirection };
+
+            const head = gameState.snake[0];
+            const newHead = {
+                x: head.x + gameState.direction.x,
+                y: head.y + gameState.direction.y
+            };
+
+            // Check wall collision
+            if (newHead.x < 0 || newHead.x >= CONFIG.gridSize ||
+                newHead.y < 0 || newHead.y >= CONFIG.gridSize) {
+                gameOver();
+                return;
+            }
+
+            // Check self collision
+            if (gameState.snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
+                gameOver();
+                return;
+            }
+
+            // Check obstacle collision
+            if (gameState.obstacles.some(o => o.x === newHead.x && o.y === newHead.y)) {
+                gameOver();
+                return;
+            }
+
+            // Check boss acorn collision
+            if (gameState.bossAcorns.some(a => a.x === newHead.x && a.y === newHead.y)) {
+                gameOver();
+                return;
+            }
+
+            // Add new head
+            gameState.snake.unshift(newHead);
+
+            // Check food collision
+            if (gameState.food && newHead.x === gameState.food.x && newHead.y === gameState.food.y) {
+                // Grow - don't remove tail
+                spawnFood();
+                updateHUD();
+
+                // Check level complete
+                if (gameState.snake.length >= LEVEL_TARGETS[gameState.level]) {
+                    levelComplete();
+                    return;
+                }
+            } else {
+                // Remove tail
+                gameState.snake.pop();
+            }
+        }
+
+        // Update HUD
+        function updateHUD() {
+            document.getElementById('level-display').textContent = gameState.level;
+            document.getElementById('length-display').textContent = gameState.snake.length;
+            document.getElementById('target-display').textContent = LEVEL_TARGETS[gameState.level];
+        }
+
+        // Game over
+        function gameOver() {
+            gameState.gameStatus = 'gameover';
+            document.getElementById('final-level').textContent = gameState.level;
+            document.getElementById('final-length').textContent = gameState.snake.length;
+            gameOverScreen.classList.remove('hidden');
+            bossHud.classList.add('hidden');
+            bossSprite.innerHTML = '';
+        }
+
+        // Level complete
+        function levelComplete() {
+            gameState.gameStatus = 'levelcomplete';
+            document.getElementById('completed-level').textContent = gameState.level;
+
+            const titleEl = document.getElementById('level-complete-title');
+            const nextBtn = document.getElementById('next-level-btn');
+
+            if (gameState.level === 5) {
+                // Boss defeated - biome complete!
+                titleEl.textContent = 'BOSS DEFEATED!';
+                titleEl.classList.add('victory-text');
+                nextBtn.textContent = 'VICTORY!';
+            } else {
+                titleEl.textContent = 'LEVEL COMPLETE!';
+                titleEl.classList.remove('victory-text');
+                nextBtn.textContent = 'NEXT LEVEL';
+            }
+
+            levelCompleteScreen.classList.remove('hidden');
+            bossHud.classList.add('hidden');
+            bossSprite.innerHTML = '';
+        }
+
+        // Start level
+        function startLevel(level) {
+            gameState.level = Math.min(Math.max(1, level), CONFIG.maxLevel);
+            gameState.gameStatus = 'playing';
+            gameState.isBossLevel = gameState.level === 5;
+            gameState.bossStage = 1;
+            gameState.bossAcorns = [];
+            gameState.bossWarnings = [];
+            gameState.bossDropTimer = 0;
+            gameState.lastMoveTime = 0;
+
+            initSnake();
+            generateObstacles();
+            spawnFood();
+            updateHUD();
+
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            levelCompleteScreen.classList.add('hidden');
+
+            if (gameState.isBossLevel) {
+                bossHud.classList.remove('hidden');
+                showBossWarning();
+            } else {
+                bossHud.classList.add('hidden');
+            }
+        }
+
+        function showBossWarning() {
+            bossWarning.classList.remove('hidden');
+            setTimeout(() => {
+                bossWarning.classList.add('hidden');
+            }, 2000);
+        }
+
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            if (gameState.gameStatus !== 'playing') return;
+
+            const keyMap = {
+                'ArrowUp': { x: 0, y: -1 },
+                'ArrowDown': { x: 0, y: 1 },
+                'ArrowLeft': { x: -1, y: 0 },
+                'ArrowRight': { x: 1, y: 0 },
+                'w': { x: 0, y: -1 },
+                's': { x: 0, y: 1 },
+                'a': { x: -1, y: 0 },
+                'd': { x: 1, y: 0 },
+                'W': { x: 0, y: -1 },
+                'S': { x: 0, y: 1 },
+                'A': { x: -1, y: 0 },
+                'D': { x: 1, y: 0 }
+            };
+
+            const newDir = keyMap[e.key];
+            if (newDir) {
+                // Prevent reversing
+                if (newDir.x !== -gameState.direction.x || newDir.y !== -gameState.direction.y) {
+                    gameState.nextDirection = newDir;
+                }
+                e.preventDefault();
+            }
+        });
+
+        // Button handlers
+        document.getElementById('start-btn').addEventListener('click', () => startLevel(1));
+        document.getElementById('go-btn').addEventListener('click', () => {
+            const level = parseInt(document.getElementById('level-input').value) || 1;
+            startLevel(level);
+        });
+        document.getElementById('restart-btn').addEventListener('click', () => startLevel(1));
+        document.getElementById('menu-btn').addEventListener('click', () => {
+            gameState.gameStatus = 'menu';
+            gameOverScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            bossSprite.innerHTML = '';
+        });
+        document.getElementById('next-level-btn').addEventListener('click', () => {
+            if (gameState.level < CONFIG.maxLevel) {
+                startLevel(gameState.level + 1);
+            } else {
+                // Game complete - return to menu
+                gameState.gameStatus = 'menu';
+                levelCompleteScreen.classList.add('hidden');
+                startScreen.classList.remove('hidden');
+            }
+        });
+
+        // Game loop
+        let lastTime = 0;
+        function gameLoop(timestamp) {
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            // Update particles always
+            updateParticles();
+
+            if (gameState.gameStatus === 'playing') {
+                // Update boss
+                updateBoss(deltaTime);
+                drawBossSprite();
+
+                // Move snake at intervals
+                gameState.lastMoveTime += deltaTime;
+                if (gameState.lastMoveTime >= gameState.moveInterval) {
+                    gameState.lastMoveTime = 0;
+                    moveSnake();
+                }
+
+                // Draw game
+                drawBackground();
+                drawObstacles();
+                drawBossElements();
+                drawFood();
+                drawSnake();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize
+        initParticles();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>

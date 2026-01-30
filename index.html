@@ -762,6 +762,32 @@
             50% { filter: drop-shadow(0 0 12px rgba(130, 170, 255, 0.8)); }
         }
 
+        /* Snake icon for Snake game */
+        .project-card__icon--snake {
+            background:
+                /* Snake head */
+                linear-gradient(#7cfc00 0 0) 44px 24px / 12px 12px,
+                /* Snake body segments */
+                linear-gradient(#32cd32 0 0) 32px 24px / 12px 12px,
+                linear-gradient(#32cd32 0 0) 20px 24px / 12px 12px,
+                linear-gradient(#32cd32 0 0) 8px 24px / 12px 12px,
+                linear-gradient(#32cd32 0 0) 8px 36px / 12px 12px,
+                linear-gradient(#228b22 0 0) 8px 48px / 12px 8px,
+                /* Eyes */
+                linear-gradient(#000 0 0) 50px 26px / 4px 4px,
+                linear-gradient(#000 0 0) 50px 32px / 4px 4px,
+                /* Food berry */
+                linear-gradient(#ff69b4 0 0) 44px 44px / 10px 10px,
+                linear-gradient(rgba(255,255,255,0.5) 0 0) 46px 46px / 3px 3px;
+            background-repeat: no-repeat;
+            animation: snakeSlither 2s ease-in-out infinite;
+        }
+
+        @keyframes snakeSlither {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(124, 252, 0, 0.5)); }
+            50% { filter: drop-shadow(0 0 12px rgba(124, 252, 0, 0.8)); }
+        }
+
         .project-card__title {
             font-family: 'Press Start 2P', cursive;
             font-size: 12px;
@@ -1021,6 +1047,20 @@
                             <div class="project-card__icon project-card__icon--web" role="img" aria-label="Pixel art web network"></div>
                             <h3 class="project-card__title">Stellar Web</h3>
                             <a href="StellarWeb/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Snake Game Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--snake" role="img" aria-label="Pixel art snake"></div>
+                            <h3 class="project-card__title">Snake</h3>
+                            <a href="Snake/index.html" class="project-card__link">Play Game</a>
                         </div>
                     </article>
                 </div>
