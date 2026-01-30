@@ -61,7 +61,7 @@ Level 15:     Boss fight (biome 2)
 
 ## Biomes (Cycling Every 5 Levels)
 
-### 1. Enchanted Forest (Levels 1-10, 21-30, 41-50...)
+### 1. Enchanted Forest (Levels 1-5, 26-30, 51-55,...)
 **Visual Theme**: Deep greens, earthy browns, bioluminescent accents
 - Mossy stones, mushrooms, fireflies, ancient trees
 - Animated particle effects: floating spores, gentle wind
@@ -74,7 +74,7 @@ Level 15:     Boss fight (biome 2)
 
 ---
 
-### 2. Volcanic Cavern (Levels 11-20, 31-40, 51-60...)
+### 2. Volcanic Cavern (Levels 6-10, 31-35, 56-60...)
 **Visual Theme**: Reds, oranges, blacks, glowing embers
 - Lava flows, obsidian formations, fire crystals
 - Animated particle effects: rising embers, heat waves
@@ -87,7 +87,7 @@ Level 15:     Boss fight (biome 2)
 
 ---
 
-### 3. Frozen Tundra (Levels 21-30, 41-50, 61-70...)
+### 3. Frozen Tundra (Levels 11-15, 36-40, 61-65...)
 **Visual Theme**: Blues, whites, purples (northern lights)
 - Ice formations, snow drifts, frozen landscape
 - Animated particle effects: falling snow, aurora shimmer
@@ -100,7 +100,7 @@ Level 15:     Boss fight (biome 2)
 
 ---
 
-### 4. Desert Ruins (Levels 31-40, 51-60, 71-80...)
+### 4. Desert Ruins (Levels 16-20, 41-45, 66-70...)
 **Visual Theme**: Golds, sandy yellows, stone grays
 - Ancient architecture, hieroglyphs, weathered stone
 - Animated particle effects: swirling sand, heat shimmer
@@ -113,7 +113,7 @@ Level 15:     Boss fight (biome 2)
 
 ---
 
-### 5. Celestial Sky (Levels 41-50, 61-70, 81-90...)
+### 5. Celestial Sky (Levels 21-25, 46-50, 71-75...)
 **Visual Theme**: Deep purples, cosmic blues, starlight whites
 - Floating islands, constellations, cosmic clouds
 - Animated particle effects: twinkling stars, nebula swirls
@@ -376,7 +376,7 @@ BossState {
 - Stage transition effects
 
 **UI Elements**:
-- HUD frames
+- **HUD frames**: level, [length]/[target_length], and speed
 - Buttons
 - Text boxes
 - Warning indicators
@@ -425,11 +425,11 @@ BossState {
 
 ### Speed Progression
 ```
-Level 1-5:   Base speed (10 cells/sec)
-Level 6-10:  1.15x speed
-Level 11-15: 1.3x speed
-Level 16-20: 1.45x speed
-Level 21+:   +0.15x per boss cycle
+Level 1-5:   Base speed (5 cells/sec)
+Level 6-10:  6 cells/sec
+Level 11-15: 8 cells/sec
+Level 16-20: 10 cells/sec
+Level 21+:   +0.15x per boss cycle, rounded to the nearest integer
 ```
 
 ### Obstacle Density
