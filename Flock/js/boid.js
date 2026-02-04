@@ -6,7 +6,7 @@ class Boid {
       y: (Math.random() - 0.5) * 2
     };
     this.acceleration = { x: 0, y: 0 };
-    this.maxSpeed = 20.0;
+    this.maxSpeed = 400.0;
     this.maxForce = 0.1;
   }
 
