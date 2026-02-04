@@ -788,6 +788,47 @@
             50% { filter: drop-shadow(0 0 12px rgba(124, 252, 0, 0.8)); }
         }
 
+        /* Flock/Bird icon for Flock Lab project */
+        .project-card__icon--flock {
+            background:
+                /* Lead bird */
+                linear-gradient(var(--cyan) 0 0) 28px 8px / 8px 4px,
+                linear-gradient(var(--cyan) 0 0) 24px 12px / 16px 4px,
+                linear-gradient(var(--cyan) 0 0) 20px 16px / 8px 4px,
+                linear-gradient(var(--cyan) 0 0) 36px 16px / 8px 4px,
+                /* Second row birds */
+                linear-gradient(#66aaff 0 0) 12px 24px / 6px 3px,
+                linear-gradient(#66aaff 0 0) 9px 27px / 12px 3px,
+                linear-gradient(#66aaff 0 0) 6px 30px / 6px 3px,
+                linear-gradient(#66aaff 0 0) 15px 30px / 6px 3px,
+                linear-gradient(#66aaff 0 0) 40px 24px / 6px 3px,
+                linear-gradient(#66aaff 0 0) 37px 27px / 12px 3px,
+                linear-gradient(#66aaff 0 0) 34px 30px / 6px 3px,
+                linear-gradient(#66aaff 0 0) 43px 30px / 6px 3px,
+                /* Third row birds */
+                linear-gradient(#5599ee 0 0) 4px 40px / 5px 3px,
+                linear-gradient(#5599ee 0 0) 2px 43px / 9px 3px,
+                linear-gradient(#5599ee 0 0) 24px 38px / 5px 3px,
+                linear-gradient(#5599ee 0 0) 22px 41px / 9px 3px,
+                linear-gradient(#5599ee 0 0) 44px 40px / 5px 3px,
+                linear-gradient(#5599ee 0 0) 42px 43px / 9px 3px,
+                linear-gradient(#5599ee 0 0) 54px 36px / 5px 3px,
+                linear-gradient(#5599ee 0 0) 52px 39px / 9px 3px;
+            background-repeat: no-repeat;
+            animation: flockFly 3s ease-in-out infinite;
+        }
+
+        @keyframes flockFly {
+            0%, 100% {
+                filter: drop-shadow(0 0 6px rgba(130, 170, 255, 0.5));
+                transform: translateY(0);
+            }
+            50% {
+                filter: drop-shadow(0 0 12px rgba(130, 170, 255, 0.8));
+                transform: translateY(-4px);
+            }
+        }
+
         .project-card__title {
             font-family: 'Press Start 2P', cursive;
             font-size: 12px;
@@ -1061,6 +1102,20 @@
                             <div class="project-card__icon project-card__icon--snake" role="img" aria-label="Pixel art snake"></div>
                             <h3 class="project-card__title">Snake</h3>
                             <a href="Snake/index.html" class="project-card__link">Play Game</a>
+                        </div>
+                    </article>
+
+                    <!-- Flock Lab Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--flock" role="img" aria-label="Pixel art flock of birds"></div>
+                            <h3 class="project-card__title">Flock Lab</h3>
+                            <a href="Flock/index.html" class="project-card__link">View Project</a>
                         </div>
                     </article>
                 </div>
