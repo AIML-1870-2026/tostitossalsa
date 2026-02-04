@@ -4,7 +4,7 @@
 const CONFIG = {
     gridSize: 20,
     cellSize: 24,
-    maxLevel: 15
+    maxLevel: 25
 };
 
 // Speed per level range (cells/sec) - using array (index 0 unused)
@@ -19,7 +19,9 @@ function getLevelSpeed(level) {
     if (lvl >= 1 && lvl <= 5) return 5;
     if (lvl >= 6 && lvl <= 10) return 6;
     if (lvl >= 11 && lvl <= 15) return 8;
-    return 5;
+    if (lvl >= 16 && lvl <= 20) return 10;
+    if (lvl >= 21 && lvl <= 25) return 12;
+    return 12;
 }
 
 // Get target length for a level
@@ -96,6 +98,44 @@ const BIOMES = {
         obstacleAccent: '#a0d8ef',
         warning: '#ff4444',
         particleColor: [255, 255, 255]
+    },
+    desert: {
+        name: 'Desert Ruins',
+        bodyBg: '#1a1508',
+        border: '#c9a227',
+        shadow: 'rgba(201, 162, 39, 0.3)',
+        hudColor: '#ffd700',
+        background: '#2d2410',
+        tile1: '#3d3118',
+        tile2: '#352a14',
+        snakeHead: '#ffd700',
+        snakeBody: '#daa520',
+        snakeTail: '#b8860b',
+        food: '#00ff88',
+        foodGlow: 'rgba(0, 255, 136, 0.6)',
+        obstacle: '#8b7355',
+        obstacleAccent: '#d4af37',
+        warning: '#ff4444',
+        particleColor: [210, 180, 140]
+    },
+    celestial: {
+        name: 'Celestial Sky',
+        bodyBg: '#0a0a20',
+        border: '#9370db',
+        shadow: 'rgba(147, 112, 219, 0.4)',
+        hudColor: '#e0b0ff',
+        background: '#0d0d25',
+        tile1: '#1a1a3a',
+        tile2: '#151530',
+        snakeHead: '#ffffff',
+        snakeBody: '#e0b0ff',
+        snakeTail: '#9370db',
+        food: '#00ffff',
+        foodGlow: 'rgba(0, 255, 255, 0.6)',
+        obstacle: '#4a4a7a',
+        obstacleAccent: '#8080ff',
+        warning: '#ffff00',
+        particleColor: [255, 255, 255]
     }
 };
 
@@ -103,14 +143,18 @@ function getBiome(level) {
     const lvl = Number(level);
     if (lvl <= 5) return BIOMES.forest;
     if (lvl <= 10) return BIOMES.volcanic;
-    return BIOMES.frozen;
+    if (lvl <= 15) return BIOMES.frozen;
+    if (lvl <= 20) return BIOMES.desert;
+    return BIOMES.celestial;
 }
 
 function getBiomeKey(level) {
     const lvl = Number(level);
     if (lvl <= 5) return 'forest';
     if (lvl <= 10) return 'volcanic';
-    return 'frozen';
+    if (lvl <= 15) return 'frozen';
+    if (lvl <= 20) return 'desert';
+    return 'celestial';
 }
 
 function getBossLevel(level) {
@@ -123,6 +167,8 @@ function getBossType(level) {
     if (lvl === 5) return 'forestSpirit';
     if (lvl === 10) return 'volcanoDragon';
     if (lvl === 15) return 'iceGiant';
+    if (lvl === 20) return 'desertSphinx';
+    if (lvl === 25) return 'thunderBird';
     return null;
 }
 
@@ -158,6 +204,20 @@ let gameState = {
     icicleTimer: 0,
     isSpeedBoosted: false,
     speedBoostTimer: 0,
+    // Desert Sphinx
+    windDirection: { x: 1, y: 0 },
+    windChangeTimer: 0,
+    windWarning: false,
+    windWarningTimer: 0,
+    sandstoneObstacles: [],
+    sandstoneWarnings: [],
+    // Thunder Bird
+    isBlinded: false,
+    blindTimer: 0,
+    blindCooldown: 0,
+    lightningObstacles: [],
+    lightningWarnings: [],
+    lightningTimer: 0,
     // Particles
     particles: []
 };
@@ -212,7 +272,7 @@ function hexToRgb(hex) {
 // ============================================
 function initParticles(biomeKey) {
     gameState.particles = [];
-    const count = biomeKey === 'frozen' ? 50 : 30;
+    const count = biomeKey === 'frozen' ? 50 : biomeKey === 'celestial' ? 60 : 30;
 
     for (let i = 0; i < count; i++) {
         const p = {
@@ -232,6 +292,14 @@ function initParticles(biomeKey) {
         } else if (biomeKey === 'frozen') {
             p.speedX = (Math.random() - 0.5) * 0.5;
             p.speedY = Math.random() * 1 + 0.3; // Falling snow
+        } else if (biomeKey === 'desert') {
+            p.speedX = Math.random() * 2 + 1; // Blowing sand
+            p.speedY = (Math.random() - 0.5) * 0.3;
+            p.size = Math.random() * 2 + 0.5;
+        } else if (biomeKey === 'celestial') {
+            p.speedX = (Math.random() - 0.5) * 0.1; // Slow drift
+            p.speedY = (Math.random() - 0.5) * 0.1;
+            p.twinkleSpeed = Math.random() * 3 + 1;
         }
 
         gameState.particles.push(p);
@@ -256,13 +324,18 @@ function updateParticles(biome, biomeKey) {
             if (p.y > particleCanvas.height) p.y = 0;
         }
 
-        // Update brightness (for fireflies/embers)
-        if (biomeKey !== 'frozen') {
+        // Update brightness based on biome
+        if (biomeKey === 'frozen') {
+            p.brightness = 0.8;
+        } else if (biomeKey === 'celestial') {
+            // Twinkling stars
+            p.brightness = Math.sin(Date.now() / 200 * p.twinkleSpeed) * 0.4 + 0.6;
+        } else if (biomeKey === 'desert') {
+            p.brightness = 0.5;
+        } else {
             p.brightness += p.brightnessDir * 0.02;
             if (p.brightness > 1) { p.brightness = 1; p.brightnessDir = -1; }
             if (p.brightness < 0.2) { p.brightness = 0.2; p.brightnessDir = 1; }
-        } else {
-            p.brightness = 0.8;
         }
 
         const alpha = p.brightness * 0.8;
@@ -273,8 +346,8 @@ function updateParticles(biome, biomeKey) {
         particleCtx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
         particleCtx.fill();
 
-        // Glow effect (not for snow)
-        if (biomeKey !== 'frozen') {
+        // Glow effect (not for snow or sand)
+        if (biomeKey !== 'frozen' && biomeKey !== 'desert') {
             particleCtx.beginPath();
             particleCtx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
             const gradient = particleCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
@@ -288,6 +361,14 @@ function updateParticles(biome, biomeKey) {
     // Aurora effect for frozen biome
     if (biomeKey === 'frozen') {
         drawAurora();
+    }
+    // Nebula effect for celestial biome
+    if (biomeKey === 'celestial') {
+        drawNebula();
+    }
+    // Heat shimmer for desert biome
+    if (biomeKey === 'desert') {
+        drawHeatShimmer();
     }
 }
 
@@ -311,6 +392,51 @@ function drawAurora() {
         particleCtx.lineTo(particleCanvas.width, 100);
         particleCtx.lineTo(0, 100);
         particleCtx.fill();
+    }
+
+    particleCtx.globalAlpha = 1;
+}
+
+function drawNebula() {
+    const time = Date.now() / 3000;
+    particleCtx.globalAlpha = 0.1;
+
+    // Draw swirling nebula clouds
+    for (let i = 0; i < 2; i++) {
+        const gradient = particleCtx.createRadialGradient(
+            particleCanvas.width / 2 + Math.sin(time + i) * 100,
+            50 + Math.cos(time * 0.5 + i) * 30,
+            0,
+            particleCanvas.width / 2,
+            80,
+            200
+        );
+        gradient.addColorStop(0, `hsla(${280 + i * 40}, 70%, 50%, 0.3)`);
+        gradient.addColorStop(0.5, `hsla(${240 + i * 30}, 60%, 40%, 0.1)`);
+        gradient.addColorStop(1, 'transparent');
+
+        particleCtx.fillStyle = gradient;
+        particleCtx.fillRect(0, 0, particleCanvas.width, 150);
+    }
+
+    particleCtx.globalAlpha = 1;
+}
+
+function drawHeatShimmer() {
+    const time = Date.now() / 1000;
+    particleCtx.globalAlpha = 0.05;
+
+    // Draw wavy heat lines
+    for (let i = 0; i < 3; i++) {
+        particleCtx.strokeStyle = `rgba(255, 200, 100, ${0.3 - i * 0.08})`;
+        particleCtx.lineWidth = 2;
+        particleCtx.beginPath();
+        for (let x = 0; x < particleCanvas.width; x += 5) {
+            const y = particleCanvas.height - 50 + Math.sin(x / 20 + time * 2 + i) * 5 - i * 20;
+            if (x === 0) particleCtx.moveTo(x, y);
+            else particleCtx.lineTo(x, y);
+        }
+        particleCtx.stroke();
     }
 
     particleCtx.globalAlpha = 1;
@@ -406,6 +532,14 @@ function moveSnake() {
         return;
     }
     if (gameState.icicles.some(i => i.x === newHead.x && i.y === newHead.y)) {
+        gameOver();
+        return;
+    }
+    if (gameState.sandstoneObstacles.some(o => o.x === newHead.x && o.y === newHead.y)) {
+        gameOver();
+        return;
+    }
+    if (gameState.lightningObstacles.some(o => o.x === newHead.x && o.y === newHead.y)) {
         gameOver();
         return;
     }
@@ -506,6 +640,24 @@ function drawObstacles(biome, biomeKey) {
             // Ice highlights
             ctx.fillRect(x + 2, y + 2, 6, 3);
             ctx.fillRect(x + 4, y + 6, 4, 10);
+        } else if (biomeKey === 'desert') {
+            // Hieroglyph-like patterns
+            ctx.fillRect(x + 3, y + 3, 4, 4);
+            ctx.fillRect(x + size - 7, y + 3, 4, 4);
+            ctx.fillRect(x + 8, y + 10, 6, 3);
+        } else if (biomeKey === 'celestial') {
+            // Star patterns
+            const cx = x + size / 2;
+            const cy = y + size / 2;
+            ctx.beginPath();
+            for (let i = 0; i < 4; i++) {
+                const angle = (i * Math.PI / 2);
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + Math.cos(angle) * 8, cy + Math.sin(angle) * 8);
+            }
+            ctx.strokeStyle = biome.obstacleAccent;
+            ctx.lineWidth = 2;
+            ctx.stroke();
         }
     });
 }
@@ -590,6 +742,78 @@ function drawBossSprite() {
                 <path d="M105 70 L115 90 L125 70" stroke="#fff" stroke-width="2" fill="none" opacity="0.5"/>
             </svg>
         `;
+    } else if (gameState.bossType === 'desertSphinx') {
+        const eyeGlow = Math.sin(time * 2) * 0.3 + 0.7;
+        bossSprite.innerHTML = `
+            <svg width="220" height="140" style="transform: translateY(${bob}px)">
+                <!-- Body/Base -->
+                <rect x="40" y="80" width="140" height="60" fill="#c9a227" rx="5"/>
+                <rect x="50" y="90" width="120" height="40" fill="#daa520"/>
+                <!-- Head -->
+                <ellipse cx="110" cy="50" rx="40" ry="35" fill="#d4af37"/>
+                <ellipse cx="110" cy="45" rx="35" ry="28" fill="#e6c547"/>
+                <!-- Headdress -->
+                <path d="M60 30 L70 60 L70 80 L50 80" fill="#1a4d80" stroke="#c9a227" stroke-width="2"/>
+                <path d="M160 30 L150 60 L150 80 L170 80" fill="#1a4d80" stroke="#c9a227" stroke-width="2"/>
+                <rect x="70" y="20" width="80" height="15" fill="#1a4d80"/>
+                <rect x="75" y="25" width="70" height="8" fill="#c9a227"/>
+                <!-- Eyes - glowing -->
+                <ellipse cx="95" cy="45" rx="10" ry="8" fill="#ffd700" opacity="${eyeGlow}"/>
+                <ellipse cx="125" cy="45" rx="10" ry="8" fill="#ffd700" opacity="${eyeGlow}"/>
+                <ellipse cx="95" cy="45" rx="4" ry="5" fill="#000"/>
+                <ellipse cx="125" cy="45" rx="4" ry="5" fill="#000"/>
+                <!-- Nose -->
+                <path d="M105 55 L110 65 L115 55" fill="#b8860b"/>
+                <!-- Mouth -->
+                <path d="M95 75 Q110 82 125 75" stroke="#8b7355" stroke-width="2" fill="none"/>
+                <!-- Front paws -->
+                <rect x="55" y="120" width="25" height="20" fill="#c9a227" rx="3"/>
+                <rect x="140" y="120" width="25" height="20" fill="#c9a227" rx="3"/>
+            </svg>
+        `;
+    } else if (gameState.bossType === 'thunderBird') {
+        const wingFlap = Math.sin(time * 4) * 15;
+        const lightningGlow = Math.sin(time * 8) * 0.4 + 0.6;
+        bossSprite.innerHTML = `
+            <svg width="260" height="140" style="transform: translateY(${bob}px)">
+                <!-- Left wing -->
+                <path d="M30 60 Q0 40 10 80 Q30 70 50 90 Q70 70 90 80"
+                      fill="#4a0080" stroke="#9370db" stroke-width="2"
+                      transform="rotate(${-wingFlap}, 90, 80)"/>
+                <path d="M40 65 Q20 50 25 75" stroke="#e0b0ff" stroke-width="3" fill="none" opacity="${lightningGlow}"
+                      transform="rotate(${-wingFlap}, 90, 80)"/>
+                <!-- Right wing -->
+                <path d="M230 60 Q260 40 250 80 Q230 70 210 90 Q190 70 170 80"
+                      fill="#4a0080" stroke="#9370db" stroke-width="2"
+                      transform="rotate(${wingFlap}, 170, 80)"/>
+                <path d="M220 65 Q240 50 235 75" stroke="#e0b0ff" stroke-width="3" fill="none" opacity="${lightningGlow}"
+                      transform="rotate(${wingFlap}, 170, 80)"/>
+                <!-- Body -->
+                <ellipse cx="130" cy="70" rx="45" ry="35" fill="#5a1a8a"/>
+                <ellipse cx="130" cy="65" rx="38" ry="28" fill="#7030a0"/>
+                <!-- Head -->
+                <ellipse cx="130" cy="35" rx="25" ry="22" fill="#7030a0"/>
+                <ellipse cx="130" cy="32" rx="20" ry="17" fill="#8040b0"/>
+                <!-- Beak -->
+                <path d="M125 40 L130 55 L135 40" fill="#ffd700"/>
+                <!-- Eyes - electric -->
+                <ellipse cx="118" cy="30" rx="8" ry="6" fill="#00ffff" opacity="${lightningGlow}"/>
+                <ellipse cx="142" cy="30" rx="8" ry="6" fill="#00ffff" opacity="${lightningGlow}"/>
+                <ellipse cx="118" cy="30" rx="3" ry="4" fill="#fff"/>
+                <ellipse cx="142" cy="30" rx="3" ry="4" fill="#fff"/>
+                <!-- Crown feathers -->
+                <path d="M115 15 L118 5 L125 18" fill="#e0b0ff"/>
+                <path d="M128 12 L130 0 L132 12" fill="#e0b0ff"/>
+                <path d="M145 15 L142 5 L135 18" fill="#e0b0ff"/>
+                <!-- Lightning bolts from body -->
+                <path d="M100 90 L95 105 L105 100 L100 120" stroke="#ffff00" stroke-width="2" fill="none" opacity="${lightningGlow}"/>
+                <path d="M160 90 L165 105 L155 100 L160 120" stroke="#ffff00" stroke-width="2" fill="none" opacity="${lightningGlow}"/>
+                <!-- Tail feathers -->
+                <path d="M110 100 L100 130 L120 115" fill="#4a0080"/>
+                <path d="M130 105 L130 135 L140 115" fill="#5a1a8a"/>
+                <path d="M150 100 L160 130 L140 115" fill="#4a0080"/>
+            </svg>
+        `;
     }
 }
 
@@ -609,6 +833,10 @@ function updateBoss(deltaTime) {
         updateVolcanoDragon(deltaTime);
     } else if (gameState.bossType === 'iceGiant') {
         updateIceGiant(deltaTime);
+    } else if (gameState.bossType === 'desertSphinx') {
+        updateDesertSphinx(deltaTime);
+    } else if (gameState.bossType === 'thunderBird') {
+        updateThunderBird(deltaTime);
     }
 
     // Update speed boost timer
@@ -772,6 +1000,129 @@ function createIcePatch() {
     }
 }
 
+// Desert Sphinx - Wind manipulation
+function updateDesertSphinx(deltaTime) {
+    // Handle wind warning countdown
+    if (gameState.windWarning) {
+        gameState.windWarningTimer -= deltaTime;
+        if (gameState.windWarningTimer <= 0) {
+            gameState.windWarning = false;
+            // Change wind direction
+            const directions = [
+                { x: 1, y: 0 },
+                { x: -1, y: 0 },
+                { x: 0, y: 1 },
+                { x: 0, y: -1 }
+            ];
+            // Pick a new direction different from current
+            let newDir;
+            do {
+                newDir = directions[Math.floor(Math.random() * directions.length)];
+            } while (newDir.x === gameState.windDirection.x && newDir.y === gameState.windDirection.y);
+            gameState.windDirection = newDir;
+        }
+    }
+
+    // Stage 2+: Wind changes direction
+    if (gameState.bossStage >= 2 && !gameState.windWarning) {
+        gameState.windChangeTimer += deltaTime;
+        const changeInterval = 8000 + Math.random() * 2000; // 8-10 seconds
+        if (gameState.windChangeTimer >= changeInterval) {
+            gameState.windChangeTimer = 0;
+            gameState.windWarning = true;
+            gameState.windWarningTimer = 2000; // 2 second warning
+        }
+    }
+
+    // Stage 3: Sandstone obstacles
+    if (gameState.bossStage >= 3) {
+        gameState.bossDropTimer += deltaTime;
+        if (gameState.bossDropTimer >= 5000) { // Every 5 seconds
+            gameState.bossDropTimer = 0;
+            createWarning(gameState.sandstoneWarnings);
+        }
+    }
+
+    // Update sandstone warnings -> obstacles
+    gameState.sandstoneWarnings = gameState.sandstoneWarnings.filter(w => {
+        w.timer -= deltaTime;
+        if (w.timer <= 0) {
+            gameState.sandstoneObstacles.push({ x: w.x, y: w.y, timer: 4000 });
+            return false;
+        }
+        return true;
+    });
+
+    // Update sandstone obstacles
+    gameState.sandstoneObstacles = gameState.sandstoneObstacles.filter(o => {
+        o.timer -= deltaTime;
+        return o.timer > 0;
+    });
+}
+
+// Apply wind effect to movement speed
+function getWindModifiedInterval() {
+    if (gameState.bossType !== 'desertSphinx') return gameState.moveInterval;
+
+    const movingWith = (gameState.direction.x === gameState.windDirection.x &&
+                        gameState.direction.y === gameState.windDirection.y);
+    const movingAgainst = (gameState.direction.x === -gameState.windDirection.x &&
+                          gameState.direction.y === -gameState.windDirection.y);
+
+    if (movingWith) {
+        return gameState.moveInterval / 1.5; // Faster
+    } else if (movingAgainst) {
+        return gameState.moveInterval * 2; // Slower
+    }
+    return gameState.moveInterval; // Normal
+}
+
+// Thunder Bird - Lightning attacks
+function updateThunderBird(deltaTime) {
+    // Update blind effect
+    if (gameState.isBlinded) {
+        gameState.blindTimer -= deltaTime;
+        if (gameState.blindTimer <= 0) {
+            gameState.isBlinded = false;
+        }
+    }
+
+    // Stage 1+: Blinding flashes
+    gameState.blindCooldown += deltaTime;
+    const flashInterval = gameState.bossStage === 3 ? 3000 : 4500; // 3-4.5 sec based on stage
+    if (gameState.blindCooldown >= flashInterval + Math.random() * 1500) {
+        gameState.blindCooldown = 0;
+        gameState.isBlinded = true;
+        gameState.blindTimer = 250; // 0.25 second flash
+    }
+
+    // Stage 2+: Lightning obstacles
+    if (gameState.bossStage >= 2) {
+        gameState.lightningTimer += deltaTime;
+        const obstacleInterval = gameState.bossStage === 3 ? 2500 : 4000;
+        if (gameState.lightningTimer >= obstacleInterval) {
+            gameState.lightningTimer = 0;
+            createWarning(gameState.lightningWarnings);
+        }
+    }
+
+    // Update lightning warnings -> obstacles (1 second warning)
+    gameState.lightningWarnings = gameState.lightningWarnings.filter(w => {
+        w.timer -= deltaTime;
+        if (w.timer <= 0) {
+            gameState.lightningObstacles.push({ x: w.x, y: w.y, timer: 2000 });
+            return false;
+        }
+        return true;
+    });
+
+    // Update lightning obstacles
+    gameState.lightningObstacles = gameState.lightningObstacles.filter(o => {
+        o.timer -= deltaTime;
+        return o.timer > 0;
+    });
+}
+
 function createWarning(warningArray) {
     let pos, attempts = 0;
     do {
@@ -872,22 +1223,132 @@ function drawBossElements(biome) {
         ctx.closePath();
         ctx.fill();
     });
+
+    // Desert Sphinx - Sandstone obstacles
+    drawWarnings(gameState.sandstoneWarnings);
+    gameState.sandstoneObstacles.forEach(obs => {
+        const x = obs.x * CONFIG.cellSize;
+        const y = obs.y * CONFIG.cellSize;
+        const size = CONFIG.cellSize - 2;
+
+        // Sandstone block
+        ctx.fillStyle = '#c9a227';
+        ctx.fillRect(x + 1, y + 1, size, size);
+
+        // Cracks/detail
+        ctx.fillStyle = '#8b7355';
+        ctx.fillRect(x + 3, y + 3, 4, 4);
+        ctx.fillRect(x + size - 7, y + size - 7, 4, 4);
+        ctx.fillRect(x + 8, y + 8, 6, 3);
+    });
+
+    // Thunder Bird - Lightning obstacles
+    drawWarnings(gameState.lightningWarnings, '#ffff00');
+    gameState.lightningObstacles.forEach(obs => {
+        const x = obs.x * CONFIG.cellSize + CONFIG.cellSize / 2;
+        const y = obs.y * CONFIG.cellSize + CONFIG.cellSize / 2;
+        const time = Date.now() / 50;
+        const flicker = Math.sin(time) * 0.3 + 0.7;
+
+        // Electric field
+        ctx.fillStyle = `rgba(255, 255, 0, ${flicker * 0.6})`;
+        ctx.beginPath();
+        ctx.arc(x, y, CONFIG.cellSize / 2 - 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Lightning bolt shape
+        ctx.strokeStyle = `rgba(255, 255, 255, ${flicker})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x - 4, y - 8);
+        ctx.lineTo(x + 2, y - 2);
+        ctx.lineTo(x - 2, y);
+        ctx.lineTo(x + 4, y + 8);
+        ctx.stroke();
+
+        // Crackle effect
+        ctx.strokeStyle = `rgba(0, 255, 255, ${flicker * 0.5})`;
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 3; i++) {
+            const angle = (time * 2 + i * 2) % (Math.PI * 2);
+            const length = 6 + Math.sin(time + i) * 3;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + Math.cos(angle) * length, y + Math.sin(angle) * length);
+            ctx.stroke();
+        }
+    });
 }
 
-function drawWarnings(warnings) {
+function drawWarnings(warnings, color = '#ff4444') {
     warnings.forEach(w => {
         const x = w.x * CONFIG.cellSize;
         const y = w.y * CONFIG.cellSize;
         const alpha = 0.3 + Math.sin(Date.now() / 100) * 0.2;
 
-        ctx.fillStyle = `rgba(255, 68, 68, ${alpha})`;
+        const rgb = color === '#ffff00' ? '255, 255, 0' : '255, 68, 68';
+        ctx.fillStyle = `rgba(${rgb}, ${alpha})`;
         ctx.beginPath();
         ctx.arc(x + CONFIG.cellSize / 2, y + CONFIG.cellSize / 2, CONFIG.cellSize / 2 - 2, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#ff4444';
+        ctx.strokeStyle = color;
         ctx.lineWidth = 2;
         ctx.stroke();
     });
+}
+
+function drawWindIndicator() {
+    const arrowSize = 40;
+    const centerX = canvas.width - 60;
+    const centerY = 60;
+
+    // Draw background circle
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 35, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Flash warning when wind is about to change
+    if (gameState.windWarning) {
+        const flashAlpha = Math.sin(Date.now() / 100) * 0.3 + 0.5;
+        ctx.strokeStyle = `rgba(255, 200, 0, ${flashAlpha})`;
+        ctx.lineWidth = 4;
+        ctx.stroke();
+    }
+
+    // Draw arrow pointing in wind direction
+    ctx.save();
+    ctx.translate(centerX, centerY);
+
+    // Rotate based on wind direction
+    let angle = 0;
+    if (gameState.windDirection.x === 1) angle = 0;
+    else if (gameState.windDirection.x === -1) angle = Math.PI;
+    else if (gameState.windDirection.y === 1) angle = Math.PI / 2;
+    else if (gameState.windDirection.y === -1) angle = -Math.PI / 2;
+
+    ctx.rotate(angle);
+
+    // Draw arrow
+    ctx.fillStyle = gameState.windWarning ? '#ffcc00' : '#ffd700';
+    ctx.beginPath();
+    ctx.moveTo(arrowSize / 2, 0);
+    ctx.lineTo(-arrowSize / 4, -arrowSize / 3);
+    ctx.lineTo(-arrowSize / 4, -arrowSize / 6);
+    ctx.lineTo(-arrowSize / 2, -arrowSize / 6);
+    ctx.lineTo(-arrowSize / 2, arrowSize / 6);
+    ctx.lineTo(-arrowSize / 4, arrowSize / 6);
+    ctx.lineTo(-arrowSize / 4, arrowSize / 3);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+
+    // Draw "WIND" label
+    ctx.fillStyle = '#ffd700';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('WIND', centerX, centerY + 50);
 }
 
 // ============================================
@@ -952,7 +1413,11 @@ function spawnFood() {
         gameState.lavaPools.some(p => p.cells.some(c => c.x === pos.x && c.y === pos.y)) ||
         gameState.lavaWarnings.some(w => w.x === pos.x && w.y === pos.y) ||
         gameState.icicles.some(i => i.x === pos.x && i.y === pos.y) ||
-        gameState.icicleWarnings.some(w => w.x === pos.x && w.y === pos.y)
+        gameState.icicleWarnings.some(w => w.x === pos.x && w.y === pos.y) ||
+        gameState.sandstoneObstacles.some(o => o.x === pos.x && o.y === pos.y) ||
+        gameState.sandstoneWarnings.some(w => w.x === pos.x && w.y === pos.y) ||
+        gameState.lightningObstacles.some(o => o.x === pos.x && o.y === pos.y) ||
+        gameState.lightningWarnings.some(w => w.x === pos.x && w.y === pos.y)
     ));
 
     gameState.food = pos;
@@ -1028,6 +1493,20 @@ function startLevel(level) {
     gameState.icicleTimer = 0;
     gameState.isSpeedBoosted = false;
     gameState.speedBoostTimer = 0;
+    // Desert Sphinx
+    gameState.windDirection = { x: 1, y: 0 };
+    gameState.windChangeTimer = 0;
+    gameState.windWarning = false;
+    gameState.windWarningTimer = 0;
+    gameState.sandstoneObstacles = [];
+    gameState.sandstoneWarnings = [];
+    // Thunder Bird
+    gameState.isBlinded = false;
+    gameState.blindTimer = 0;
+    gameState.blindCooldown = 0;
+    gameState.lightningObstacles = [];
+    gameState.lightningWarnings = [];
+    gameState.lightningTimer = 0;
     gameState.lastMoveTime = 0;
 
     // Apply biome theme
@@ -1051,7 +1530,9 @@ function startLevel(level) {
         const bossNames = {
             'forestSpirit': 'FOREST SPIRIT',
             'volcanoDragon': 'VOLCANO DRAGON',
-            'iceGiant': 'ICE GIANT'
+            'iceGiant': 'ICE GIANT',
+            'desertSphinx': 'DESERT SPHINX',
+            'thunderBird': 'THUNDER BIRD'
         };
         document.getElementById('boss-name').textContent = bossNames[gameState.bossType];
         showBossWarning();
@@ -1135,8 +1616,13 @@ function gameLoop(timestamp) {
         updateBoss(deltaTime);
         drawBossSprite();
 
+        // Use wind-modified interval for Desert Sphinx
+        const effectiveInterval = gameState.bossType === 'desertSphinx'
+            ? getWindModifiedInterval()
+            : gameState.moveInterval;
+
         gameState.lastMoveTime += deltaTime;
-        if (gameState.lastMoveTime >= gameState.moveInterval) {
+        if (gameState.lastMoveTime >= effectiveInterval) {
             gameState.lastMoveTime = 0;
             moveSnake();
         }
@@ -1146,6 +1632,17 @@ function gameLoop(timestamp) {
         drawBossElements(biome);
         drawFood(biome);
         drawSnake(biome);
+
+        // Draw Thunder Bird blind effect
+        if (gameState.bossType === 'thunderBird' && gameState.isBlinded) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Draw wind indicator for Desert Sphinx
+        if (gameState.bossType === 'desertSphinx') {
+            drawWindIndicator();
+        }
     }
 
     requestAnimationFrame(gameLoop);
