@@ -4,19 +4,21 @@ class Renderer {
     this.ctx = canvas.getContext('2d');
   }
 
-  renderBoid(boid, maxSpeed) {
+  renderBoid(boid, index, totalBoids) {
     const ctx = this.ctx;
     const { x, y } = boid.position;
     const heading = Math.atan2(boid.velocity.y, boid.velocity.x);
 
-    // Color by speed
-    const speed = Math.sqrt(boid.velocity.x ** 2 + boid.velocity.y ** 2);
-    const speedRatio = Math.min(speed / maxSpeed, 1);
-    const hue = 200 + speedRatio * 80; // Blue to cyan
+    // Rainbow color based on boid index - full spectrum
+    const hue = (index / totalBoids) * 360;
 
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(heading);
+
+    // Neon glow effect
+    ctx.shadowColor = `hsl(${hue}, 100%, 60%)`;
+    ctx.shadowBlur = 12;
 
     // Triangle
     ctx.beginPath();
@@ -25,10 +27,12 @@ class Renderer {
     ctx.lineTo(-4, -4);
     ctx.closePath();
 
-    ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+    // Neon fill - high saturation, bright
+    ctx.fillStyle = `hsl(${hue}, 100%, 55%)`;
     ctx.fill();
-    ctx.strokeStyle = `hsl(${hue}, 80%, 80%)`;
-    ctx.lineWidth = 1;
+    // Bright neon stroke
+    ctx.strokeStyle = `hsl(${hue}, 100%, 75%)`;
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     ctx.restore();
@@ -41,7 +45,7 @@ class Renderer {
     ctx.fillStyle = '#0a0a0f';
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Draw all boids
-    boids.forEach(boid => this.renderBoid(boid, maxSpeed));
+    // Draw all boids with rainbow colors
+    boids.forEach((boid, index) => this.renderBoid(boid, index, boids.length));
   }
 }
