@@ -66,7 +66,7 @@ class Simulation {
       alignmentWeight: 1.0,
       cohesionWeight: 1.0,
       neighborRadius: 50,
-      maxSpeed: 4.0
+      maxSpeed: 20.0
     };
     this.width = canvasWidth;
     this.height = canvasHeight;
