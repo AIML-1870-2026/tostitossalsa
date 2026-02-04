@@ -25,7 +25,7 @@ const PARAMS = {
     elementId: 'radius'
   },
   maxSpeed: {
-    min: 100, max: 800, default: 400.0, step: 50,
+    min: 1, max: 10, default: 4.0, step: 0.5,
     label: 'Max Speed',
     tooltip: 'Maximum velocity',
     elementId: 'speed'
@@ -39,21 +39,21 @@ const PRESETS = {
     alignmentWeight: 1.0,
     cohesionWeight: 1.0,
     neighborRadius: 50,
-    maxSpeed: 400.0
+    maxSpeed: 4.0
   },
   chaos: {
     separationWeight: 3.0,
     alignmentWeight: 0.1,
     cohesionWeight: 0.1,
     neighborRadius: 20,
-    maxSpeed: 500.0
+    maxSpeed: 6.0
   },
   cluster: {
     separationWeight: 0.5,
     alignmentWeight: 0.3,
     cohesionWeight: 2.5,
     neighborRadius: 80,
-    maxSpeed: 300.0
+    maxSpeed: 3.0
   }
 };
 

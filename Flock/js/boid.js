@@ -1,13 +1,16 @@
 class Boid {
   constructor(x, y) {
     this.position = { x, y };
+    // Start with random velocity scaled to maxSpeed
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 2 + Math.random() * 2;
     this.velocity = {
-      x: (Math.random() - 0.5) * 2,
-      y: (Math.random() - 0.5) * 2
+      x: Math.cos(angle) * speed,
+      y: Math.sin(angle) * speed
     };
     this.acceleration = { x: 0, y: 0 };
-    this.maxSpeed = 400.0;
-    this.maxForce = 0.1;
+    this.maxSpeed = 4.0;
+    this.maxForce = 0.2;
   }
 
   applyForce(force) {
@@ -15,10 +18,10 @@ class Boid {
     this.acceleration.y += force.y;
   }
 
-  update(dt) {
+  update() {
     // Update velocity
-    this.velocity.x += this.acceleration.x * dt;
-    this.velocity.y += this.acceleration.y * dt;
+    this.velocity.x += this.acceleration.x;
+    this.velocity.y += this.acceleration.y;
 
     // Limit speed
     const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
@@ -27,9 +30,9 @@ class Boid {
       this.velocity.y = (this.velocity.y / speed) * this.maxSpeed;
     }
 
-    // Update position
-    this.position.x += this.velocity.x * dt;
-    this.position.y += this.velocity.y * dt;
+    // Update position directly (velocity = pixels per frame)
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
 
     // Reset acceleration
     this.acceleration.x = 0;

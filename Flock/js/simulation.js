@@ -66,7 +66,7 @@ class Simulation {
       alignmentWeight: 1.0,
       cohesionWeight: 1.0,
       neighborRadius: 50,
-      maxSpeed: 400.0
+      maxSpeed: 4.0
     };
     this.width = canvasWidth;
     this.height = canvasHeight;
@@ -80,9 +80,7 @@ class Simulation {
     }
   }
 
-  update(deltaTime) {
-    const dt = Math.min(deltaTime, 0.05); // Cap at 50ms
-
+  update() {
     this.boids.forEach(boid => {
       // Update boid's maxSpeed from params
       boid.maxSpeed = this.params.maxSpeed;
@@ -96,7 +94,7 @@ class Simulation {
       boid.applyForce(sep);
       boid.applyForce(ali);
       boid.applyForce(coh);
-      boid.update(dt);
+      boid.update();
 
       this.wrap(boid);
     });

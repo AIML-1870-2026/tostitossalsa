@@ -32,7 +32,7 @@ function gameLoop() {
   lastTime = currentTime;
 
   // Update simulation
-  simulation.update(deltaTime);
+  simulation.update();
 
   // Render
   renderer.render(simulation.boids, simulation.params.maxSpeed);
