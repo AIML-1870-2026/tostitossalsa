@@ -122,9 +122,27 @@ function calculateObstacleAvoidance(boid, obstacles, weight) {
   return steer;
 }
 
+// Attraction to cursor
+function calculateAttraction(boid, target, weight) {
+  if (!target) return { x: 0, y: 0 };
+
+  const dx = target.x - boid.position.x;
+  const dy = target.y - boid.position.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist < 5) return { x: 0, y: 0 };
+
+  // Normalize and scale by weight
+  return {
+    x: (dx / dist) * weight,
+    y: (dy / dist) * weight
+  };
+}
+
 // Simulation state
 let boids = [];
 let obstacles = [];
+let attractTarget = null;
 let params = {
   separationWeight: 1.5,
   alignmentWeight: 1.0,
@@ -132,7 +150,8 @@ let params = {
   neighborRadius: 50,
   maxSpeed: 20.0,
   spawnRate: 10,
-  obstacleAvoidance: 8.0
+  obstacleAvoidance: 8.0,
+  attractionWeight: 2.0
 };
 let width = 800;
 let height = 600;
@@ -230,11 +249,13 @@ function update(deltaTime) {
     const ali = calculateAlignment(boid, neighbors, params.alignmentWeight);
     const coh = calculateCohesion(boid, neighbors, params.cohesionWeight);
     const obs = calculateObstacleAvoidance(boid, obstacles, params.obstacleAvoidance);
+    const att = calculateAttraction(boid, attractTarget, params.attractionWeight);
 
     boid.applyForce(sep);
     boid.applyForce(ali);
     boid.applyForce(coh);
     boid.applyForce(obs);
+    boid.applyForce(att);
     boid.update();
     wrap(boid);
   }
@@ -288,6 +309,14 @@ self.onmessage = function(e) {
 
     case 'setParam':
       params[msg.key] = msg.value;
+      break;
+
+    case 'setTarget':
+      attractTarget = msg.target;
+      break;
+
+    case 'clearTarget':
+      attractTarget = null;
       break;
 
     case 'stop':

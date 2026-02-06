@@ -65,6 +65,31 @@ function init() {
   // Create controls (uses simulationProxy)
   controls = new Controls(simulationProxy);
 
+  // Click to attract boids
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    worker.postMessage({ type: 'setTarget', target: { x, y } });
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (e.buttons === 1) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      worker.postMessage({ type: 'setTarget', target: { x, y } });
+    }
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    worker.postMessage({ type: 'clearTarget' });
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    worker.postMessage({ type: 'clearTarget' });
+  });
+
   // Start render loop (decoupled from simulation)
   requestAnimationFrame(renderLoop);
 }
