@@ -17,7 +17,7 @@ const simulationProxy = {
     alignmentWeight: 1.0,
     cohesionWeight: 1.0,
     neighborRadius: 50,
-    maxSpeed: 25.0,
+    maxSpeed: 20.0,
     spawnRate: 10
   },
   setParam(key, value) {
@@ -47,10 +47,12 @@ function init() {
   worker = new Worker('js/simulationWorker.js');
 
   worker.onmessage = function(e) {
-    if (e.data.type === 'update') {
+    if (e.data.type === 'obstacles') {
+      // Obstacles sent once at init - they never move
+      latestObstacles = e.data.obstacles;
+    } else if (e.data.type === 'update') {
       latestBoids = e.data.boids;
       latestParams = e.data.params;
-      latestObstacles = e.data.obstacles || [];
     }
   };
 

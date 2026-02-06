@@ -4,14 +4,14 @@ class Boid {
   constructor(x, y) {
     this.position = { x, y };
     const angle = Math.random() * Math.PI * 2;
-    const speed = 15 + Math.random() * 10;
+    const speed = 5 + Math.random() * 5;
     this.velocity = {
       x: Math.cos(angle) * speed,
       y: Math.sin(angle) * speed
     };
     this.acceleration = { x: 0, y: 0 };
-    this.maxSpeed = 25.0;
-    this.maxForce = 1.0;
+    this.maxSpeed = 20.0;
+    this.maxForce = 0.8;
   }
 
   applyForce(force) {
@@ -130,7 +130,7 @@ let params = {
   alignmentWeight: 1.0,
   cohesionWeight: 1.0,
   neighborRadius: 50,
-  maxSpeed: 25.0,
+  maxSpeed: 20.0,
   spawnRate: 10,
   obstacleAvoidance: 8.0
 };
@@ -249,7 +249,7 @@ function sendBoidData() {
     vy: b.velocity.y
   }));
 
-  self.postMessage({ type: 'update', boids: data, params: params, obstacles: obstacles });
+  self.postMessage({ type: 'update', boids: data, params: params });
 }
 
 function simulationLoop() {
@@ -276,6 +276,8 @@ self.onmessage = function(e) {
       height = msg.height;
       boids = [];
       initObstacles();
+      // Send obstacles once - they never change
+      self.postMessage({ type: 'obstacles', obstacles: obstacles });
       for (let i = 0; i < 20; i++) {
         spawnBoid();
       }
