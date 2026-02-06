@@ -59,24 +59,26 @@ class Renderer {
 
     // Draw obstacles
     for (const obs of obstacles) {
-      // Outer glow
+      // Solid fill with glow
       ctx.beginPath();
       ctx.arc(obs.x, obs.y, obs.radius, 0, Math.PI * 2);
       ctx.shadowColor = '#ff3366';
-      ctx.shadowBlur = 15;
-      ctx.fillStyle = '#1a1a2e';
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = '#2a1a2e';
       ctx.fill();
 
-      // Border
+      // Bright border
       ctx.strokeStyle = '#ff3366';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       ctx.stroke();
 
-      // Inner highlight
+      // Inner circle
       ctx.beginPath();
-      ctx.arc(obs.x, obs.y, obs.radius * 0.7, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(255, 51, 102, 0.3)';
-      ctx.lineWidth = 1;
+      ctx.arc(obs.x, obs.y, obs.radius * 0.6, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 51, 102, 0.15)';
+      ctx.fill();
+      ctx.strokeStyle = '#ff6699';
+      ctx.lineWidth = 2;
       ctx.stroke();
 
       ctx.shadowBlur = 0;

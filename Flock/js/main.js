@@ -17,7 +17,7 @@ const simulationProxy = {
     alignmentWeight: 1.0,
     cohesionWeight: 1.0,
     neighborRadius: 50,
-    maxSpeed: 60.0,
+    maxSpeed: 25.0,
     spawnRate: 10
   },
   setParam(key, value) {

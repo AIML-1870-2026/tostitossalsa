@@ -4,14 +4,14 @@ class Boid {
   constructor(x, y) {
     this.position = { x, y };
     const angle = Math.random() * Math.PI * 2;
-    const speed = 40 + Math.random() * 20;
+    const speed = 15 + Math.random() * 10;
     this.velocity = {
       x: Math.cos(angle) * speed,
       y: Math.sin(angle) * speed
     };
     this.acceleration = { x: 0, y: 0 };
-    this.maxSpeed = 60.0;
-    this.maxForce = 2.5;
+    this.maxSpeed = 25.0;
+    this.maxForce = 1.0;
   }
 
   applyForce(force) {
@@ -130,7 +130,7 @@ let params = {
   alignmentWeight: 1.0,
   cohesionWeight: 1.0,
   neighborRadius: 50,
-  maxSpeed: 60.0,
+  maxSpeed: 25.0,
   spawnRate: 10,
   obstacleAvoidance: 8.0
 };
