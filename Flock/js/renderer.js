@@ -2,6 +2,8 @@ class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.trailLength = 15;
+    this.trails = new Map(); // Store trail history per boid index
   }
 
   renderBoid(boid, index, totalBoids) {
@@ -84,8 +86,42 @@ class Renderer {
       ctx.shadowBlur = 0;
     }
 
-    // Draw all boids
+    // Update and draw trails
     const total = boids.length;
+    for (let i = 0; i < total; i++) {
+      const boid = boids[i];
+      const hue = (i / total) * 360;
+
+      // Update trail history
+      if (!this.trails.has(i)) {
+        this.trails.set(i, []);
+      }
+      const trail = this.trails.get(i);
+      trail.push({ x: boid.x, y: boid.y });
+      if (trail.length > this.trailLength) {
+        trail.shift();
+      }
+
+      // Draw trail
+      ctx.shadowBlur = 0;
+      for (let j = 0; j < trail.length - 1; j++) {
+        const alpha = (j / trail.length) * 0.6;
+        const size = 2 + (j / trail.length) * 2;
+        ctx.beginPath();
+        ctx.arc(trail[j].x, trail[j].y, size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue}, 100%, 55%, ${alpha})`;
+        ctx.fill();
+      }
+    }
+
+    // Clean up trails for removed boids
+    if (this.trails.size > total) {
+      for (const key of this.trails.keys()) {
+        if (key >= total) this.trails.delete(key);
+      }
+    }
+
+    // Draw all boids
     for (let i = 0; i < total; i++) {
       const boid = boids[i];
       const heading = Math.atan2(boid.vy, boid.vx);
