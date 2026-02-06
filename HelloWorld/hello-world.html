@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <title>Hello World - Arcade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,52 +13,126 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Press Start 2P', cursive;
             min-height: 100vh;
-            background: #0a0a0a;
+            background: linear-gradient(180deg, #0a0a12 0%, #1a0a25 50%, #0a0a12 100%);
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
 
-        .container {
-            text-align: center;
-            opacity: 0;
-            animation: fadeIn 1.5s ease-out forwards;
+        /* Subtle CRT scanlines */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.08),
+                rgba(0, 0, 0, 0.08) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
         }
 
-        .title {
-            font-size: 48px;
-            font-weight: 300;
-            color: #e0e0e0;
-            letter-spacing: 0.1em;
-            margin-bottom: 16px;
+        /* Score */
+        .score {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            color: #4a9ead;
+            font-size: 11px;
+            opacity: 0.7;
         }
 
-        .subtitle {
+        /* Lives */
+        .lives {
+            position: fixed;
+            top: 25px;
+            right: 25px;
             font-size: 14px;
-            font-weight: 400;
-            color: #505050;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
+            opacity: 0.7;
         }
 
+        /* Main container */
+        .arcade-container {
+            text-align: center;
+            padding: 50px 70px;
+            border: 3px solid #3a2a4a;
+            border-radius: 12px;
+            background: rgba(15, 10, 25, 0.5);
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Title */
+        .title {
+            font-size: 36px;
+            color: #c0a0e0;
+            text-shadow: 0 0 20px rgba(180, 120, 220, 0.4);
+            margin-bottom: 25px;
+            letter-spacing: 0.05em;
+        }
+
+        /* Alien - gentle float */
+        .alien {
+            font-size: 50px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+            margin: 15px 0;
+        }
+
+        /* Press Start - slow pulse */
+        .cta {
+            font-size: 12px;
+            color: #6a8a9a;
+            margin-top: 25px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* High score */
+        .high-score {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #5a5a6a;
+            font-size: 8px;
+            letter-spacing: 0.1em;
+        }
+
+        /* Animations */
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="title">Hello World</h1>
-        <p class="subtitle">Welcome</p>
+    <div class="score">SCORE: 9999999</div>
+    <div class="lives">&#x2764;&#xFE0F; &#x2764;&#xFE0F; &#x2764;&#xFE0F;</div>
+
+    <div class="arcade-container">
+        <h1 class="title">HELLO WORLD</h1>
+        <div class="alien">&#x1F47E;</div>
+        <div class="cta">PRESS START</div>
     </div>
+
+    <div class="high-score">INSERT COIN TO CONTINUE</div>
 </body>
 </html>
