@@ -2,7 +2,7 @@ class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.trailLength = 15;
+    this.trailLength = 25;
     this.trails = new Map(); // Store trail history per boid index
   }
 
@@ -103,15 +103,19 @@ class Renderer {
       }
 
       // Draw trail
-      ctx.shadowBlur = 0;
       for (let j = 0; j < trail.length - 1; j++) {
-        const alpha = (j / trail.length) * 0.6;
-        const size = 2 + (j / trail.length) * 2;
+        const t = j / (trail.length - 1);
+        const alpha = 0.1 + t * 0.8;
+        const size = 1 + t * 4;
+
         ctx.beginPath();
         ctx.arc(trail[j].x, trail[j].y, size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${hue}, 100%, 55%, ${alpha})`;
+        ctx.shadowColor = `hsl(${hue}, 100%, 60%)`;
+        ctx.shadowBlur = 4 + t * 6;
+        ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${alpha})`;
         ctx.fill();
       }
+      ctx.shadowBlur = 0;
     }
 
     // Clean up trails for removed boids
