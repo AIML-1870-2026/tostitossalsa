@@ -5,6 +5,7 @@ let controls;
 let chart;
 let latestBoids = [];
 let latestParams = {};
+let latestObstacles = [];
 let frameCount = 0;
 let fps = 60;
 let lastFpsUpdate = performance.now();
@@ -49,6 +50,7 @@ function init() {
     if (e.data.type === 'update') {
       latestBoids = e.data.boids;
       latestParams = e.data.params;
+      latestObstacles = e.data.obstacles || [];
     }
   };
 
@@ -66,10 +68,8 @@ function init() {
 }
 
 function renderLoop() {
-  // Render latest boid data
-  if (latestBoids.length > 0) {
-    renderer.renderFromData(latestBoids, latestParams.maxSpeed || 60);
-  }
+  // Render latest boid data and obstacles
+  renderer.renderFromData(latestBoids, latestParams.maxSpeed || 60, latestObstacles);
 
   // Update stats
   updateStats();

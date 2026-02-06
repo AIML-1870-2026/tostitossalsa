@@ -95,15 +95,44 @@ function calculateCohesion(boid, neighbors, weight) {
   };
 }
 
+// Obstacle avoidance force
+function calculateObstacleAvoidance(boid, obstacles, weight) {
+  let steer = { x: 0, y: 0 };
+  const lookAhead = 60; // How far ahead to look
+
+  for (const obs of obstacles) {
+    const dx = boid.position.x - obs.x;
+    const dy = boid.position.y - obs.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const buffer = obs.radius + lookAhead;
+
+    if (dist < buffer) {
+      // Strength increases as boid gets closer
+      const strength = (buffer - dist) / buffer;
+      const force = strength * strength * weight;
+
+      // Push away from obstacle center
+      if (dist > 0) {
+        steer.x += (dx / dist) * force;
+        steer.y += (dy / dist) * force;
+      }
+    }
+  }
+
+  return steer;
+}
+
 // Simulation state
 let boids = [];
+let obstacles = [];
 let params = {
   separationWeight: 1.5,
   alignmentWeight: 1.0,
   cohesionWeight: 1.0,
   neighborRadius: 50,
   maxSpeed: 60.0,
-  spawnRate: 10
+  spawnRate: 10,
+  obstacleAvoidance: 8.0
 };
 let width = 800;
 let height = 600;
@@ -112,22 +141,47 @@ let spawnAccumulator = 0;
 let running = false;
 let lastTime = 0;
 
-function spawnBoid() {
-  const spawnType = Math.random();
-  let x, y;
+function initObstacles() {
+  obstacles = [
+    { x: 200, y: 200, radius: 50 },
+    { x: 600, y: 400, radius: 60 },
+    { x: 400, y: 300, radius: 45 },
+    { x: 150, y: 450, radius: 35 },
+    { x: 650, y: 150, radius: 40 }
+  ];
+}
 
-  if (spawnType < 0.5) {
-    const edge = Math.floor(Math.random() * 4);
-    switch (edge) {
-      case 0: x = 0; y = Math.random() * height; break;
-      case 1: x = width; y = Math.random() * height; break;
-      case 2: x = Math.random() * width; y = 0; break;
-      case 3: x = Math.random() * width; y = height; break;
+function isInsideObstacle(x, y) {
+  for (const obs of obstacles) {
+    const dx = x - obs.x;
+    const dy = y - obs.y;
+    if (dx * dx + dy * dy < (obs.radius + 10) ** 2) {
+      return true;
     }
-  } else {
-    x = Math.random() * width;
-    y = Math.random() * height;
   }
+  return false;
+}
+
+function spawnBoid() {
+  let x, y;
+  let attempts = 0;
+
+  do {
+    const spawnType = Math.random();
+    if (spawnType < 0.5) {
+      const edge = Math.floor(Math.random() * 4);
+      switch (edge) {
+        case 0: x = 0; y = Math.random() * height; break;
+        case 1: x = width; y = Math.random() * height; break;
+        case 2: x = Math.random() * width; y = 0; break;
+        case 3: x = Math.random() * width; y = height; break;
+      }
+    } else {
+      x = Math.random() * width;
+      y = Math.random() * height;
+    }
+    attempts++;
+  } while (isInsideObstacle(x, y) && attempts < 10);
 
   const boid = new Boid(x, y);
   boid.maxSpeed = params.maxSpeed;
@@ -175,10 +229,12 @@ function update(deltaTime) {
     const sep = calculateSeparation(boid, neighbors, params.separationWeight);
     const ali = calculateAlignment(boid, neighbors, params.alignmentWeight);
     const coh = calculateCohesion(boid, neighbors, params.cohesionWeight);
+    const obs = calculateObstacleAvoidance(boid, obstacles, params.obstacleAvoidance);
 
     boid.applyForce(sep);
     boid.applyForce(ali);
     boid.applyForce(coh);
+    boid.applyForce(obs);
     boid.update();
     wrap(boid);
   }
@@ -193,7 +249,7 @@ function sendBoidData() {
     vy: b.velocity.y
   }));
 
-  self.postMessage({ type: 'update', boids: data, params: params });
+  self.postMessage({ type: 'update', boids: data, params: params, obstacles: obstacles });
 }
 
 function simulationLoop() {
@@ -219,6 +275,7 @@ self.onmessage = function(e) {
       width = msg.width;
       height = msg.height;
       boids = [];
+      initObstacles();
       for (let i = 0; i < 20; i++) {
         spawnBoid();
       }

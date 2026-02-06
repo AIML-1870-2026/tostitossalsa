@@ -50,12 +50,37 @@ class Renderer {
   }
 
   // Render from worker data format (x, y, vx, vy)
-  renderFromData(boids, maxSpeed) {
+  renderFromData(boids, maxSpeed, obstacles = []) {
     const ctx = this.ctx;
 
     // Clear
     ctx.fillStyle = '#0a0a0f';
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Draw obstacles
+    for (const obs of obstacles) {
+      // Outer glow
+      ctx.beginPath();
+      ctx.arc(obs.x, obs.y, obs.radius, 0, Math.PI * 2);
+      ctx.shadowColor = '#ff3366';
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+
+      // Border
+      ctx.strokeStyle = '#ff3366';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Inner highlight
+      ctx.beginPath();
+      ctx.arc(obs.x, obs.y, obs.radius * 0.7, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 51, 102, 0.3)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+    }
 
     // Draw all boids
     const total = boids.length;
