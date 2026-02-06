@@ -29,6 +29,12 @@ const PARAMS = {
     label: 'Max Speed',
     tooltip: 'Maximum velocity',
     elementId: 'speed'
+  },
+  spawnRate: {
+    min: 0, max: 50, default: 10, step: 1,
+    label: 'Spawn Rate',
+    tooltip: 'Boids spawned per second',
+    elementId: 'spawn'
   }
 };
 
@@ -39,21 +45,24 @@ const PRESETS = {
     alignmentWeight: 1.0,
     cohesionWeight: 1.0,
     neighborRadius: 50,
-    maxSpeed: 4.0
+    maxSpeed: 4.0,
+    spawnRate: 10
   },
   chaos: {
     separationWeight: 3.0,
     alignmentWeight: 0.1,
     cohesionWeight: 0.1,
     neighborRadius: 20,
-    maxSpeed: 6.0
+    maxSpeed: 6.0,
+    spawnRate: 30
   },
   cluster: {
     separationWeight: 0.5,
     alignmentWeight: 0.3,
     cohesionWeight: 2.5,
     neighborRadius: 80,
-    maxSpeed: 3.0
+    maxSpeed: 3.0,
+    spawnRate: 5
   }
 };
 
@@ -77,9 +86,17 @@ class Controls {
         const value = parseFloat(slider.value);
         this.currentParams[key] = value;
         this.simulation.setParam(key, value);
-        valueDisplay.textContent = value.toFixed(1);
+        valueDisplay.textContent = this.formatValue(key, value);
       });
     });
+  }
+
+  formatValue(key, value) {
+    // Integer parameters don't need decimals
+    if (key === 'neighborRadius' || key === 'spawnRate') {
+      return Math.round(value).toString();
+    }
+    return value.toFixed(1);
   }
 
   setupPresets() {
@@ -134,7 +151,7 @@ class Controls {
     const slider = document.getElementById(config.elementId);
     const valueDisplay = slider.parentElement.querySelector('.value');
     slider.value = value;
-    valueDisplay.textContent = value.toFixed(1);
+    valueDisplay.textContent = this.formatValue(key, value);
   }
 
   lerp(start, end, t) {

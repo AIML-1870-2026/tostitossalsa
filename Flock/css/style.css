@@ -91,3 +91,15 @@ body {
 #stats b {
   color: #667eea;
 }
+
+#chart-container {
+  width: 800px;
+  margin-top: 15px;
+}
+
+#chart {
+  width: 100%;
+  height: 150px;
+  border: 1px solid #333;
+  border-radius: 8px;
+}

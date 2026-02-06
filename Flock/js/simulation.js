@@ -66,22 +66,56 @@ class Simulation {
       alignmentWeight: 1.0,
       cohesionWeight: 1.0,
       neighborRadius: 50,
-      maxSpeed: 4.0
+      maxSpeed: 4.0,
+      spawnRate: 10
     };
     this.width = canvasWidth;
     this.height = canvasHeight;
+    this.maxBoids = 200;
+    this.spawnAccumulator = 0;
 
-    // Initialize 100 boids
-    for (let i = 0; i < 100; i++) {
-      this.boids.push(new Boid(
-        Math.random() * canvasWidth,
-        Math.random() * canvasHeight
-      ));
+    // Initialize with 20 boids
+    for (let i = 0; i < 20; i++) {
+      this.spawnBoid();
     }
+  }
+
+  spawnBoid() {
+    // Random spawn location: edges or anywhere
+    const spawnType = Math.random();
+    let x, y;
+
+    if (spawnType < 0.5) {
+      // Spawn from edges
+      const edge = Math.floor(Math.random() * 4);
+      switch (edge) {
+        case 0: x = 0; y = Math.random() * this.height; break;
+        case 1: x = this.width; y = Math.random() * this.height; break;
+        case 2: x = Math.random() * this.width; y = 0; break;
+        case 3: x = Math.random() * this.width; y = this.height; break;
+      }
+    } else {
+      // Spawn anywhere
+      x = Math.random() * this.width;
+      y = Math.random() * this.height;
+    }
+
+    const boid = new Boid(x, y);
+    boid.maxSpeed = this.params.maxSpeed;
+    this.boids.push(boid);
   }
 
   update(deltaTime) {
     const dt = Math.min(deltaTime, 0.05); // Cap at 50ms
+
+    // Spawn new boids based on spawn rate
+    if (this.boids.length < this.maxBoids && this.params.spawnRate > 0) {
+      this.spawnAccumulator += this.params.spawnRate * dt;
+      while (this.spawnAccumulator >= 1 && this.boids.length < this.maxBoids) {
+        this.spawnBoid();
+        this.spawnAccumulator -= 1;
+      }
+    }
 
     this.boids.forEach(boid => {
       // Update boid's maxSpeed from params
