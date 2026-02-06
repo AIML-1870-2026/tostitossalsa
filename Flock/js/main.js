@@ -1,12 +1,29 @@
-// Main entry point
-let simulation;
+// Main entry point - rendering on main thread, simulation in worker
+let worker;
 let renderer;
 let controls;
 let chart;
-let lastTime = performance.now();
+let latestBoids = [];
+let latestParams = {};
 let frameCount = 0;
 let fps = 60;
 let lastFpsUpdate = performance.now();
+
+// Simulation proxy object for controls compatibility
+const simulationProxy = {
+  params: {
+    separationWeight: 1.5,
+    alignmentWeight: 1.0,
+    cohesionWeight: 1.0,
+    neighborRadius: 50,
+    maxSpeed: 60.0,
+    spawnRate: 10
+  },
+  setParam(key, value) {
+    this.params[key] = value;
+    worker.postMessage({ type: 'setParam', key, value });
+  }
+};
 
 function init() {
   // Setup canvas
@@ -19,63 +36,69 @@ function init() {
   chartCanvas.width = 800;
   chartCanvas.height = 150;
 
-  // Create simulation
-  simulation = new Simulation(canvas.width, canvas.height);
-
   // Create renderer
   renderer = new Renderer(canvas);
-
-  // Create controls
-  controls = new Controls(simulation);
 
   // Create chart
   chart = new LiveChart(chartCanvas);
 
-  // Start game loop
-  requestAnimationFrame(gameLoop);
+  // Create and start worker
+  worker = new Worker('js/simulationWorker.js');
+
+  worker.onmessage = function(e) {
+    if (e.data.type === 'update') {
+      latestBoids = e.data.boids;
+      latestParams = e.data.params;
+    }
+  };
+
+  worker.postMessage({
+    type: 'init',
+    width: canvas.width,
+    height: canvas.height
+  });
+
+  // Create controls (uses simulationProxy)
+  controls = new Controls(simulationProxy);
+
+  // Start render loop (decoupled from simulation)
+  requestAnimationFrame(renderLoop);
 }
 
-function gameLoop() {
-  const currentTime = performance.now();
-  const deltaTime = (currentTime - lastTime) / 1000;
-  lastTime = currentTime;
-
-  // Update simulation
-  simulation.update(deltaTime);
-
-  // Render
-  renderer.render(simulation.boids, simulation.params.maxSpeed);
+function renderLoop() {
+  // Render latest boid data
+  if (latestBoids.length > 0) {
+    renderer.renderFromData(latestBoids, latestParams.maxSpeed || 60);
+  }
 
   // Update stats
-  updateStats(deltaTime);
+  updateStats();
 
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(renderLoop);
 }
 
-function updateStats(deltaTime) {
-  // Calculate FPS and stats only every 500ms to avoid expensive O(n²) calculations every frame
+function updateStats() {
   frameCount++;
   const now = performance.now();
+
   if (now - lastFpsUpdate >= 500) {
     fps = Math.round(frameCount / ((now - lastFpsUpdate) / 1000));
     frameCount = 0;
     lastFpsUpdate = now;
 
-    // Calculate boid stats only during this interval
-    const stats = calculateStats(simulation.boids, simulation.params);
+    const stats = calculateStats(latestBoids, latestParams);
     document.getElementById('fps').textContent = fps;
-    document.getElementById('boid-count').textContent = simulation.boids.length;
+    document.getElementById('boid-count').textContent = latestBoids.length;
     document.getElementById('avg-speed').textContent = stats.avgSpeed;
     document.getElementById('avg-neighbors').textContent = stats.avgNeighbors;
 
-    // Update chart
     chart.addDataPoint(stats.avgNeighborsRaw, stats.speedVariance, stats.compactness);
     chart.render();
   }
 }
 
 function calculateStats(boids, params) {
-  if (boids.length === 0) {
+  if (!boids || boids.length === 0) {
     return {
       avgSpeed: '0.00',
       avgNeighbors: '0.0',
@@ -88,52 +111,48 @@ function calculateStats(boids, params) {
   let totalSpeed = 0;
   let totalNeighbors = 0;
   const speeds = [];
+  const neighborRadius = params.neighborRadius || 50;
 
-  // Calculate center of mass
   let centerX = 0;
   let centerY = 0;
 
-  boids.forEach(boid => {
-    const speed = Math.sqrt(boid.velocity.x ** 2 + boid.velocity.y ** 2);
+  for (const boid of boids) {
+    const speed = Math.sqrt(boid.vx ** 2 + boid.vy ** 2);
     totalSpeed += speed;
     speeds.push(speed);
 
-    centerX += boid.position.x;
-    centerY += boid.position.y;
+    centerX += boid.x;
+    centerY += boid.y;
 
-    // Count neighbors
-    const r2 = params.neighborRadius ** 2;
+    const r2 = neighborRadius ** 2;
     let neighborCount = 0;
-    boids.forEach(other => {
-      if (other === boid) return;
-      const dx = boid.position.x - other.position.x;
-      const dy = boid.position.y - other.position.y;
+    for (const other of boids) {
+      if (other === boid) continue;
+      const dx = boid.x - other.x;
+      const dy = boid.y - other.y;
       if (dx * dx + dy * dy < r2) neighborCount++;
-    });
+    }
     totalNeighbors += neighborCount;
-  });
+  }
 
   const avgSpeed = totalSpeed / boids.length;
   const avgNeighbors = totalNeighbors / boids.length;
   centerX /= boids.length;
   centerY /= boids.length;
 
-  // Calculate speed variance
   let speedVariance = 0;
-  speeds.forEach(speed => {
+  for (const speed of speeds) {
     speedVariance += (speed - avgSpeed) ** 2;
-  });
+  }
   speedVariance = Math.sqrt(speedVariance / boids.length);
 
-  // Calculate compactness (inverse of average distance from center, normalized)
   let totalDistFromCenter = 0;
-  boids.forEach(boid => {
-    const dx = boid.position.x - centerX;
-    const dy = boid.position.y - centerY;
+  for (const boid of boids) {
+    const dx = boid.x - centerX;
+    const dy = boid.y - centerY;
     totalDistFromCenter += Math.sqrt(dx * dx + dy * dy);
-  });
+  }
   const avgDistFromCenter = totalDistFromCenter / boids.length;
-  // Normalize: 0 = spread out (avg dist ~400), 1 = compact (avg dist ~0)
   const maxDist = 400;
   const compactness = Math.max(0, 1 - avgDistFromCenter / maxDist);
 
@@ -146,5 +165,4 @@ function calculateStats(boids, params) {
   };
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', init);
