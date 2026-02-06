@@ -130,7 +130,7 @@ class Simulation {
       boid.applyForce(sep);
       boid.applyForce(ali);
       boid.applyForce(coh);
-      boid.update(dt);
+      boid.update();
 
       this.wrap(boid);
     });

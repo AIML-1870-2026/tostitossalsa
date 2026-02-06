@@ -18,10 +18,10 @@ class Boid {
     this.acceleration.y += force.y;
   }
 
-  update(dt) {
+  update() {
     // Update velocity
-    this.velocity.x += this.acceleration.x * dt;
-    this.velocity.y += this.acceleration.y * dt;
+    this.velocity.x += this.acceleration.x;
+    this.velocity.y += this.acceleration.y;
 
     // Limit speed
     const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
@@ -31,8 +31,8 @@ class Boid {
     }
 
     // Update position
-    this.position.x += this.velocity.x * dt;
-    this.position.y += this.velocity.y * dt;
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
 
     // Reset acceleration
     this.acceleration.x = 0;
