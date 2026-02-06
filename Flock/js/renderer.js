@@ -16,9 +16,9 @@ class Renderer {
     ctx.translate(x, y);
     ctx.rotate(heading);
 
-    // Neon glow effect
+    // Neon glow effect (reduced blur for better performance)
     ctx.shadowColor = `hsl(${hue}, 100%, 60%)`;
-    ctx.shadowBlur = 12;
+    ctx.shadowBlur = 6;
 
     // Triangle
     ctx.beginPath();

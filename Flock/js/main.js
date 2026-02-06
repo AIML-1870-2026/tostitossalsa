@@ -44,22 +44,20 @@ function gameLoop() {
 }
 
 function updateStats(deltaTime) {
-  // Calculate FPS
+  // Calculate FPS and stats only every 500ms to avoid expensive O(n²) calculations every frame
   frameCount++;
   const now = performance.now();
   if (now - lastFpsUpdate >= 500) {
     fps = Math.round(frameCount / ((now - lastFpsUpdate) / 1000));
     frameCount = 0;
     lastFpsUpdate = now;
+
+    // Calculate boid stats only during this interval
+    const stats = calculateStats(simulation.boids, simulation.params);
+    document.getElementById('fps').textContent = fps;
+    document.getElementById('avg-speed').textContent = stats.avgSpeed;
+    document.getElementById('avg-neighbors').textContent = stats.avgNeighbors;
   }
-
-  // Calculate boid stats
-  const stats = calculateStats(simulation.boids, simulation.params);
-
-  // Update display
-  document.getElementById('fps').textContent = fps;
-  document.getElementById('avg-speed').textContent = stats.avgSpeed;
-  document.getElementById('avg-neighbors').textContent = stats.avgNeighbors;
 }
 
 function calculateStats(boids, params) {
