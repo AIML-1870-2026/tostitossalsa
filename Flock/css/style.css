@@ -39,6 +39,44 @@ body {
 .parameter input[type="range"] {
   flex: 1;
   margin: 0 10px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  background: #2a2a3e;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+.parameter input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #667eea;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #8899ff;
+  transition: background 0.2s;
+}
+
+.parameter input[type="range"]::-webkit-slider-thumb:hover {
+  background: #7788ff;
+}
+
+.parameter input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #667eea;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #8899ff;
+}
+
+.parameter input[type="range"]::-moz-range-track {
+  background: #2a2a3e;
+  height: 8px;
+  border-radius: 4px;
 }
 
 .parameter .value {
