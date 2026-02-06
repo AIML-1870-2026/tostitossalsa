@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turing Patterns Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e8e8e8;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .canvases-container {
+            display: flex;
+            gap: 15px;
+        }
+
+        .pane {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .pane.active {
+            box-shadow: 0 0 0 3px #00d4ff, 0 8px 32px rgba(0, 212, 255, 0.3);
+        }
+
+        .pane-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            z-index: 10;
+        }
+
+        .pane.active .pane-label {
+            background: rgba(0, 212, 255, 0.3);
+        }
+
+        canvas.simulation {
+            display: block;
+            cursor: crosshair;
+        }
+
+        .phase-space-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .phase-space-container h3 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: #aaa;
+        }
+
+        #phaseCanvas {
+            display: block;
+            cursor: crosshair;
+            border-radius: 8px;
+        }
+
+        .phase-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.pane1 {
+            background: #00d4ff;
+        }
+
+        .legend-dot.pane2 {
+            background: #ff6b6b;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .control-group {
+            min-width: 200px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #ccc;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        select:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .slider-group {
+            margin-bottom: 15px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .slider-label {
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .slider-value {
+            color: #00d4ff;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.4);
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.4);
+        }
+
+        .buttons-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #fff;
+        }
+
+        .btn-play:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #7b2cbf, #5a1f8c);
+            color: #fff;
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(123, 44, 191, 0.4);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #ff6b6b, #cc5555);
+            color: #fff;
+        }
+
+        .btn-clear:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .pane-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .pane-btn {
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+
+        .pane-btn.active {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #fff;
+        }
+
+        .dual-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 26px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .canvases-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Turing Patterns Explorer</h1>
+
+        <div class="main-content">
+            <div class="canvases-container" id="canvasesContainer">
+                <div class="pane active" id="pane1">
+                    <span class="pane-label">Pane 1</span>
+                    <canvas id="canvas1" class="simulation" width="400" height="400"></canvas>
+                </div>
+                <div class="pane hidden" id="pane2">
+                    <span class="pane-label">Pane 2</span>
+                    <canvas id="canvas2" class="simulation" width="400" height="400"></canvas>
+                </div>
+            </div>
+
+            <div class="phase-space-container">
+                <h3>K/F Phase Space</h3>
+                <canvas id="phaseCanvas" width="280" height="220"></canvas>
+                <div class="phase-legend" id="phaseLegend">
+                    <div class="legend-item">
+                        <div class="legend-dot pane1"></div>
+                        <span>Pane 1</span>
+                    </div>
+                    <div class="legend-item hidden" id="legend2">
+                        <div class="legend-dot pane2"></div>
+                        <span>Pane 2</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="pane-selector hidden" id="paneSelector">
+                <button class="btn-play pane-btn active" id="selectPane1">Pane 1</button>
+                <button class="btn-play pane-btn" id="selectPane2">Pane 2</button>
+            </div>
+
+            <div class="controls-row">
+                <div class="control-group">
+                    <label for="presetSelect">Pattern Preset</label>
+                    <select id="presetSelect">
+                        <option value="fingerprint">Fingerprint</option>
+                        <option value="spots">Spots</option>
+                        <option value="stripes">Stripes</option>
+                        <option value="waves">Waves</option>
+                        <option value="coral">Coral / Mazes</option>
+                        <option value="mitosis">Mitosis</option>
+                        <option value="spirals">Spirals</option>
+                        <option value="worms">Worms</option>
+                        <option value="holes">Holes</option>
+                        <option value="solitons">Pulsating Solitons</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Feed Rate (F)</span>
+                            <span class="slider-value" id="fValue">0.037</span>
+                        </div>
+                        <input type="range" id="fSlider" min="0" max="0.1" step="0.001" value="0.037">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Kill Rate (K)</span>
+                            <span class="slider-value" id="kValue">0.060</span>
+                        </div>
+                        <input type="range" id="kSlider" min="0.045" max="0.07" step="0.001" value="0.060">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Speed</span>
+                            <span class="slider-value" id="speedValue">1.0x</span>
+                        </div>
+                        <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="buttons-group">
+                        <button class="btn-play" id="playBtn">Pause</button>
+                        <button class="btn-reset" id="resetBtn">Reset</button>
+                        <button class="btn-clear" id="clearBtn">Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dual-toggle">
+                <span>Dual Pane Mode</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="dualToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <p class="info-text">Click on the canvas to spawn chemical B. Click on the phase space graph to jump to those F/K values.</p>
+        </div>
+    </div>
+
+    <script>
+        // Presets
+        const PRESETS = {
+            spots: { f: 0.0545, k: 0.062, name: 'Spots' },
+            stripes: { f: 0.035, k: 0.06, name: 'Stripes' },
+            waves: { f: 0.014, k: 0.054, name: 'Waves' },
+            coral: { f: 0.055, k: 0.062, name: 'Coral / Mazes' },
+            mitosis: { f: 0.0367, k: 0.0649, name: 'Mitosis' },
+            spirals: { f: 0.026, k: 0.051, name: 'Spirals' },
+            worms: { f: 0.058, k: 0.065, name: 'Worms' },
+            holes: { f: 0.039, k: 0.058, name: 'Holes' },
+            solitons: { f: 0.025, k: 0.060, name: 'Pulsating Solitons' },
+            fingerprint: { f: 0.037, k: 0.060, name: 'Fingerprint' }
+        };
+
+        // Simulation class
+        class GrayScottSimulation {
+            constructor(width, height) {
+                this.width = width;
+                this.height = height;
+                this.gridSize = 128; // Internal grid resolution
+                this.Du = 0.2;
+                this.Dv = 0.1;
+                this.f = 0.037;
+                this.k = 0.060;
+                this.dt = 1.0;
+
+                this.u = new Float32Array(this.gridSize * this.gridSize);
+                this.v = new Float32Array(this.gridSize * this.gridSize);
+                this.uNext = new Float32Array(this.gridSize * this.gridSize);
+                this.vNext = new Float32Array(this.gridSize * this.gridSize);
+
+                this.initialize();
+            }
+
+            initialize() {
+                const gs = this.gridSize;
+                for (let i = 0; i < gs * gs; i++) {
+                    this.u[i] = 1.0;
+                    this.v[i] = 0.0;
+                }
+                this.seedCenter();
+            }
+
+            seedCenter() {
+                const gs = this.gridSize;
+                const cx = Math.floor(gs / 2);
+                const cy = Math.floor(gs / 2);
+                const size = Math.floor(gs / 10);
+
+                for (let y = cy - size; y <= cy + size; y++) {
+                    for (let x = cx - size; x <= cx + size; x++) {
+                        if (x >= 0 && x < gs && y >= 0 && y < gs) {
+                            const idx = y * gs + x;
+                            this.u[idx] = 0.5;
+                            this.v[idx] = 0.25 + Math.random() * 0.1;
+                        }
+                    }
+                }
+            }
+
+            seedRandom() {
+                const gs = this.gridSize;
+                const numSeeds = 5 + Math.floor(Math.random() * 5);
+                for (let s = 0; s < numSeeds; s++) {
+                    const cx = Math.floor(Math.random() * gs);
+                    const cy = Math.floor(Math.random() * gs);
+                    const size = 3 + Math.floor(Math.random() * 5);
+                    for (let y = cy - size; y <= cy + size; y++) {
+                        for (let x = cx - size; x <= cx + size; x++) {
+                            const px = (x + gs) % gs;
+                            const py = (y + gs) % gs;
+                            const idx = py * gs + px;
+                            this.u[idx] = 0.5;
+                            this.v[idx] = 0.25 + Math.random() * 0.1;
+                        }
+                    }
+                }
+            }
+
+            addChemical(normX, normY, radius = 5) {
+                const gs = this.gridSize;
+                const cx = Math.floor(normX * gs);
+                const cy = Math.floor(normY * gs);
+                const gridRadius = Math.floor(radius * gs / 128);
+
+                for (let dy = -gridRadius; dy <= gridRadius; dy++) {
+                    for (let dx = -gridRadius; dx <= gridRadius; dx++) {
+                        if (dx * dx + dy * dy <= gridRadius * gridRadius) {
+                            const x = (cx + dx + gs) % gs;
+                            const y = (cy + dy + gs) % gs;
+                            const idx = y * gs + x;
+                            this.v[idx] = Math.min(1.0, this.v[idx] + 0.5);
+                            this.u[idx] = Math.max(0.0, this.u[idx] - 0.2);
+                        }
+                    }
+                }
+            }
+
+            laplacian(arr, x, y) {
+                const gs = this.gridSize;
+                const idx = y * gs + x;
+                const left = y * gs + ((x - 1 + gs) % gs);
+                const right = y * gs + ((x + 1) % gs);
+                const up = ((y - 1 + gs) % gs) * gs + x;
+                const down = ((y + 1) % gs) * gs + x;
+
+                return arr[left] + arr[right] + arr[up] + arr[down] - 4 * arr[idx];
+            }
+
+            step(iterations = 10) {
+                const gs = this.gridSize;
+                const Du = this.Du;
+                const Dv = this.Dv;
+                const f = this.f;
+                const k = this.k;
+                const dt = this.dt;
+
+                for (let iter = 0; iter < iterations; iter++) {
+                    for (let y = 0; y < gs; y++) {
+                        for (let x = 0; x < gs; x++) {
+                            const idx = y * gs + x;
+                            const u = this.u[idx];
+                            const v = this.v[idx];
+
+                            const lapU = this.laplacian(this.u, x, y);
+                            const lapV = this.laplacian(this.v, x, y);
+
+                            const uvv = u * v * v;
+
+                            this.uNext[idx] = u + dt * (Du * lapU - uvv + f * (1 - u));
+                            this.vNext[idx] = v + dt * (Dv * lapV + uvv - (f + k) * v);
+
+                            // Clamp values
+                            this.uNext[idx] = Math.max(0, Math.min(1, this.uNext[idx]));
+                            this.vNext[idx] = Math.max(0, Math.min(1, this.vNext[idx]));
+                        }
+                    }
+
+                    // Swap buffers
+                    [this.u, this.uNext] = [this.uNext, this.u];
+                    [this.v, this.vNext] = [this.vNext, this.v];
+                }
+            }
+
+            clear() {
+                const gs = this.gridSize;
+                for (let i = 0; i < gs * gs; i++) {
+                    this.u[i] = 1.0;
+                    this.v[i] = 0.0;
+                }
+            }
+        }
+
+        // Renderer class
+        class Renderer {
+            constructor(canvas, simulation) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.simulation = simulation;
+                this.imageData = this.ctx.createImageData(canvas.width, canvas.height);
+            }
+
+            draw() {
+                const sim = this.simulation;
+                const gs = sim.gridSize;
+                const cw = this.canvas.width;
+                const ch = this.canvas.height;
+                const data = this.imageData.data;
+
+                const scaleX = gs / cw;
+                const scaleY = gs / ch;
+
+                for (let py = 0; py < ch; py++) {
+                    for (let px = 0; px < cw; px++) {
+                        const gx = Math.floor(px * scaleX);
+                        const gy = Math.floor(py * scaleY);
+                        const idx = gy * gs + gx;
+
+                        const v = sim.v[idx];
+                        const u = sim.u[idx];
+
+                        // Color gradient based on v concentration
+                        const t = v * 2;
+                        let r, g, b;
+
+                        if (t < 0.5) {
+                            // Dark blue to cyan
+                            r = Math.floor(10 + t * 40);
+                            g = Math.floor(20 + t * 180);
+                            b = Math.floor(80 + t * 300);
+                        } else if (t < 1.0) {
+                            // Cyan to magenta
+                            const t2 = (t - 0.5) * 2;
+                            r = Math.floor(30 + t2 * 200);
+                            g = Math.floor(110 - t2 * 60);
+                            b = Math.floor(230 - t2 * 30);
+                        } else {
+                            // Magenta to white/pink
+                            const t2 = Math.min(1, t - 1.0);
+                            r = Math.floor(230 + t2 * 25);
+                            g = Math.floor(50 + t2 * 150);
+                            b = Math.floor(200 + t2 * 55);
+                        }
+
+                        const pixelIdx = (py * cw + px) * 4;
+                        data[pixelIdx] = Math.min(255, r);
+                        data[pixelIdx + 1] = Math.min(255, g);
+                        data[pixelIdx + 2] = Math.min(255, b);
+                        data[pixelIdx + 3] = 255;
+                    }
+                }
+
+                this.ctx.putImageData(this.imageData, 0, 0);
+            }
+        }
+
+        // Phase Space Graph
+        class PhaseSpaceGraph {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.fMin = 0;
+                this.fMax = 0.1;
+                this.kMin = 0.045;
+                this.kMax = 0.07;
+                this.padding = 30;
+            }
+
+            fToX(f) {
+                const w = this.canvas.width - 2 * this.padding;
+                return this.padding + (f - this.fMin) / (this.fMax - this.fMin) * w;
+            }
+
+            kToY(k) {
+                const h = this.canvas.height - 2 * this.padding;
+                return this.canvas.height - this.padding - (k - this.kMin) / (this.kMax - this.kMin) * h;
+            }
+
+            xToF(x) {
+                const w = this.canvas.width - 2 * this.padding;
+                return this.fMin + (x - this.padding) / w * (this.fMax - this.fMin);
+            }
+
+            yToK(y) {
+                const h = this.canvas.height - 2 * this.padding;
+                return this.kMin + (this.canvas.height - this.padding - y) / h * (this.kMax - this.kMin);
+            }
+
+            draw(f1, k1, f2 = null, k2 = null, isDualMode = false) {
+                const ctx = this.ctx;
+                const w = this.canvas.width;
+                const h = this.canvas.height;
+                const p = this.padding;
+
+                // Clear
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, w, h);
+
+                // Draw grid
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.lineWidth = 1;
+
+                for (let f = 0; f <= 0.1; f += 0.02) {
+                    const x = this.fToX(f);
+                    ctx.beginPath();
+                    ctx.moveTo(x, p);
+                    ctx.lineTo(x, h - p);
+                    ctx.stroke();
+                }
+
+                for (let k = 0.045; k <= 0.07; k += 0.005) {
+                    const y = this.kToY(k);
+                    ctx.beginPath();
+                    ctx.moveTo(p, y);
+                    ctx.lineTo(w - p, y);
+                    ctx.stroke();
+                }
+
+                // Draw axes
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(p, h - p);
+                ctx.lineTo(w - p, h - p);
+                ctx.moveTo(p, h - p);
+                ctx.lineTo(p, p);
+                ctx.stroke();
+
+                // Axis labels
+                ctx.fillStyle = '#888';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('F (Feed Rate)', w / 2, h - 5);
+
+                ctx.save();
+                ctx.translate(10, h / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText('K (Kill Rate)', 0, 0);
+                ctx.restore();
+
+                // Draw preset points
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                for (const key in PRESETS) {
+                    const preset = PRESETS[key];
+                    const x = this.fToX(preset.f);
+                    const y = this.kToY(preset.k);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Draw current position markers
+                // Pane 1 - Blue
+                ctx.fillStyle = '#00d4ff';
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                const x1 = this.fToX(f1);
+                const y1 = this.kToY(k1);
+                ctx.beginPath();
+                ctx.arc(x1, y1, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Pane 2 - Red (if dual mode)
+                if (isDualMode && f2 !== null && k2 !== null) {
+                    ctx.fillStyle = '#ff6b6b';
+                    const x2 = this.fToX(f2);
+                    const y2 = this.kToY(k2);
+                    ctx.beginPath();
+                    ctx.arc(x2, y2, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // App state
+        let simulations = [];
+        let renderers = [];
+        let isRunning = true;
+        let isDualMode = false;
+        let activePane = 0;
+        let speed = 1.0;
+
+        // DOM elements
+        const canvas1 = document.getElementById('canvas1');
+        const canvas2 = document.getElementById('canvas2');
+        const phaseCanvas = document.getElementById('phaseCanvas');
+        const pane1Div = document.getElementById('pane1');
+        const pane2Div = document.getElementById('pane2');
+        const paneSelector = document.getElementById('paneSelector');
+        const legend2 = document.getElementById('legend2');
+
+        const presetSelect = document.getElementById('presetSelect');
+        const fSlider = document.getElementById('fSlider');
+        const kSlider = document.getElementById('kSlider');
+        const speedSlider = document.getElementById('speedSlider');
+        const fValue = document.getElementById('fValue');
+        const kValue = document.getElementById('kValue');
+        const speedValue = document.getElementById('speedValue');
+        const playBtn = document.getElementById('playBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const dualToggle = document.getElementById('dualToggle');
+        const selectPane1 = document.getElementById('selectPane1');
+        const selectPane2 = document.getElementById('selectPane2');
+
+        // Initialize simulations
+        const sim1 = new GrayScottSimulation(canvas1.width, canvas1.height);
+        const sim2 = new GrayScottSimulation(canvas2.width, canvas2.height);
+        simulations = [sim1, sim2];
+
+        const renderer1 = new Renderer(canvas1, sim1);
+        const renderer2 = new Renderer(canvas2, sim2);
+        renderers = [renderer1, renderer2];
+
+        const phaseGraph = new PhaseSpaceGraph(phaseCanvas);
+
+        // Update UI from active simulation
+        function updateUIFromSim() {
+            const sim = simulations[activePane];
+            fSlider.value = sim.f;
+            kSlider.value = sim.k;
+            fValue.textContent = sim.f.toFixed(3);
+            kValue.textContent = sim.k.toFixed(3);
+        }
+
+        // Apply preset
+        function applyPreset(presetKey) {
+            const preset = PRESETS[presetKey];
+            const sim = simulations[activePane];
+            sim.f = preset.f;
+            sim.k = preset.k;
+            sim.initialize();
+            updateUIFromSim();
+        }
+
+        // Event listeners
+        presetSelect.addEventListener('change', () => {
+            applyPreset(presetSelect.value);
+        });
+
+        fSlider.addEventListener('input', () => {
+            const sim = simulations[activePane];
+            sim.f = parseFloat(fSlider.value);
+            fValue.textContent = sim.f.toFixed(3);
+        });
+
+        kSlider.addEventListener('input', () => {
+            const sim = simulations[activePane];
+            sim.k = parseFloat(kSlider.value);
+            kValue.textContent = sim.k.toFixed(3);
+        });
+
+        speedSlider.addEventListener('input', () => {
+            speed = parseFloat(speedSlider.value);
+            speedValue.textContent = speed.toFixed(1) + 'x';
+        });
+
+        playBtn.addEventListener('click', () => {
+            isRunning = !isRunning;
+            playBtn.textContent = isRunning ? 'Pause' : 'Play';
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (isDualMode) {
+                simulations[0].initialize();
+                simulations[1].initialize();
+            } else {
+                simulations[activePane].initialize();
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            if (isDualMode) {
+                simulations[0].clear();
+                simulations[1].clear();
+            } else {
+                simulations[activePane].clear();
+            }
+        });
+
+        dualToggle.addEventListener('change', () => {
+            isDualMode = dualToggle.checked;
+            pane2Div.classList.toggle('hidden', !isDualMode);
+            paneSelector.classList.toggle('hidden', !isDualMode);
+            legend2.classList.toggle('hidden', !isDualMode);
+
+            if (!isDualMode) {
+                activePane = 0;
+                pane1Div.classList.add('active');
+                pane2Div.classList.remove('active');
+            }
+        });
+
+        selectPane1.addEventListener('click', () => {
+            activePane = 0;
+            selectPane1.classList.add('active');
+            selectPane2.classList.remove('active');
+            pane1Div.classList.add('active');
+            pane2Div.classList.remove('active');
+            updateUIFromSim();
+        });
+
+        selectPane2.addEventListener('click', () => {
+            activePane = 1;
+            selectPane2.classList.add('active');
+            selectPane1.classList.remove('active');
+            pane2Div.classList.add('active');
+            pane1Div.classList.remove('active');
+            updateUIFromSim();
+        });
+
+        // Canvas click handlers
+        function handleCanvasClick(e, canvasIdx) {
+            const canvas = canvasIdx === 0 ? canvas1 : canvas2;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = (e.clientY - rect.top) / rect.height;
+            simulations[canvasIdx].addChemical(x, y);
+        }
+
+        canvas1.addEventListener('click', (e) => handleCanvasClick(e, 0));
+        canvas2.addEventListener('click', (e) => handleCanvasClick(e, 1));
+
+        // Phase space click handler
+        phaseCanvas.addEventListener('click', (e) => {
+            const rect = phaseCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const f = phaseGraph.xToF(x);
+            const k = phaseGraph.yToK(y);
+
+            // Clamp to valid range
+            const clampedF = Math.max(0, Math.min(0.1, f));
+            const clampedK = Math.max(0.045, Math.min(0.07, k));
+
+            const sim = simulations[activePane];
+            sim.f = clampedF;
+            sim.k = clampedK;
+            updateUIFromSim();
+        });
+
+        // Animation loop
+        function animate() {
+            if (isRunning) {
+                const iterations = Math.ceil(speed * 10);
+
+                simulations[0].step(iterations);
+                renderers[0].draw();
+
+                if (isDualMode) {
+                    simulations[1].step(iterations);
+                    renderers[1].draw();
+                }
+            }
+
+            // Always update phase graph
+            if (isDualMode) {
+                phaseGraph.draw(
+                    simulations[0].f, simulations[0].k,
+                    simulations[1].f, simulations[1].k,
+                    true
+                );
+            } else {
+                phaseGraph.draw(simulations[0].f, simulations[0].k);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Initial render
+        renderers[0].draw();
+        renderers[1].draw();
+        phaseGraph.draw(sim1.f, sim1.k);
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
