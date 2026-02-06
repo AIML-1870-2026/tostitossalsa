@@ -71,7 +71,7 @@ function init() {
 
 function renderLoop() {
   // Render latest boid data and obstacles
-  renderer.renderFromData(latestBoids, latestParams.maxSpeed || 60, latestObstacles);
+  renderer.renderFromData(latestBoids, latestParams.maxSpeed || 20, latestObstacles);
 
   // Update stats
   updateStats();

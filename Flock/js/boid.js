@@ -3,14 +3,14 @@ class Boid {
     this.position = { x, y };
     // Start with random velocity scaled to maxSpeed
     const angle = Math.random() * Math.PI * 2;
-    const speed = 40 + Math.random() * 20;
+    const speed = 5 + Math.random() * 5;
     this.velocity = {
       x: Math.cos(angle) * speed,
       y: Math.sin(angle) * speed
     };
     this.acceleration = { x: 0, y: 0 };
-    this.maxSpeed = 60.0;
-    this.maxForce = 2.5;
+    this.maxSpeed = 20.0;
+    this.maxForce = 0.8;
   }
 
   applyForce(force) {
