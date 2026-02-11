@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ryland's Landing Page</title>
+    <title>Tostitos' Landing Page</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='6' y='0' width='4' height='2' fill='%23ff6b9d'/><rect x='4' y='2' width='8' height='2' fill='%23fffffe'/><rect x='4' y='4' width='8' height='6' fill='%23fffffe'/><rect x='6' y='5' width='4' height='3' fill='%2382aaff'/><rect x='2' y='8' width='2' height='4' fill='%23ff6b9d'/><rect x='12' y='8' width='2' height='4' fill='%23ff6b9d'/><rect x='5' y='12' width='2' height='2' fill='%23ffcb6b'/><rect x='9' y='12' width='2' height='2' fill='%23ffcb6b'/><rect x='7' y='14' width='2' height='2' fill='%23ff6b4a'/></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -829,6 +829,34 @@
             }
         }
 
+        /* Turing Pattern icon for reaction-diffusion */
+        .project-card__icon--turing {
+            background:
+                /* Spots pattern - organic looking cells */
+                linear-gradient(var(--purple) 0 0) 8px 8px / 10px 10px,
+                linear-gradient(var(--purple) 0 0) 28px 4px / 12px 12px,
+                linear-gradient(var(--purple) 0 0) 48px 10px / 8px 8px,
+                linear-gradient(var(--purple) 0 0) 4px 28px / 8px 8px,
+                linear-gradient(var(--purple) 0 0) 22px 24px / 14px 14px,
+                linear-gradient(var(--purple) 0 0) 44px 30px / 10px 10px,
+                linear-gradient(var(--purple) 0 0) 12px 46px / 12px 12px,
+                linear-gradient(var(--purple) 0 0) 36px 48px / 8px 8px,
+                linear-gradient(var(--purple) 0 0) 52px 52px / 6px 6px,
+                /* Background fills */
+                linear-gradient(var(--cyan) 0 0) 0 0 / 64px 64px;
+            background-repeat: no-repeat;
+            animation: turingPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes turingPulse {
+            0%, 100% {
+                filter: drop-shadow(0 0 6px rgba(199, 146, 234, 0.5));
+            }
+            50% {
+                filter: drop-shadow(0 0 14px rgba(199, 146, 234, 0.9));
+            }
+        }
+
         .project-card__title {
             font-family: 'Press Start 2P', cursive;
             font-size: 12px;
@@ -1116,6 +1144,20 @@
                             <div class="project-card__icon project-card__icon--flock" role="img" aria-label="Pixel art flock of birds"></div>
                             <h3 class="project-card__title">Flock Lab</h3>
                             <a href="Flock/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Turing Patterns Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--turing" role="img" aria-label="Pixel art reaction-diffusion pattern"></div>
+                            <h3 class="project-card__title">Turing Patterns</h3>
+                            <a href="Turing-Pattern/index.html" class="project-card__link">View Project</a>
                         </div>
                     </article>
                 </div>
