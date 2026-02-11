@@ -857,6 +857,39 @@
             }
         }
 
+        /* Julia Set icon for fractal explorer */
+        .project-card__icon--julia {
+            background:
+                /* Spiral fractal pattern */
+                linear-gradient(var(--cyan) 0 0) 28px 4px / 8px 8px,
+                linear-gradient(var(--purple) 0 0) 20px 8px / 8px 8px,
+                linear-gradient(var(--cyan) 0 0) 36px 12px / 8px 8px,
+                linear-gradient(var(--pink) 0 0) 12px 16px / 8px 8px,
+                linear-gradient(var(--purple) 0 0) 28px 16px / 8px 8px,
+                linear-gradient(var(--cyan) 0 0) 44px 20px / 8px 8px,
+                linear-gradient(var(--pink) 0 0) 8px 28px / 8px 8px,
+                linear-gradient(var(--purple) 0 0) 20px 28px / 8px 8px,
+                linear-gradient(var(--cyan) 0 0) 36px 28px / 8px 8px,
+                linear-gradient(var(--pink) 0 0) 48px 32px / 8px 8px,
+                linear-gradient(var(--purple) 0 0) 12px 40px / 8px 8px,
+                linear-gradient(var(--cyan) 0 0) 28px 44px / 8px 8px,
+                linear-gradient(var(--pink) 0 0) 40px 48px / 8px 8px,
+                linear-gradient(var(--purple) 0 0) 24px 52px / 8px 8px;
+            background-repeat: no-repeat;
+            animation: juliaPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes juliaPulse {
+            0%, 100% {
+                filter: drop-shadow(0 0 8px rgba(130, 170, 255, 0.6));
+                transform: rotate(0deg);
+            }
+            50% {
+                filter: drop-shadow(0 0 16px rgba(199, 146, 234, 0.9));
+                transform: rotate(3deg);
+            }
+        }
+
         .project-card__title {
             font-family: 'Press Start 2P', cursive;
             font-size: 12px;
@@ -1158,6 +1191,20 @@
                             <div class="project-card__icon project-card__icon--turing" role="img" aria-label="Pixel art reaction-diffusion pattern"></div>
                             <h3 class="project-card__title">Turing Patterns</h3>
                             <a href="Turing-Pattern/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Julia Set Explorer Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--julia" role="img" aria-label="Pixel art fractal pattern"></div>
+                            <h3 class="project-card__title">Julia Set Explorer</h3>
+                            <a href="Julia-Set-Explorer/index.html" class="project-card__link">View Project</a>
                         </div>
                     </article>
                 </div>

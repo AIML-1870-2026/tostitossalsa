@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julia Set Explorer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='6' fill='%23c792ea'/><circle cx='6' cy='6' r='2' fill='%2382aaff'/><circle cx='10' cy='10' r='1.5' fill='%23ff6b9d'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #0f0e17;
+            --bg-mid: #1a1626;
+            --bg-accent: #2d1b4e;
+            --pink: #ff6b9d;
+            --purple: #c792ea;
+            --cyan: #82aaff;
+            --yellow: #ffcb6b;
+            --orange: #ff6b4a;
+            --text-light: #fffffe;
+            --text-cream: #f4f4f5;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: var(--bg-deep);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-mid);
+            border-bottom: 2px solid var(--purple);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 56px;
+        }
+
+        .header__title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            color: var(--cyan);
+            text-shadow: 0 0 10px rgba(130, 170, 255, 0.5);
+        }
+
+        .header__actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            padding: 10px 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn--primary {
+            background: var(--yellow);
+            color: var(--bg-deep);
+        }
+
+        .btn--primary:hover {
+            background: var(--pink);
+            transform: scale(1.05);
+        }
+
+        .btn--secondary {
+            background: var(--bg-accent);
+            color: var(--text-light);
+            border: 2px solid var(--purple);
+        }
+
+        .btn--secondary:hover {
+            background: var(--purple);
+            color: var(--bg-deep);
+        }
+
+        /* Main Layout */
+        .main {
+            display: flex;
+            height: calc(100vh - 56px - 40px);
+        }
+
+        /* Control Panel */
+        .controls {
+            width: 320px;
+            background: var(--bg-mid);
+            border-right: 2px solid var(--purple);
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .control-section {
+            margin-bottom: 24px;
+        }
+
+        .control-section__title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            color: var(--pink);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--bg-accent);
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 18px;
+            color: var(--text-cream);
+            margin-bottom: 6px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            background: var(--bg-accent);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(130, 170, 255, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 6px 8px;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            background: var(--bg-deep);
+            border: 2px solid var(--bg-accent);
+            color: var(--text-light);
+            border-radius: 4px;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--cyan);
+            outline: none;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn--small {
+            font-size: 8px;
+            padding: 8px 12px;
+        }
+
+        /* Palette Selector */
+        .palette-select {
+            width: 100%;
+            padding: 10px;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            background: var(--bg-deep);
+            border: 2px solid var(--bg-accent);
+            color: var(--text-light);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .palette-select:focus {
+            border-color: var(--cyan);
+            outline: none;
+        }
+
+        .palette-preview {
+            height: 24px;
+            margin-top: 8px;
+            border-radius: 4px;
+            border: 2px solid var(--bg-accent);
+        }
+
+        /* Presets Grid */
+        .presets-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .preset-btn {
+            padding: 10px 8px;
+            font-family: 'VT323', monospace;
+            font-size: 14px;
+            background: var(--bg-deep);
+            border: 2px solid var(--bg-accent);
+            color: var(--text-cream);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--cyan);
+            background: var(--bg-accent);
+        }
+
+        .preset-btn.active {
+            border-color: var(--pink);
+            background: var(--bg-accent);
+        }
+
+        /* Collapsible Section */
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+
+        .collapsible-header::after {
+            content: '[-]';
+            font-family: 'VT323', monospace;
+            color: var(--cyan);
+        }
+
+        .collapsible-header.collapsed::after {
+            content: '[+]';
+        }
+
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0 !important;
+        }
+
+        /* Canvas Area */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: var(--bg-deep);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #fractalCanvas {
+            cursor: crosshair;
+            image-rendering: pixelated;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            pointer-events: none;
+            padding: 8px 12px;
+            background: rgba(15, 14, 23, 0.8);
+            border: 1px solid var(--purple);
+            font-size: 16px;
+            color: var(--text-cream);
+        }
+
+        .canvas-overlay--top-left {
+            top: 10px;
+            left: 10px;
+        }
+
+        .canvas-overlay--top-right {
+            top: 10px;
+            right: 10px;
+        }
+
+        .canvas-overlay--bottom-right {
+            bottom: 10px;
+            right: 10px;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 40px;
+            background: var(--bg-mid);
+            border-top: 2px solid var(--purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            font-size: 18px;
+            color: var(--text-cream);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-item__label {
+            color: var(--purple);
+        }
+
+        .status-item__value {
+            color: var(--cyan);
+            font-weight: bold;
+        }
+
+        /* Help Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--bg-mid);
+            border: 3px solid var(--purple);
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .modal__title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            color: var(--cyan);
+            margin-bottom: 20px;
+        }
+
+        .modal__content {
+            font-size: 20px;
+            line-height: 1.6;
+            color: var(--text-cream);
+        }
+
+        .modal__content h3 {
+            color: var(--pink);
+            margin: 16px 0 8px;
+            font-size: 22px;
+        }
+
+        .modal__content ul {
+            margin-left: 20px;
+        }
+
+        .modal__close {
+            margin-top: 20px;
+        }
+
+        /* Loading Indicator */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            color: var(--yellow);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main {
+                flex-direction: column;
+            }
+            .controls {
+                width: 100%;
+                height: 300px;
+                border-right: none;
+                border-bottom: 2px solid var(--purple);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1 class="header__title">Julia Set Explorer</h1>
+        <div class="header__actions">
+            <button class="btn btn--secondary" id="helpBtn">HELP</button>
+            <button class="btn btn--primary" id="exportBtn">EXPORT PNG</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Control Panel -->
+        <aside class="controls">
+            <!-- Parameter Control -->
+            <section class="control-section">
+                <h2 class="control-section__title">Complex Parameter (c)</h2>
+                <div class="control-group">
+                    <label>Real: <span id="realValue">-0.7</span></label>
+                    <div class="slider-row">
+                        <input type="range" id="realSlider" min="-2" max="2" step="0.001" value="-0.7">
+                        <input type="number" id="realInput" min="-2" max="2" step="0.01" value="-0.7">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Imaginary: <span id="imagValue">0.27</span></label>
+                    <div class="slider-row">
+                        <input type="range" id="imagSlider" min="-2" max="2" step="0.001" value="0.27">
+                        <input type="number" id="imagInput" min="-2" max="2" step="0.01" value="0.27">
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn--secondary btn--small" id="randomizeBtn">RANDOMIZE</button>
+                </div>
+            </section>
+
+            <!-- Iteration Control -->
+            <section class="control-section">
+                <h2 class="control-section__title">Iterations</h2>
+                <div class="control-group">
+                    <label>Max Iterations: <span id="iterValue">256</span></label>
+                    <div class="slider-row">
+                        <input type="range" id="iterSlider" min="50" max="1000" step="1" value="256">
+                        <input type="number" id="iterInput" min="50" max="1000" step="1" value="256">
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn--secondary btn--small iter-preset" data-iter="100">100</button>
+                    <button class="btn btn--secondary btn--small iter-preset" data-iter="256">256</button>
+                    <button class="btn btn--secondary btn--small iter-preset" data-iter="500">500</button>
+                    <button class="btn btn--secondary btn--small iter-preset" data-iter="1000">1000</button>
+                </div>
+            </section>
+
+            <!-- Color Palette -->
+            <section class="control-section">
+                <h2 class="control-section__title">Color Palette</h2>
+                <select class="palette-select" id="paletteSelect">
+                    <option value="classic">Classic (Blue-White)</option>
+                    <option value="fire">Fire</option>
+                    <option value="ocean">Ocean</option>
+                    <option value="forest">Forest</option>
+                    <option value="sunset">Sunset</option>
+                    <option value="monochrome">Monochrome</option>
+                    <option value="electric">Electric</option>
+                    <option value="psychedelic">Psychedelic</option>
+                    <option value="earth">Earth</option>
+                    <option value="ice">Ice</option>
+                </select>
+                <div class="palette-preview" id="palettePreview"></div>
+            </section>
+
+            <!-- Presets -->
+            <section class="control-section">
+                <div class="collapsible-header" id="presetsHeader">
+                    <h2 class="control-section__title" style="margin-bottom:0; border:none; padding-bottom:0;">Famous Julia Sets</h2>
+                </div>
+                <div class="collapsible-content" id="presetsContent">
+                    <div class="presets-grid" style="margin-top: 12px;">
+                        <button class="preset-btn" data-real="0" data-imag="1">Dendrite</button>
+                        <button class="preset-btn" data-real="-0.123" data-imag="0.745">Rabbit</button>
+                        <button class="preset-btn" data-real="-0.8" data-imag="0.156">Dragon</button>
+                        <button class="preset-btn" data-real="-0.122561" data-imag="0.744862">Douady</button>
+                        <button class="preset-btn" data-real="-0.391" data-imag="-0.587">Siegel Disk</button>
+                        <button class="preset-btn" data-real="-0.75" data-imag="0">San Marco</button>
+                        <button class="preset-btn" data-real="-0.4" data-imag="0.6">Spiral</button>
+                        <button class="preset-btn" data-real="0.285" data-imag="0.01">Leaf</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Advanced Options -->
+            <section class="control-section">
+                <div class="collapsible-header collapsed" id="advancedHeader">
+                    <h2 class="control-section__title" style="margin-bottom:0; border:none; padding-bottom:0;">Advanced Options</h2>
+                </div>
+                <div class="collapsible-content collapsed" id="advancedContent" style="max-height: 0;">
+                    <div class="control-group" style="margin-top: 12px;">
+                        <label>Escape Radius: <span id="escapeValue">2</span></label>
+                        <div class="slider-row">
+                            <input type="range" id="escapeSlider" min="2" max="10" step="0.1" value="2">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Color Mapping:</label>
+                        <select class="palette-select" id="mappingSelect">
+                            <option value="linear">Linear</option>
+                            <option value="logarithmic" selected>Logarithmic</option>
+                            <option value="sqrt">Square Root</option>
+                        </select>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn--secondary btn--small" id="resetViewBtn">RESET VIEW</button>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <!-- Canvas Area -->
+        <div class="canvas-container" id="canvasContainer">
+            <canvas id="fractalCanvas"></canvas>
+            <div class="canvas-overlay canvas-overlay--top-left" id="cValueOverlay">c = -0.7 + 0.27i</div>
+            <div class="canvas-overlay canvas-overlay--top-right" id="zoomOverlay">Zoom: 1.00x</div>
+            <div class="loading" id="loadingIndicator" style="display: none;">RENDERING...</div>
+        </div>
+    </main>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+        <div class="status-item">
+            <span class="status-item__label">c =</span>
+            <span class="status-item__value" id="statusC">-0.7 + 0.27i</span>
+        </div>
+        <div class="status-item">
+            <span class="status-item__label">Iterations:</span>
+            <span class="status-item__value" id="statusIter">256</span>
+        </div>
+        <div class="status-item">
+            <span class="status-item__label">Zoom:</span>
+            <span class="status-item__value" id="statusZoom">1.00x</span>
+        </div>
+        <div class="status-item">
+            <span class="status-item__label">Render:</span>
+            <span class="status-item__value" id="statusRender">--ms</span>
+        </div>
+    </footer>
+
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal">
+            <h2 class="modal__title">How to Explore</h2>
+            <div class="modal__content">
+                <h3>What is a Julia Set?</h3>
+                <p>Julia sets are fractals created by iterating the formula z = z&sup2; + c, where c is a complex number you control.</p>
+
+                <h3>Controls</h3>
+                <ul>
+                    <li><strong>Click on canvas:</strong> Set c value from click position</li>
+                    <li><strong>Scroll wheel:</strong> Zoom in/out (centered on cursor)</li>
+                    <li><strong>Click + drag:</strong> Pan the view</li>
+                    <li><strong>Sliders:</strong> Fine-tune c value and iterations</li>
+                </ul>
+
+                <h3>Tips</h3>
+                <ul>
+                    <li>Try the famous presets for beautiful starting points</li>
+                    <li>Increase iterations for more detail at high zoom</li>
+                    <li>Different color palettes reveal different structures</li>
+                    <li>Export your favorite discoveries as PNG images</li>
+                </ul>
+            </div>
+            <button class="btn btn--primary modal__close" id="closeHelpBtn">GOT IT</button>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // Julia Set Explorer - Core Engine
+        // ========================================
+
+        // Color Palettes
+        const PALETTES = {
+            classic: [
+                { pos: 0.0, color: [0, 7, 100] },
+                { pos: 0.16, color: [32, 107, 203] },
+                { pos: 0.42, color: [237, 255, 255] },
+                { pos: 0.6425, color: [255, 170, 0] },
+                { pos: 0.8575, color: [0, 2, 0] },
+                { pos: 1.0, color: [0, 7, 100] }
+            ],
+            fire: [
+                { pos: 0.0, color: [0, 0, 0] },
+                { pos: 0.25, color: [139, 0, 0] },
+                { pos: 0.5, color: [255, 69, 0] },
+                { pos: 0.75, color: [255, 215, 0] },
+                { pos: 1.0, color: [255, 255, 255] }
+            ],
+            ocean: [
+                { pos: 0.0, color: [0, 0, 50] },
+                { pos: 0.3, color: [0, 50, 150] },
+                { pos: 0.6, color: [0, 150, 200] },
+                { pos: 0.8, color: [100, 200, 255] },
+                { pos: 1.0, color: [255, 255, 255] }
+            ],
+            forest: [
+                { pos: 0.0, color: [0, 30, 0] },
+                { pos: 0.3, color: [0, 80, 20] },
+                { pos: 0.6, color: [50, 150, 50] },
+                { pos: 0.8, color: [150, 200, 50] },
+                { pos: 1.0, color: [255, 255, 150] }
+            ],
+            sunset: [
+                { pos: 0.0, color: [25, 0, 50] },
+                { pos: 0.25, color: [100, 0, 100] },
+                { pos: 0.5, color: [200, 50, 100] },
+                { pos: 0.75, color: [255, 150, 50] },
+                { pos: 1.0, color: [255, 255, 100] }
+            ],
+            monochrome: [
+                { pos: 0.0, color: [0, 0, 0] },
+                { pos: 1.0, color: [255, 255, 255] }
+            ],
+            electric: [
+                { pos: 0.0, color: [0, 0, 0] },
+                { pos: 0.25, color: [0, 255, 255] },
+                { pos: 0.5, color: [255, 0, 255] },
+                { pos: 0.75, color: [255, 255, 0] },
+                { pos: 1.0, color: [255, 255, 255] }
+            ],
+            psychedelic: [
+                { pos: 0.0, color: [255, 0, 0] },
+                { pos: 0.166, color: [255, 255, 0] },
+                { pos: 0.333, color: [0, 255, 0] },
+                { pos: 0.5, color: [0, 255, 255] },
+                { pos: 0.666, color: [0, 0, 255] },
+                { pos: 0.833, color: [255, 0, 255] },
+                { pos: 1.0, color: [255, 0, 0] }
+            ],
+            earth: [
+                { pos: 0.0, color: [50, 30, 10] },
+                { pos: 0.3, color: [139, 90, 43] },
+                { pos: 0.5, color: [85, 107, 47] },
+                { pos: 0.7, color: [107, 142, 35] },
+                { pos: 1.0, color: [189, 183, 107] }
+            ],
+            ice: [
+                { pos: 0.0, color: [255, 255, 255] },
+                { pos: 0.3, color: [200, 230, 255] },
+                { pos: 0.6, color: [100, 180, 255] },
+                { pos: 0.8, color: [50, 100, 200] },
+                { pos: 1.0, color: [20, 50, 150] }
+            ]
+        };
+
+        // State
+        const state = {
+            cReal: -0.7,
+            cImag: 0.27,
+            maxIter: 256,
+            escapeRadius: 2,
+            zoom: 1,
+            panX: 0,
+            panY: 0,
+            palette: 'classic',
+            mapping: 'logarithmic',
+            isDragging: false,
+            lastMouseX: 0,
+            lastMouseY: 0
+        };
+
+        // DOM Elements
+        const canvas = document.getElementById('fractalCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvasContainer');
+
+        // Initialize canvas size
+        function resizeCanvas() {
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            render();
+        }
+
+        // Color interpolation
+        function interpolateColor(palette, t) {
+            t = Math.max(0, Math.min(1, t));
+            const stops = PALETTES[palette];
+
+            for (let i = 0; i < stops.length - 1; i++) {
+                if (t >= stops[i].pos && t <= stops[i + 1].pos) {
+                    const localT = (t - stops[i].pos) / (stops[i + 1].pos - stops[i].pos);
+                    return [
+                        Math.round(stops[i].color[0] + (stops[i + 1].color[0] - stops[i].color[0]) * localT),
+                        Math.round(stops[i].color[1] + (stops[i + 1].color[1] - stops[i].color[1]) * localT),
+                        Math.round(stops[i].color[2] + (stops[i + 1].color[2] - stops[i].color[2]) * localT)
+                    ];
+                }
+            }
+            return stops[stops.length - 1].color;
+        }
+
+        // Map iterations to 0-1 range
+        function mapIterations(iter, maxIter) {
+            if (iter >= maxIter) return 0;
+
+            const normalized = iter / maxIter;
+
+            switch (state.mapping) {
+                case 'logarithmic':
+                    return Math.log(iter + 1) / Math.log(maxIter + 1);
+                case 'sqrt':
+                    return Math.sqrt(normalized);
+                default:
+                    return normalized;
+            }
+        }
+
+        // Julia set iteration
+        function julia(x, y, cReal, cImag, maxIter, escapeRadius) {
+            let zReal = x;
+            let zImag = y;
+            const escapeRadiusSq = escapeRadius * escapeRadius;
+
+            for (let i = 0; i < maxIter; i++) {
+                const zRealSq = zReal * zReal;
+                const zImagSq = zImag * zImag;
+
+                if (zRealSq + zImagSq > escapeRadiusSq) {
+                    // Smooth coloring
+                    const log_zn = Math.log(zRealSq + zImagSq) / 2;
+                    const nu = Math.log(log_zn / Math.log(2)) / Math.log(2);
+                    return i + 1 - nu;
+                }
+
+                zImag = 2 * zReal * zImag + cImag;
+                zReal = zRealSq - zImagSq + cReal;
+            }
+
+            return maxIter;
+        }
+
+        // Convert pixel to complex coordinates
+        function pixelToComplex(px, py) {
+            const aspectRatio = canvas.width / canvas.height;
+            const range = 3.0 / state.zoom;
+
+            const x = (px / canvas.width - 0.5) * range * aspectRatio + state.panX;
+            const y = (py / canvas.height - 0.5) * range + state.panY;
+
+            return { x, y };
+        }
+
+        // Main render function
+        function render() {
+            const startTime = performance.now();
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+
+            const aspectRatio = width / height;
+            const range = 3.0 / state.zoom;
+
+            for (let py = 0; py < height; py++) {
+                for (let px = 0; px < width; px++) {
+                    const x = (px / width - 0.5) * range * aspectRatio + state.panX;
+                    const y = (py / height - 0.5) * range + state.panY;
+
+                    const iter = julia(x, y, state.cReal, state.cImag, state.maxIter, state.escapeRadius);
+                    const t = mapIterations(iter, state.maxIter);
+
+                    let color;
+                    if (iter >= state.maxIter) {
+                        color = [0, 0, 0];
+                    } else {
+                        color = interpolateColor(state.palette, t);
+                    }
+
+                    const idx = (py * width + px) * 4;
+                    data[idx] = color[0];
+                    data[idx + 1] = color[1];
+                    data[idx + 2] = color[2];
+                    data[idx + 3] = 255;
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+
+            const renderTime = Math.round(performance.now() - startTime);
+            document.getElementById('statusRender').textContent = renderTime + 'ms';
+        }
+
+        // Update displays
+        function updateDisplays() {
+            const sign = state.cImag >= 0 ? '+' : '-';
+            const cStr = `${state.cReal.toFixed(4)} ${sign} ${Math.abs(state.cImag).toFixed(4)}i`;
+
+            document.getElementById('cValueOverlay').textContent = `c = ${cStr}`;
+            document.getElementById('statusC').textContent = cStr;
+            document.getElementById('zoomOverlay').textContent = `Zoom: ${state.zoom.toFixed(2)}x`;
+            document.getElementById('statusZoom').textContent = `${state.zoom.toFixed(2)}x`;
+            document.getElementById('statusIter').textContent = state.maxIter;
+
+            document.getElementById('realValue').textContent = state.cReal.toFixed(3);
+            document.getElementById('imagValue').textContent = state.cImag.toFixed(3);
+            document.getElementById('iterValue').textContent = state.maxIter;
+            document.getElementById('escapeValue').textContent = state.escapeRadius.toFixed(1);
+        }
+
+        // Update palette preview
+        function updatePalettePreview() {
+            const preview = document.getElementById('palettePreview');
+            const stops = PALETTES[state.palette];
+            const gradientStops = stops.map(s =>
+                `rgb(${s.color.join(',')}) ${s.pos * 100}%`
+            ).join(', ');
+            preview.style.background = `linear-gradient(to right, ${gradientStops})`;
+        }
+
+        // Debounced render
+        let renderTimeout;
+        function debouncedRender() {
+            clearTimeout(renderTimeout);
+            renderTimeout = setTimeout(render, 16);
+        }
+
+        // ========================================
+        // Event Handlers
+        // ========================================
+
+        // Real slider/input
+        document.getElementById('realSlider').addEventListener('input', (e) => {
+            state.cReal = parseFloat(e.target.value);
+            document.getElementById('realInput').value = state.cReal;
+            updateDisplays();
+            debouncedRender();
+        });
+
+        document.getElementById('realInput').addEventListener('change', (e) => {
+            state.cReal = parseFloat(e.target.value) || 0;
+            document.getElementById('realSlider').value = state.cReal;
+            updateDisplays();
+            render();
+        });
+
+        // Imaginary slider/input
+        document.getElementById('imagSlider').addEventListener('input', (e) => {
+            state.cImag = parseFloat(e.target.value);
+            document.getElementById('imagInput').value = state.cImag;
+            updateDisplays();
+            debouncedRender();
+        });
+
+        document.getElementById('imagInput').addEventListener('change', (e) => {
+            state.cImag = parseFloat(e.target.value) || 0;
+            document.getElementById('imagSlider').value = state.cImag;
+            updateDisplays();
+            render();
+        });
+
+        // Iteration slider/input
+        document.getElementById('iterSlider').addEventListener('input', (e) => {
+            state.maxIter = parseInt(e.target.value);
+            document.getElementById('iterInput').value = state.maxIter;
+            updateDisplays();
+            debouncedRender();
+        });
+
+        document.getElementById('iterInput').addEventListener('change', (e) => {
+            state.maxIter = parseInt(e.target.value) || 256;
+            document.getElementById('iterSlider').value = state.maxIter;
+            updateDisplays();
+            render();
+        });
+
+        // Iteration presets
+        document.querySelectorAll('.iter-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                state.maxIter = parseInt(btn.dataset.iter);
+                document.getElementById('iterSlider').value = state.maxIter;
+                document.getElementById('iterInput').value = state.maxIter;
+                updateDisplays();
+                render();
+            });
+        });
+
+        // Randomize
+        document.getElementById('randomizeBtn').addEventListener('click', () => {
+            state.cReal = (Math.random() - 0.5) * 2.5;
+            state.cImag = (Math.random() - 0.5) * 2.5;
+            document.getElementById('realSlider').value = state.cReal;
+            document.getElementById('realInput').value = state.cReal.toFixed(4);
+            document.getElementById('imagSlider').value = state.cImag;
+            document.getElementById('imagInput').value = state.cImag.toFixed(4);
+            updateDisplays();
+            render();
+        });
+
+        // Palette select
+        document.getElementById('paletteSelect').addEventListener('change', (e) => {
+            state.palette = e.target.value;
+            updatePalettePreview();
+            render();
+        });
+
+        // Mapping select
+        document.getElementById('mappingSelect').addEventListener('change', (e) => {
+            state.mapping = e.target.value;
+            render();
+        });
+
+        // Escape radius
+        document.getElementById('escapeSlider').addEventListener('input', (e) => {
+            state.escapeRadius = parseFloat(e.target.value);
+            document.getElementById('escapeValue').textContent = state.escapeRadius.toFixed(1);
+            debouncedRender();
+        });
+
+        // Presets
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                state.cReal = parseFloat(btn.dataset.real);
+                state.cImag = parseFloat(btn.dataset.imag);
+                document.getElementById('realSlider').value = state.cReal;
+                document.getElementById('realInput').value = state.cReal;
+                document.getElementById('imagSlider').value = state.cImag;
+                document.getElementById('imagInput').value = state.cImag;
+                updateDisplays();
+                render();
+            });
+        });
+
+        // Reset view
+        document.getElementById('resetViewBtn').addEventListener('click', () => {
+            state.zoom = 1;
+            state.panX = 0;
+            state.panY = 0;
+            updateDisplays();
+            render();
+        });
+
+        // Collapsible sections
+        document.getElementById('presetsHeader').addEventListener('click', () => {
+            document.getElementById('presetsHeader').classList.toggle('collapsed');
+            document.getElementById('presetsContent').classList.toggle('collapsed');
+        });
+
+        document.getElementById('advancedHeader').addEventListener('click', () => {
+            const header = document.getElementById('advancedHeader');
+            const content = document.getElementById('advancedContent');
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+            if (!content.classList.contains('collapsed')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        });
+
+        // Canvas click to set c
+        canvas.addEventListener('click', (e) => {
+            if (state.isDragging) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const px = e.clientX - rect.left;
+            const py = e.clientY - rect.top;
+            const { x, y } = pixelToComplex(px, py);
+
+            state.cReal = x;
+            state.cImag = y;
+            document.getElementById('realSlider').value = state.cReal;
+            document.getElementById('realInput').value = state.cReal.toFixed(4);
+            document.getElementById('imagSlider').value = state.cImag;
+            document.getElementById('imagInput').value = state.cImag.toFixed(4);
+            updateDisplays();
+            render();
+        });
+
+        // Zoom with scroll
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            const rect = canvas.getBoundingClientRect();
+            const px = e.clientX - rect.left;
+            const py = e.clientY - rect.top;
+            const { x, y } = pixelToComplex(px, py);
+
+            const zoomFactor = e.deltaY < 0 ? 1.2 : 0.8;
+            const newZoom = state.zoom * zoomFactor;
+
+            if (newZoom >= 0.1 && newZoom <= 10000) {
+                // Pan towards/away from cursor
+                state.panX = x - (x - state.panX) / zoomFactor;
+                state.panY = y - (y - state.panY) / zoomFactor;
+                state.zoom = newZoom;
+
+                updateDisplays();
+                render();
+            }
+        });
+
+        // Pan with drag
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 0) {
+                state.isDragging = false;
+                state.lastMouseX = e.clientX;
+                state.lastMouseY = e.clientY;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (e.buttons === 1) {
+                const dx = e.clientX - state.lastMouseX;
+                const dy = e.clientY - state.lastMouseY;
+
+                if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+                    state.isDragging = true;
+                }
+
+                if (state.isDragging) {
+                    const aspectRatio = canvas.width / canvas.height;
+                    const range = 3.0 / state.zoom;
+
+                    state.panX -= (dx / canvas.width) * range * aspectRatio;
+                    state.panY -= (dy / canvas.height) * range;
+
+                    state.lastMouseX = e.clientX;
+                    state.lastMouseY = e.clientY;
+
+                    updateDisplays();
+                    debouncedRender();
+                }
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            setTimeout(() => { state.isDragging = false; }, 50);
+        });
+
+        // Export
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const link = document.createElement('a');
+            const timestamp = Date.now();
+            link.download = `julia-set-${state.cReal.toFixed(3)}-${state.cImag.toFixed(3)}-${timestamp}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        // Help modal
+        document.getElementById('helpBtn').addEventListener('click', () => {
+            document.getElementById('helpModal').classList.add('active');
+        });
+
+        document.getElementById('closeHelpBtn').addEventListener('click', () => {
+            document.getElementById('helpModal').classList.remove('active');
+        });
+
+        document.getElementById('helpModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('helpModal')) {
+                document.getElementById('helpModal').classList.remove('active');
+            }
+        });
+
+        // Resize handler
+        window.addEventListener('resize', resizeCanvas);
+
+        // Initialize
+        resizeCanvas();
+        updatePalettePreview();
+        updateDisplays();
+    </script>
+</body>
+</html>
