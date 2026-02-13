@@ -9,7 +9,7 @@ This folder is your entire AIML 1870 portfolio. It is a single git repository
 containing all your assignments as subfolders.
 
 Structure:
-- Root folder = Your Gamertag (this IS the git repo)
+- Root folder = UserGamertag (this IS the git repo)
 - Each assignment = A subfolder (NOT a separate repo)
 - CLAUDE.md = Lives at the root, governs everything
 
@@ -47,7 +47,7 @@ When I say "Show my URLs" or "Where's my stuff?":
 2. For each, show the live URL pattern
 
 ## Coding Standards
-- Single HTML file projects preferred (unless specified otherwise)
+- Projects decomposed into html, css, and javascript are preferred (unless specified otherwise)
 - No personally identifiable information in code or comments
 - Use descriptive folder names (e.g., "Julia-Set-Explorer" not "assignment3")
 

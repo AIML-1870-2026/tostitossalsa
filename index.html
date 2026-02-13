@@ -890,6 +890,42 @@
             }
         }
 
+        /* Brain/Neuron icon for Decision Neuron Lab */
+        .project-card__icon--neuron {
+            background:
+                /* Brain outline - top */
+                linear-gradient(var(--pink) 0 0) 20px 4px / 24px 4px,
+                linear-gradient(var(--pink) 0 0) 12px 8px / 40px 4px,
+                linear-gradient(var(--pink) 0 0) 8px 12px / 48px 4px,
+                /* Brain folds */
+                linear-gradient(var(--purple) 0 0) 16px 16px / 8px 4px,
+                linear-gradient(var(--purple) 0 0) 32px 16px / 8px 4px,
+                linear-gradient(var(--pink) 0 0) 8px 20px / 48px 4px,
+                linear-gradient(var(--purple) 0 0) 24px 24px / 12px 4px,
+                linear-gradient(var(--pink) 0 0) 8px 28px / 48px 4px,
+                linear-gradient(var(--purple) 0 0) 16px 32px / 8px 4px,
+                linear-gradient(var(--purple) 0 0) 36px 32px / 8px 4px,
+                linear-gradient(var(--pink) 0 0) 12px 36px / 40px 4px,
+                linear-gradient(var(--pink) 0 0) 20px 40px / 24px 4px,
+                /* Neural connections - sparks */
+                linear-gradient(var(--cyan) 0 0) 4px 24px / 4px 4px,
+                linear-gradient(var(--cyan) 0 0) 56px 24px / 4px 4px,
+                linear-gradient(var(--yellow) 0 0) 28px 48px / 8px 4px,
+                linear-gradient(var(--cyan) 0 0) 24px 52px / 4px 4px,
+                linear-gradient(var(--cyan) 0 0) 36px 52px / 4px 4px;
+            background-repeat: no-repeat;
+            animation: neuronPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes neuronPulse {
+            0%, 100% {
+                filter: drop-shadow(0 0 6px rgba(255, 107, 157, 0.5));
+            }
+            50% {
+                filter: drop-shadow(0 0 14px rgba(130, 170, 255, 0.9));
+            }
+        }
+
         .project-card__title {
             font-family: 'Press Start 2P', cursive;
             font-size: 12px;
@@ -1205,6 +1241,20 @@
                             <div class="project-card__icon project-card__icon--julia" role="img" aria-label="Pixel art fractal pattern"></div>
                             <h3 class="project-card__title">Julia Set Explorer</h3>
                             <a href="Julia-Set-Explorer/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Decision Neuron Lab Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--neuron" role="img" aria-label="Pixel art brain neuron"></div>
+                            <h3 class="project-card__title">Decision Neuron</h3>
+                            <a href="decision-neuron/index.html" class="project-card__link">View Project</a>
                         </div>
                     </article>
                 </div>
