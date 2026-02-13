@@ -539,7 +539,7 @@ body {
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 380px;
+    height: 450px;
     flex-shrink: 0;
 }
 
