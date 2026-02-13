@@ -80,65 +80,85 @@
             </section>
         </aside>
 
-        <!-- Center Panel - Isometric Graph -->
-        <section class="panel graph-panel">
-            <div class="graph-container" id="graph-container">
-                <canvas id="graph-canvas"></canvas>
-                <!-- Interaction Hint -->
-                <div class="graph-hint">
-                    <span class="graph-hint-icon">🖱️</span>
-                    Drag to rotate · Use +/- to zoom
-                </div>
-                <!-- Training Mode Overlay -->
-                <div class="training-overlay hidden" id="training-overlay">
-                    <div class="training-badge">
-                        <span class="training-icon">🎓</span>
-                        Training Mode
-                        <span class="training-progress" id="training-progress">Point 1/10</span>
+        <!-- Center Column - Graph + Math Panel -->
+        <div class="center-column">
+            <section class="panel graph-panel">
+                <div class="graph-container" id="graph-container">
+                    <canvas id="graph-canvas"></canvas>
+                    <!-- Interaction Hint -->
+                    <div class="graph-hint">
+                        <span class="graph-hint-icon">🖱️</span>
+                        Drag to rotate · Use +/- to zoom
                     </div>
-                    <div class="training-point-info" id="training-point-info">
-                        <!-- Dynamically populated with current point values -->
+                    <!-- Training Mode Overlay -->
+                    <div class="training-overlay hidden" id="training-overlay">
+                        <div class="training-badge">
+                            <span class="training-icon">🎓</span>
+                            Training Mode
+                            <span class="training-progress" id="training-progress">Point 1/10</span>
+                        </div>
+                        <div class="training-point-info" id="training-point-info">
+                            <!-- Dynamically populated with current point values -->
+                        </div>
+                        <div class="training-buttons" id="training-buttons">
+                            <button class="label-btn yes-btn" id="label-yes-btn">
+                                <span class="icon">✓</span>
+                                YES
+                                <span class="shortcut">(Y)</span>
+                            </button>
+                            <button class="label-btn no-btn" id="label-no-btn">
+                                <span class="icon">✗</span>
+                                NO
+                                <span class="shortcut">(N)</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="training-buttons" id="training-buttons">
-                        <button class="label-btn yes-btn" id="label-yes-btn">
-                            <span class="icon">✓</span>
-                            YES
-                            <span class="shortcut">(Y)</span>
-                        </button>
-                        <button class="label-btn no-btn" id="label-no-btn">
-                            <span class="icon">✗</span>
-                            NO
-                            <span class="shortcut">(N)</span>
-                        </button>
+                    <!-- Dimension Selector (for >3 params) -->
+                    <div class="dimension-selector hidden" id="dimension-selector">
+                        <label>
+                            X: <select id="dim-x"></select>
+                        </label>
+                        <label>
+                            Y: <select id="dim-y"></select>
+                        </label>
+                        <label>
+                            Z: <select id="dim-z"></select>
+                        </label>
+                    </div>
+                    <!-- Point Tooltip -->
+                    <div class="point-tooltip hidden" id="point-tooltip">
+                        <div class="tooltip-values"></div>
+                        <div class="tooltip-prediction"></div>
                     </div>
                 </div>
-                <!-- Dimension Selector (for >3 params) -->
-                <div class="dimension-selector hidden" id="dimension-selector">
-                    <label>
-                        X: <select id="dim-x"></select>
-                    </label>
-                    <label>
-                        Y: <select id="dim-y"></select>
-                    </label>
-                    <label>
-                        Z: <select id="dim-z"></select>
-                    </label>
+                <!-- Camera Controls -->
+                <div class="camera-controls">
+                    <button class="cam-btn" id="rotate-left" title="Rotate Left">◀</button>
+                    <button class="cam-btn" id="rotate-right" title="Rotate Right">▶</button>
+                    <button class="cam-btn" id="zoom-in" title="Zoom In">+</button>
+                    <button class="cam-btn" id="zoom-out" title="Zoom Out">−</button>
+                    <button class="cam-btn" id="reset-view" title="Reset View">⌂</button>
                 </div>
-                <!-- Point Tooltip -->
-                <div class="point-tooltip hidden" id="point-tooltip">
-                    <div class="tooltip-values"></div>
-                    <div class="tooltip-prediction"></div>
+            </section>
+
+            <!-- Math Panel - Below Graph -->
+            <section class="panel math-panel" id="math-panel">
+                <div class="math-header">
+                    <h2 class="section-title">
+                        <span class="icon">📊</span>
+                        Current Calculation
+                    </h2>
+                    <button class="collapse-btn" id="collapse-math-btn">▼</button>
                 </div>
-            </div>
-            <!-- Camera Controls -->
-            <div class="camera-controls">
-                <button class="cam-btn" id="rotate-left" title="Rotate Left">◀</button>
-                <button class="cam-btn" id="rotate-right" title="Rotate Right">▶</button>
-                <button class="cam-btn" id="zoom-in" title="Zoom In">+</button>
-                <button class="cam-btn" id="zoom-out" title="Zoom Out">−</button>
-                <button class="cam-btn" id="reset-view" title="Reset View">⌂</button>
-            </div>
-        </section>
+                <div class="math-content" id="math-content">
+                    <div class="calculation-display" id="calculation-display">
+                        <div class="calc-instruction">
+                            Enter values in the test panel and click Calculate to see the math breakdown.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
 
         <!-- Right Panel - Info & Testing -->
         <aside class="panel info-panel">
@@ -190,24 +210,6 @@
             </section>
         </aside>
     </main>
-
-    <!-- Bottom Panel - Math Visualization -->
-    <footer class="math-panel" id="math-panel">
-        <div class="math-header">
-            <h2 class="section-title">
-                <span class="icon">📊</span>
-                Current Calculation
-            </h2>
-            <button class="collapse-btn" id="collapse-math-btn">▼</button>
-        </div>
-        <div class="math-content" id="math-content">
-            <div class="calculation-display" id="calculation-display">
-                <div class="calc-instruction">
-                    Enter values in the test panel and click Calculate to see the math breakdown.
-                </div>
-            </div>
-        </div>
-    </footer>
 
     <!-- Success/Training Complete Overlay -->
     <div class="celebration-overlay hidden" id="celebration-overlay">
