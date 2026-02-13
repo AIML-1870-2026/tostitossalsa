@@ -39,6 +39,7 @@ class DecisionNeuronApp {
             graphContainer: document.getElementById('graph-container'),
             trainingOverlay: document.getElementById('training-overlay'),
             trainingProgress: document.getElementById('training-progress'),
+            trainingPointInfo: document.getElementById('training-point-info'),
             labelYesBtn: document.getElementById('label-yes-btn'),
             labelNoBtn: document.getElementById('label-no-btn'),
             dimensionSelector: document.getElementById('dimension-selector'),
@@ -624,10 +625,36 @@ class DecisionNeuronApp {
         const mesh = this.graph.addTrainingPoint({ values: point.values, label: 'YES' }, true);
         point.mesh = mesh;
 
+        // Update training point info panel
+        this.updateTrainingPointInfo(point.values);
+
         // Highlight current point
         setTimeout(() => {
             this.graph.highlightPoint(mesh, true);
         }, 600);
+    }
+
+    // Update training point info panel with current values
+    updateTrainingPointInfo(values) {
+        const params = this.currentDecision.parameters;
+        let html = `
+            <div class="training-point-info-title">Current Point</div>
+            <div class="training-point-values">
+        `;
+
+        params.forEach((param, i) => {
+            const value = values[i];
+            const unit = param.unit ? `<span class="training-point-unit">${param.unit}</span>` : '';
+            html += `
+                <div class="training-point-value">
+                    <span class="training-point-label">${param.name}</span>
+                    <span class="training-point-number">${value}${unit}</span>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        this.elements.trainingPointInfo.innerHTML = html;
     }
 
     // Label current training point

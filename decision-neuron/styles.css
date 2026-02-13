@@ -616,6 +616,64 @@ body {
     font-size: 0.85rem;
 }
 
+.training-point-info {
+    position: absolute;
+    bottom: 8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 248, 231, 0.95);
+    border: 2px solid var(--panel-wood-border);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 16px var(--shadow-deep);
+    min-width: 200px;
+}
+
+.training-point-info-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.training-point-values {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.training-point-value {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.training-point-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.training-point-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--boundary-blue);
+    background: rgba(123, 167, 188, 0.15);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.training-point-unit {
+    font-size: 0.75rem;
+    color: var(--text-medium);
+    margin-left: 0.25rem;
+}
+
 .training-buttons {
     position: absolute;
     bottom: 2rem;
