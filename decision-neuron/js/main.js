@@ -717,8 +717,12 @@ class DecisionNeuronApp {
             label: p.label
         }));
 
+        console.log('Training data:', trainingData);
+
         // Train the model
         const result = MathUtils.train(trainingData);
+
+        console.log('Training result:', result);
 
         if (result) {
             // Store trained weights for reverting later
@@ -745,6 +749,10 @@ class DecisionNeuronApp {
                 // Show celebration
                 this.elements.celebrationOverlay.classList.remove('hidden');
             }, 1000);
+        } else {
+            // Training failed - show message and keep current weights
+            console.error('Training failed - could not calculate weights');
+            alert('Training could not complete. Try labeling with a mix of YES and NO answers.');
         }
 
         this.exitTrainingMode();

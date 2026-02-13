@@ -112,15 +112,11 @@ const MathUtils = {
             return this.trainGradientDescent(trainingData);
         }
 
-        const XTy = this.multiply(XT, [y])[0] || this.multiply(XT, y);
+        // Compute X^T * y using matrix-vector multiplication
+        const XTy = this.multiply(XT, y);
 
-        // Handle the result based on whether XTy is a matrix or vector
-        let weights;
-        if (Array.isArray(XTy[0])) {
-            weights = this.multiply(XTXinv, XTy.map(row => row[0]));
-        } else {
-            weights = this.multiply(XTXinv, XTy);
-        }
+        // Compute (X^T X)^(-1) * (X^T y)
+        const weights = this.multiply(XTXinv, XTy);
 
         return {
             bias: weights[0],
