@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Neuron Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="top-bar">
+        <div class="logo">
+            <span class="brain-icon">🧠</span>
+            <h1>Decision Neuron Lab</h1>
+        </div>
+        <div class="decision-name-wrapper">
+            <input type="text" id="decision-name" class="decision-name-input" value="Should I Watch YouTube?" placeholder="Name your decision...">
+        </div>
+        <div class="top-actions">
+            <div class="history-dropdown">
+                <button class="history-btn" id="history-btn">
+                    <span class="icon">📚</span>
+                    History
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="history-panel" id="history-panel">
+                    <div class="history-list" id="history-list">
+                        <div class="history-empty">No saved decisions yet</div>
+                    </div>
+                </div>
+            </div>
+            <button class="new-decision-btn" id="new-decision-btn">
+                <span class="icon">✨</span>
+                New Decision
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Left Panel - Controls -->
+        <aside class="panel control-panel">
+            <section class="panel-section">
+                <h2 class="section-title">Parameters</h2>
+                <div class="parameters-list" id="parameters-list">
+                    <!-- Dynamically populated -->
+                </div>
+                <button class="add-param-btn" id="add-param-btn">
+                    <span class="icon">+</span>
+                    Add Parameter
+                </button>
+            </section>
+
+            <section class="panel-section">
+                <h2 class="section-title">Weights & Bias</h2>
+                <div class="weights-list" id="weights-list">
+                    <!-- Dynamically populated -->
+                </div>
+                <div class="bias-slider-wrapper">
+                    <label class="slider-label">
+                        <span class="label-text">Bias (y-intercept)</span>
+                        <span class="slider-value" id="bias-value">-1.2</span>
+                    </label>
+                    <input type="range" class="bias-slider" id="bias-slider" min="-5" max="5" step="0.1" value="-1.2">
+                </div>
+            </section>
+
+            <section class="panel-section actions-section">
+                <button class="action-btn reset-btn" id="reset-weights-btn">
+                    <span class="icon">↺</span>
+                    Reset Weights
+                </button>
+                <button class="action-btn train-btn" id="train-btn">
+                    <span class="icon">🎓</span>
+                    <span class="btn-text">Train Mode</span>
+                </button>
+            </section>
+        </aside>
+
+        <!-- Center Panel - Isometric Graph -->
+        <section class="panel graph-panel">
+            <div class="graph-container" id="graph-container">
+                <canvas id="graph-canvas"></canvas>
+                <!-- Training Mode Overlay -->
+                <div class="training-overlay hidden" id="training-overlay">
+                    <div class="training-badge">
+                        <span class="training-icon">🎓</span>
+                        Training Mode
+                        <span class="training-progress" id="training-progress">Point 1/10</span>
+                    </div>
+                    <div class="training-buttons" id="training-buttons">
+                        <button class="label-btn yes-btn" id="label-yes-btn">
+                            <span class="icon">✓</span>
+                            YES
+                            <span class="shortcut">(Y)</span>
+                        </button>
+                        <button class="label-btn no-btn" id="label-no-btn">
+                            <span class="icon">✗</span>
+                            NO
+                            <span class="shortcut">(N)</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Dimension Selector (for >3 params) -->
+                <div class="dimension-selector hidden" id="dimension-selector">
+                    <label>
+                        X: <select id="dim-x"></select>
+                    </label>
+                    <label>
+                        Y: <select id="dim-y"></select>
+                    </label>
+                    <label>
+                        Z: <select id="dim-z"></select>
+                    </label>
+                </div>
+                <!-- Point Tooltip -->
+                <div class="point-tooltip hidden" id="point-tooltip">
+                    <div class="tooltip-values"></div>
+                    <div class="tooltip-prediction"></div>
+                </div>
+            </div>
+            <!-- Camera Controls -->
+            <div class="camera-controls">
+                <button class="cam-btn" id="rotate-left" title="Rotate Left">◀</button>
+                <button class="cam-btn" id="rotate-right" title="Rotate Right">▶</button>
+                <button class="cam-btn" id="zoom-in" title="Zoom In">+</button>
+                <button class="cam-btn" id="zoom-out" title="Zoom Out">−</button>
+                <button class="cam-btn" id="reset-view" title="Reset View">⌂</button>
+            </div>
+        </section>
+
+        <!-- Right Panel - Info & Testing -->
+        <aside class="panel info-panel">
+            <section class="panel-section">
+                <h2 class="section-title">Decision Function</h2>
+                <div class="function-display" id="function-display">
+                    <div class="function-equation" id="function-equation">
+                        y = w₁x₁ + w₂x₂ + w₃x₃ + b
+                    </div>
+                    <div class="function-values" id="function-values">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel-section">
+                <h2 class="section-title">Test Your Decision</h2>
+                <div class="test-inputs" id="test-inputs">
+                    <!-- Dynamically populated -->
+                </div>
+                <button class="calculate-btn" id="calculate-btn">
+                    <span class="icon">⚡</span>
+                    Calculate
+                </button>
+                <div class="result-display" id="result-display">
+                    <div class="result-label">Result</div>
+                    <div class="result-value" id="result-value">—</div>
+                    <div class="result-score" id="result-score"></div>
+                    <div class="result-strength" id="result-strength"></div>
+                </div>
+            </section>
+
+            <section class="panel-section stats-section" id="stats-section">
+                <h2 class="section-title">Model Stats</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Training Points</span>
+                        <span class="stat-value" id="stat-points">10</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Accuracy</span>
+                        <span class="stat-value" id="stat-accuracy">100%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Last Trained</span>
+                        <span class="stat-value" id="stat-trained">Just now</span>
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </main>
+
+    <!-- Bottom Panel - Math Visualization -->
+    <footer class="math-panel" id="math-panel">
+        <div class="math-header">
+            <h2 class="section-title">
+                <span class="icon">📊</span>
+                Current Calculation
+            </h2>
+            <button class="collapse-btn" id="collapse-math-btn">▼</button>
+        </div>
+        <div class="math-content" id="math-content">
+            <div class="calculation-display" id="calculation-display">
+                <div class="calc-instruction">
+                    Enter values in the test panel and click Calculate to see the math breakdown.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success/Training Complete Overlay -->
+    <div class="celebration-overlay hidden" id="celebration-overlay">
+        <div class="celebration-content">
+            <div class="celebration-icon">✨</div>
+            <h2>Training Complete!</h2>
+            <p>Your decision model has been updated.</p>
+            <button class="dismiss-btn" id="dismiss-celebration">Continue</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/math.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/graph.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
