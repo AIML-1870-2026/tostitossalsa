@@ -8,10 +8,20 @@ class IsometricGraph {
         this.points = [];
         this.pointMeshes = [];
         this.boundaryMesh = null;
-        this.currentRotation = 0;
-        this.targetRotation = 0;
+
+        // Camera rotation angles (spherical coordinates)
+        this.theta = Math.PI / 4;  // Horizontal angle
+        this.phi = Math.PI / 4;    // Vertical angle (from top)
+        this.targetTheta = Math.PI / 4;
+        this.targetPhi = Math.PI / 4;
+
         this.zoom = 1;
         this.targetZoom = 1;
+
+        // Mouse/touch interaction state
+        this.isDragging = false;
+        this.previousMousePosition = { x: 0, y: 0 };
+        this.autoRotate = false;
 
         this.parameters = [];
         this.weights = [];
@@ -77,11 +87,123 @@ class IsometricGraph {
         this.createPlatform();
         this.createAxes();
 
+        // Setup mouse/touch controls
+        this.setupControls();
+
         // Start animation loop
         this.animate();
 
         // Handle resize
         window.addEventListener('resize', () => this.onResize());
+    }
+
+    setupControls() {
+        const canvas = this.canvas;
+
+        // Mouse events
+        canvas.addEventListener('mousedown', (e) => this.onMouseDown(e));
+        canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
+        canvas.addEventListener('mouseup', () => this.onMouseUp());
+        canvas.addEventListener('mouseleave', () => this.onMouseUp());
+
+        // Touch events
+        canvas.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
+        canvas.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
+        canvas.addEventListener('touchend', () => this.onTouchEnd());
+
+        // Scroll wheel for zoom
+        canvas.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
+
+        // Set cursor style
+        canvas.style.cursor = 'grab';
+    }
+
+    onMouseDown(e) {
+        this.isDragging = true;
+        this.previousMousePosition = {
+            x: e.clientX,
+            y: e.clientY
+        };
+        this.canvas.style.cursor = 'grabbing';
+    }
+
+    onMouseMove(e) {
+        if (!this.isDragging) return;
+
+        const deltaX = e.clientX - this.previousMousePosition.x;
+        const deltaY = e.clientY - this.previousMousePosition.y;
+
+        // Adjust rotation based on mouse movement
+        this.targetTheta += deltaX * 0.01;
+        this.targetPhi -= deltaY * 0.01;
+
+        // Clamp vertical angle to prevent flipping
+        this.targetPhi = Math.max(0.1, Math.min(Math.PI / 2 - 0.1, this.targetPhi));
+
+        this.previousMousePosition = {
+            x: e.clientX,
+            y: e.clientY
+        };
+    }
+
+    onMouseUp() {
+        this.isDragging = false;
+        this.canvas.style.cursor = 'grab';
+    }
+
+    onTouchStart(e) {
+        if (e.touches.length === 1) {
+            e.preventDefault();
+            this.isDragging = true;
+            this.previousMousePosition = {
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY
+            };
+        } else if (e.touches.length === 2) {
+            // Pinch zoom start
+            e.preventDefault();
+            this.initialPinchDistance = this.getPinchDistance(e.touches);
+        }
+    }
+
+    onTouchMove(e) {
+        if (e.touches.length === 1 && this.isDragging) {
+            e.preventDefault();
+            const deltaX = e.touches[0].clientX - this.previousMousePosition.x;
+            const deltaY = e.touches[0].clientY - this.previousMousePosition.y;
+
+            this.targetTheta += deltaX * 0.01;
+            this.targetPhi -= deltaY * 0.01;
+            this.targetPhi = Math.max(0.1, Math.min(Math.PI / 2 - 0.1, this.targetPhi));
+
+            this.previousMousePosition = {
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY
+            };
+        } else if (e.touches.length === 2) {
+            // Pinch zoom
+            e.preventDefault();
+            const currentDistance = this.getPinchDistance(e.touches);
+            const scale = currentDistance / this.initialPinchDistance;
+            this.targetZoom = MathUtils.clamp(this.zoom * scale, 0.5, 3);
+            this.initialPinchDistance = currentDistance;
+        }
+    }
+
+    onTouchEnd() {
+        this.isDragging = false;
+    }
+
+    getPinchDistance(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    onWheel(e) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        this.targetZoom = MathUtils.clamp(this.targetZoom * delta, 0.5, 3);
     }
 
     setupLighting() {
@@ -200,14 +322,12 @@ class IsometricGraph {
 
     updateCameraPosition() {
         const distance = 15 / this.zoom;
-        const angle = this.currentRotation;
 
-        // Isometric angle (approx 35.264 degrees)
-        const isoAngle = Math.atan(1 / Math.sqrt(2));
-
-        this.camera.position.x = Math.cos(angle) * Math.cos(isoAngle) * distance;
-        this.camera.position.y = Math.sin(isoAngle) * distance;
-        this.camera.position.z = Math.sin(angle) * Math.cos(isoAngle) * distance;
+        // Spherical to Cartesian coordinates
+        // theta = horizontal rotation, phi = vertical angle from top
+        this.camera.position.x = Math.sin(this.phi) * Math.cos(this.theta) * distance;
+        this.camera.position.y = Math.cos(this.phi) * distance;
+        this.camera.position.z = Math.sin(this.phi) * Math.sin(this.theta) * distance;
 
         this.camera.lookAt(0, 0, 0);
         this.camera.updateProjectionMatrix();
@@ -509,15 +629,15 @@ class IsometricGraph {
 
     // Camera controls
     rotateLeft() {
-        this.targetRotation -= Math.PI / 2;
+        this.targetTheta -= Math.PI / 4;
     }
 
     rotateRight() {
-        this.targetRotation += Math.PI / 2;
+        this.targetTheta += Math.PI / 4;
     }
 
     zoomIn() {
-        this.targetZoom = Math.min(this.targetZoom * 1.2, 2);
+        this.targetZoom = Math.min(this.targetZoom * 1.2, 3);
     }
 
     zoomOut() {
@@ -525,7 +645,8 @@ class IsometricGraph {
     }
 
     resetView() {
-        this.targetRotation = Math.PI / 4;
+        this.targetTheta = Math.PI / 4;
+        this.targetPhi = Math.PI / 4;
         this.targetZoom = 1;
     }
 
@@ -534,11 +655,17 @@ class IsometricGraph {
         requestAnimationFrame(() => this.animate());
 
         // Smooth camera rotation
-        const rotationSpeed = 0.08;
-        this.currentRotation = MathUtils.lerp(this.currentRotation, this.targetRotation, rotationSpeed);
+        const smoothSpeed = 0.1;
+        this.theta = MathUtils.lerp(this.theta, this.targetTheta, smoothSpeed);
+        this.phi = MathUtils.lerp(this.phi, this.targetPhi, smoothSpeed);
 
         // Smooth zoom
-        this.zoom = MathUtils.lerp(this.zoom, this.targetZoom, rotationSpeed);
+        this.zoom = MathUtils.lerp(this.zoom, this.targetZoom, smoothSpeed);
+
+        // Auto-rotate when idle (optional, subtle)
+        if (this.autoRotate && !this.isDragging) {
+            this.targetTheta += 0.002;
+        }
 
         this.updateCameraPosition();
 
