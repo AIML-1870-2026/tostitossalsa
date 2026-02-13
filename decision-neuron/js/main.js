@@ -10,6 +10,10 @@ class DecisionNeuronApp {
         this.currentTrainingIndex = 0;
         this.graph = null;
 
+        // Store trained weights to allow reverting
+        this.trainedWeights = null;
+        this.trainedBias = null;
+
         // Debounce timer for auto-save
         this.saveTimeout = null;
 
@@ -179,12 +183,31 @@ class DecisionNeuronApp {
             trainingData: JSON.parse(JSON.stringify(preset.trainingData))
         };
 
+        // Store preset weights as trained weights (for reverting)
+        if (preset.trainingData && preset.trainingData.length > 0) {
+            this.trainedWeights = [...preset.weights];
+            this.trainedBias = preset.bias;
+        } else {
+            this.trainedWeights = null;
+            this.trainedBias = null;
+        }
+
         this.updateUI();
     }
 
     // Load a saved decision
     loadDecision(decision) {
         this.currentDecision = JSON.parse(JSON.stringify(decision));
+
+        // Store saved weights as trained weights (for reverting)
+        if (decision.trainingData && decision.trainingData.length > 0) {
+            this.trainedWeights = [...decision.weights];
+            this.trainedBias = decision.bias;
+        } else {
+            this.trainedWeights = null;
+            this.trainedBias = null;
+        }
+
         this.updateUI();
         this.elements.historyBtn.parentElement.classList.remove('open');
     }
@@ -372,10 +395,16 @@ class DecisionNeuronApp {
         this.scheduleAutoSave();
     }
 
-    // Reset all weights to 0
+    // Revert to trained model weights
     resetWeights() {
-        this.currentDecision.weights = this.currentDecision.weights.map(() => 0);
-        this.currentDecision.bias = 0;
+        if (this.trainedWeights && this.trainedBias !== null) {
+            this.currentDecision.weights = [...this.trainedWeights];
+            this.currentDecision.bias = this.trainedBias;
+        } else {
+            // No trained model, reset to zeros
+            this.currentDecision.weights = this.currentDecision.weights.map(() => 0);
+            this.currentDecision.bias = 0;
+        }
         this.renderWeights();
         this.updateBiasSlider();
         this.updateGraph();
@@ -665,6 +694,10 @@ class DecisionNeuronApp {
         const result = MathUtils.train(trainingData);
 
         if (result) {
+            // Store trained weights for reverting later
+            this.trainedWeights = [...result.weights];
+            this.trainedBias = result.bias;
+
             // Animate weight changes
             this.animateWeightChange(result.weights, result.bias);
 
