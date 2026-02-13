@@ -127,12 +127,12 @@ const Presets = {
             { name: 'Energy Level', unit: '1-10 scale', min: 1, max: 10 },
             { name: 'Tasks Remaining', unit: 'count', min: 0, max: 10 }
         ],
-        weights: [0.5, 0.3, -0.8],
+        weights: [0.12633175, -0.39583948, -0.90958859],
         bias: -1.2,
         trainingData: [
             { values: [15, 3, 5], label: 'NO' },
             { values: [60, 8, 0], label: 'YES' },
-            { values: [30, 5, 2], label: 'NO' },
+            { values: [20, 5, 2], label: 'NO' },
             { values: [90, 9, 1], label: 'YES' },
             { values: [10, 2, 8], label: 'NO' },
             { values: [45, 7, 1], label: 'YES' },
