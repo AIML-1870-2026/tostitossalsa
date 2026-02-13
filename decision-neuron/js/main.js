@@ -63,7 +63,10 @@ class DecisionNeuronApp {
             rotateRight: document.getElementById('rotate-right'),
             zoomIn: document.getElementById('zoom-in'),
             zoomOut: document.getElementById('zoom-out'),
-            resetView: document.getElementById('reset-view')
+            resetView: document.getElementById('reset-view'),
+            dimXSelect: document.getElementById('dim-x-select'),
+            dimYSelect: document.getElementById('dim-y-select'),
+            dimZSelect: document.getElementById('dim-z-select')
         };
 
         // Initialize 3D graph
@@ -169,6 +172,59 @@ class DecisionNeuronApp {
         this.elements.zoomIn.addEventListener('click', () => this.graph.zoomIn());
         this.elements.zoomOut.addEventListener('click', () => this.graph.zoomOut());
         this.elements.resetView.addEventListener('click', () => this.graph.resetView());
+
+        // Dimension selectors
+        this.elements.dimXSelect.addEventListener('change', () => this.onDimensionChange());
+        this.elements.dimYSelect.addEventListener('change', () => this.onDimensionChange());
+        this.elements.dimZSelect.addEventListener('change', () => this.onDimensionChange());
+    }
+
+    // Handle dimension selector changes
+    onDimensionChange() {
+        const dimX = parseInt(this.elements.dimXSelect.value);
+        const dimY = parseInt(this.elements.dimYSelect.value);
+        const dimZ = parseInt(this.elements.dimZSelect.value);
+
+        this.graph.setDimensions(
+            isNaN(dimX) ? -1 : dimX,
+            isNaN(dimY) ? -1 : dimY,
+            isNaN(dimZ) ? -1 : dimZ
+        );
+        this.graph.updatePoints();
+        this.graph.updateBoundary();
+    }
+
+    // Populate dimension selector dropdowns
+    updateDimensionSelectors() {
+        const params = this.currentDecision.parameters;
+        const selects = [
+            this.elements.dimXSelect,
+            this.elements.dimYSelect,
+            this.elements.dimZSelect
+        ];
+        const currentValues = selects.map(s => s.value);
+
+        selects.forEach((select, i) => {
+            select.innerHTML = '<option value="">None</option>';
+            params.forEach((param, paramIndex) => {
+                const option = document.createElement('option');
+                option.value = paramIndex;
+                option.textContent = param.name;
+                select.appendChild(option);
+            });
+
+            // Restore previous value or set default
+            if (currentValues[i] !== '' && parseInt(currentValues[i]) < params.length) {
+                select.value = currentValues[i];
+            } else if (params.length > i) {
+                select.value = i;
+            } else {
+                select.value = '';
+            }
+        });
+
+        // Apply the dimension changes
+        this.onDimensionChange();
     }
 
     // Load a preset
@@ -233,6 +289,7 @@ class DecisionNeuronApp {
         this.renderTestInputs();
         this.updateFunctionDisplay();
         this.updateStats();
+        this.updateDimensionSelectors();
         this.updateGraph();
     }
 
@@ -368,6 +425,7 @@ class DecisionNeuronApp {
         this.renderWeights();
         this.renderTestInputs();
         this.updateFunctionDisplay();
+        this.updateDimensionSelectors();
         this.updateGraph();
         this.scheduleAutoSave();
     }
@@ -392,6 +450,7 @@ class DecisionNeuronApp {
         this.renderWeights();
         this.renderTestInputs();
         this.updateFunctionDisplay();
+        this.updateDimensionSelectors();
         this.updateGraph();
         this.scheduleAutoSave();
     }

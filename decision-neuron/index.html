@@ -133,11 +133,27 @@
                 </div>
                 <!-- Camera Controls -->
                 <div class="camera-controls">
-                    <button class="cam-btn" id="rotate-left" title="Rotate Left">◀</button>
-                    <button class="cam-btn" id="rotate-right" title="Rotate Right">▶</button>
-                    <button class="cam-btn" id="zoom-in" title="Zoom In">+</button>
-                    <button class="cam-btn" id="zoom-out" title="Zoom Out">−</button>
-                    <button class="cam-btn" id="reset-view" title="Reset View">⌂</button>
+                    <div class="dimension-selectors">
+                        <label class="dim-select-label">
+                            <span>X:</span>
+                            <select id="dim-x-select" class="dim-select"></select>
+                        </label>
+                        <label class="dim-select-label">
+                            <span>Y:</span>
+                            <select id="dim-y-select" class="dim-select"></select>
+                        </label>
+                        <label class="dim-select-label">
+                            <span>Z:</span>
+                            <select id="dim-z-select" class="dim-select"></select>
+                        </label>
+                    </div>
+                    <div class="camera-buttons">
+                        <button class="cam-btn" id="rotate-left" title="Rotate Left">◀</button>
+                        <button class="cam-btn" id="rotate-right" title="Rotate Right">▶</button>
+                        <button class="cam-btn" id="zoom-in" title="Zoom In">+</button>
+                        <button class="cam-btn" id="zoom-out" title="Zoom Out">−</button>
+                        <button class="cam-btn" id="reset-view" title="Reset View">⌂</button>
+                    </div>
                 </div>
             </section>
 

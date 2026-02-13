@@ -801,21 +801,64 @@ body {
 /* Camera Controls */
 .camera-controls {
     display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
     background: var(--bg-warm);
     border-top: 1px solid rgba(184, 149, 106, 0.3);
 }
 
+.dimension-selectors {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.dim-select-label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.dim-select {
+    padding: 0.25rem 0.4rem;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    background: var(--bg-cream);
+    border: 1px solid var(--panel-wood-border);
+    border-radius: 4px;
+    cursor: pointer;
+    max-width: 90px;
+}
+
+.dim-select:hover {
+    border-color: var(--accent-blue);
+}
+
+.dim-select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(123, 167, 188, 0.2);
+}
+
+.camera-buttons {
+    display: flex;
+    gap: 0.4rem;
+}
+
 .cam-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
     color: var(--text-dark);
     background: var(--bg-cream);
     border: 2px solid var(--panel-wood-border);
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all var(--transition-quick);
 }

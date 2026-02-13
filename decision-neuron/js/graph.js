@@ -332,6 +332,13 @@ class IsometricGraph {
         this.updateBoundary();
     }
 
+    // Set which dimensions to display on each axis
+    setDimensions(dimX, dimY, dimZ) {
+        this.dimX = dimX;
+        this.dimY = dimY;
+        this.dimZ = dimZ;
+    }
+
     // Update data points in the scene
     updatePoints() {
         // Remove existing point meshes
@@ -380,21 +387,24 @@ class IsometricGraph {
     }
 
     getPointPosition(values) {
-        const pos = new THREE.Vector3();
+        const pos = new THREE.Vector3(0, 0.5, 0); // Default center position
 
-        if (this.parameters.length >= 1 && values.length >= 1) {
+        // X axis
+        if (this.dimX >= 0 && this.dimX < this.parameters.length && values.length > this.dimX) {
             const param = this.parameters[this.dimX];
             const normalized = MathUtils.normalize(values[this.dimX], param.min, param.max);
             pos.x = (normalized - 0.5) * 8;
         }
 
-        if (this.parameters.length >= 2 && values.length >= 2) {
+        // Y axis (height)
+        if (this.dimY >= 0 && this.dimY < this.parameters.length && values.length > this.dimY) {
             const param = this.parameters[this.dimY];
             const normalized = MathUtils.normalize(values[this.dimY], param.min, param.max);
             pos.y = normalized * 5 + 0.5;
         }
 
-        if (this.parameters.length >= 3 && values.length >= 3) {
+        // Z axis
+        if (this.dimZ >= 0 && this.dimZ < this.parameters.length && values.length > this.dimZ) {
             const param = this.parameters[this.dimZ];
             const normalized = MathUtils.normalize(values[this.dimZ], param.min, param.max);
             pos.z = (normalized - 0.5) * 8;
@@ -413,19 +423,27 @@ class IsometricGraph {
             this.boundaryMesh = null;
         }
 
-        if (this.parameters.length < 2 || this.weights.length < 2) return;
+        // Check if we have valid dimensions selected
+        const hasX = this.dimX >= 0 && this.dimX < this.parameters.length;
+        const hasY = this.dimY >= 0 && this.dimY < this.parameters.length;
+        const hasZ = this.dimZ >= 0 && this.dimZ < this.parameters.length;
 
-        const numParams = Math.min(this.parameters.length, 3);
+        // Need at least X and Y for boundary
+        if (!hasX || !hasY) return;
+        if (this.weights.length < 2) return;
 
-        if (numParams === 2) {
-            this.createBoundary2D();
-        } else {
+        if (hasZ) {
             this.createBoundary3D();
+        } else {
+            this.createBoundary2D();
         }
     }
 
     createBoundary2D() {
         // For 2 parameters, create a line
+        if (this.dimX < 0 || this.dimY < 0) return;
+        if (!this.parameters[this.dimX] || !this.parameters[this.dimY]) return;
+
         const w1 = this.weights[this.dimX] || 0;
         const w2 = this.weights[this.dimY] || 0;
         const b = this.bias;
@@ -474,6 +492,9 @@ class IsometricGraph {
 
     createBoundary3D() {
         // For 3 parameters, create a plane
+        if (this.dimX < 0 || this.dimY < 0 || this.dimZ < 0) return;
+        if (!this.parameters[this.dimX] || !this.parameters[this.dimY] || !this.parameters[this.dimZ]) return;
+
         const w1 = this.weights[this.dimX] || 0;
         const w2 = this.weights[this.dimY] || 0;
         const w3 = this.weights[this.dimZ] || 0;
