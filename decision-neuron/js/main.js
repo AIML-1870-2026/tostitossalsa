@@ -42,7 +42,6 @@ class DecisionNeuronApp {
             trainingPointInfo: document.getElementById('training-point-info'),
             labelYesBtn: document.getElementById('label-yes-btn'),
             labelNoBtn: document.getElementById('label-no-btn'),
-            dimensionSelector: document.getElementById('dimension-selector'),
             functionEquation: document.getElementById('function-equation'),
             functionValues: document.getElementById('function-values'),
             testInputs: document.getElementById('test-inputs'),
