@@ -106,13 +106,10 @@ class IsometricGraph {
         canvas.addEventListener('mouseup', () => this.onMouseUp());
         canvas.addEventListener('mouseleave', () => this.onMouseUp());
 
-        // Touch events
-        canvas.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
-        canvas.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
+        // Touch events - allow page scroll, only capture for pinch zoom
+        canvas.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: true });
+        canvas.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: true });
         canvas.addEventListener('touchend', () => this.onTouchEnd());
-
-        // Scroll wheel for zoom
-        canvas.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
 
         // Set cursor style
         canvas.style.cursor = 'grab';
@@ -152,37 +149,33 @@ class IsometricGraph {
     }
 
     onTouchStart(e) {
-        if (e.touches.length === 1) {
-            e.preventDefault();
+        if (e.touches.length === 2) {
+            // Two-finger touch for rotation
             this.isDragging = true;
             this.previousMousePosition = {
-                x: e.touches[0].clientX,
-                y: e.touches[0].clientY
+                x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                y: (e.touches[0].clientY + e.touches[1].clientY) / 2
             };
-        } else if (e.touches.length === 2) {
-            // Pinch zoom start
-            e.preventDefault();
             this.initialPinchDistance = this.getPinchDistance(e.touches);
         }
     }
 
     onTouchMove(e) {
-        if (e.touches.length === 1 && this.isDragging) {
-            e.preventDefault();
-            const deltaX = e.touches[0].clientX - this.previousMousePosition.x;
-            const deltaY = e.touches[0].clientY - this.previousMousePosition.y;
+        if (e.touches.length === 2 && this.isDragging) {
+            // Two-finger drag for rotation
+            const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+            const deltaX = centerX - this.previousMousePosition.x;
+            const deltaY = centerY - this.previousMousePosition.y;
 
             this.targetTheta += deltaX * 0.01;
             this.targetPhi -= deltaY * 0.01;
             this.targetPhi = Math.max(0.1, Math.min(Math.PI / 2 - 0.1, this.targetPhi));
 
-            this.previousMousePosition = {
-                x: e.touches[0].clientX,
-                y: e.touches[0].clientY
-            };
-        } else if (e.touches.length === 2) {
+            this.previousMousePosition = { x: centerX, y: centerY };
+
             // Pinch zoom
-            e.preventDefault();
             const currentDistance = this.getPinchDistance(e.touches);
             const scale = currentDistance / this.initialPinchDistance;
             this.targetZoom = MathUtils.clamp(this.zoom * scale, 0.5, 3);
@@ -198,12 +191,6 @@ class IsometricGraph {
         const dx = touches[0].clientX - touches[1].clientX;
         const dy = touches[0].clientY - touches[1].clientY;
         return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    onWheel(e) {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        this.targetZoom = MathUtils.clamp(this.targetZoom * delta, 0.5, 3);
     }
 
     setupLighting() {
