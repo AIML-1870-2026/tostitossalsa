@@ -8,6 +8,7 @@ class IsometricGraph {
         this.points = [];
         this.pointMeshes = [];
         this.boundaryMesh = null;
+        this.testPointMesh = null;
 
         // Camera rotation angles (spherical coordinates)
         this.theta = Math.PI / 4;  // Horizontal angle
@@ -614,6 +615,66 @@ class IsometricGraph {
         mesh.userData.point.label = label;
     }
 
+    // Show test point from calculation (yellow diamond)
+    showTestPoint(values) {
+        // Remove existing test point
+        this.removeTestPoint();
+
+        if (!values || values.length === 0 || !this.parameters.length) return;
+
+        // Create yellow diamond for test point
+        const geometry = new THREE.OctahedronGeometry(0.35, 0);
+        const material = new THREE.MeshStandardMaterial({
+            color: 0xFFD700,
+            roughness: 0.2,
+            metalness: 0.4,
+            emissive: 0xFFD700,
+            emissiveIntensity: 0.4
+        });
+
+        this.testPointMesh = new THREE.Mesh(geometry, material);
+        this.testPointMesh.userData = { isTestPoint: true, values: values };
+
+        // Position based on values
+        const pos = this.getPointPosition(values);
+        this.testPointMesh.position.copy(pos);
+
+        // Animate entrance
+        const targetY = pos.y;
+        this.testPointMesh.position.y = targetY + 3;
+        this.testPointMesh.scale.set(0.3, 0.3, 0.3);
+
+        const startTime = performance.now();
+        const duration = 400;
+
+        const animateDrop = () => {
+            const elapsed = performance.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const t = 1 - Math.pow(1 - progress, 3);
+
+            this.testPointMesh.position.y = MathUtils.lerp(targetY + 3, targetY, t);
+            const scale = MathUtils.lerp(0.3, 1.2, t);
+            this.testPointMesh.scale.set(scale, scale, scale);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateDrop);
+            }
+        };
+
+        animateDrop();
+        this.scene.add(this.testPointMesh);
+    }
+
+    // Remove test point
+    removeTestPoint() {
+        if (this.testPointMesh) {
+            this.scene.remove(this.testPointMesh);
+            this.testPointMesh.geometry.dispose();
+            this.testPointMesh.material.dispose();
+            this.testPointMesh = null;
+        }
+    }
+
     // Camera controls
     rotateLeft() {
         this.targetTheta -= Math.PI / 4;
@@ -665,6 +726,16 @@ class IsometricGraph {
             }
         });
 
+        // Animate test point (pulsing glow)
+        if (this.testPointMesh && this.testPointMesh.userData.values) {
+            const baseY = this.getPointPosition(this.testPointMesh.userData.values).y;
+            this.testPointMesh.position.y = baseY + Math.sin(time * 3) * 0.08;
+            this.testPointMesh.rotation.y = time * 2;
+            // Pulsing scale
+            const pulse = 1.1 + Math.sin(time * 4) * 0.1;
+            this.testPointMesh.scale.set(pulse, pulse, pulse);
+        }
+
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -696,6 +767,8 @@ class IsometricGraph {
             this.boundaryMesh.geometry.dispose();
             this.boundaryMesh.material.dispose();
         }
+
+        this.removeTestPoint();
 
         this.renderer.dispose();
     }

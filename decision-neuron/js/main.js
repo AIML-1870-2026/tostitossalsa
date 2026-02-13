@@ -516,6 +516,9 @@ class DecisionNeuronApp {
 
         // Update math panel
         this.showCalculation(values, result, isYes);
+
+        // Show test point on graph (yellow)
+        this.graph.showTestPoint(values);
     }
 
     // Show calculation breakdown in math panel
@@ -579,6 +582,9 @@ class DecisionNeuronApp {
         this.isTrainingMode = true;
         this.trainingPoints = [];
         this.currentTrainingIndex = 0;
+
+        // Remove any test point from the graph
+        this.graph.removeTestPoint();
 
         // Generate 10 random points
         for (let i = 0; i < 10; i++) {

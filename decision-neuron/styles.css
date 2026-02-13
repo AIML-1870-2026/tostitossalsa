@@ -985,7 +985,7 @@ body {
 .math-panel {
     background: linear-gradient(180deg, var(--bg-warm) 0%, var(--bg-dark) 100%);
     border-top: 2px solid var(--panel-wood-border);
-    max-height: 200px;
+    max-height: 300px;
     overflow: hidden;
     transition: max-height var(--transition-standard);
 }
