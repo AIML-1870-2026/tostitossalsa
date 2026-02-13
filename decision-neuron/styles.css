@@ -54,7 +54,8 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Utility Classes */
@@ -256,7 +257,6 @@ body {
     gap: 1rem;
     padding: 1rem;
     min-height: 0;
-    overflow: hidden;
 }
 
 /* Panels */
@@ -1186,24 +1186,26 @@ body {
 @media (max-width: 992px) {
     .main-content {
         grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr auto;
+        grid-template-rows: auto auto auto;
+        overflow: visible;
     }
 
     .control-panel {
         order: 2;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .graph-panel {
         order: 1;
         min-height: 400px;
+        height: 50vh;
     }
 
     .info-panel {
         order: 3;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
