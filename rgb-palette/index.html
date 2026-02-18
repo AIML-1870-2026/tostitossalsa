@@ -26,14 +26,44 @@ body {
   font-size: 14px;
 }
 
-/* === NAV === */
-nav {
+/* === HEADER === */
+header {
   position: sticky;
   top: 0;
   z-index: 100;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
   display: flex;
+  align-items: stretch;
+  gap: 24px;
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  flex-shrink: 0;
+}
+.header-logo {
+  font-size: 20px;
+  color: var(--accent);
+  transition: color var(--t);
+  line-height: 1;
+}
+.header-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+nav {
+  display: flex;
+  flex: 1;
 }
 .tab-btn {
   padding: 14px 24px;
@@ -401,17 +431,28 @@ nav {
   .contrast-layout { grid-template-columns: 1fr; }
   .sim-grid { grid-template-columns: 1fr; }
   .pal-controls { flex-direction: column; }
-  .tab-btn { padding: 12px 14px; font-size: 13px; }
+  .tab-btn { padding: 10px 12px; font-size: 13px; }
+  .header-inner { padding: 0 14px; flex-wrap: wrap; gap: 0; }
+  .header-brand { padding: 10px 0; }
+  .header-title { font-size: 13px; }
 }
 </style>
 </head>
 <body>
 
-<nav>
-  <button class="tab-btn active" data-tab="explorer">Color Explorer</button>
-  <button class="tab-btn" data-tab="palette">Palette Generator</button>
-  <button class="tab-btn" data-tab="contrast">Contrast Checker</button>
-</nav>
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <span class="header-logo">&#9679;</span>
+      <span class="header-title">RGB Color Studio</span>
+    </div>
+    <nav>
+      <button class="tab-btn active" data-tab="explorer">Color Explorer</button>
+      <button class="tab-btn" data-tab="palette">Palette Generator</button>
+      <button class="tab-btn" data-tab="contrast">Contrast Checker</button>
+    </nav>
+  </div>
+</header>
 
 <!-- ===== TAB 1: COLOR EXPLORER ===== -->
 <section id="tab-explorer" class="tab-panel active">
@@ -460,7 +501,10 @@ nav {
       </div>
     </div>
   </div>
-  <button class="btn" id="reset-btn">Reset Positions</button>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+    <button class="btn" id="reset-btn">Reset Positions</button>
+    <button class="btn" id="mode-btn">Switch to Particle Beam</button>
+  </div>
 </section>
 
 <!-- ===== TAB 2: PALETTE GENERATOR ===== -->
@@ -705,11 +749,51 @@ const spotlights = [
 ];
 const DEFAULTS = spotlights.map(s => ({ x: s.x, y: s.y }));
 let dragging = null;
+let beamMode = false;
 
 function resizeCanvas() {
   const c = document.getElementById('canvas-container');
   canvas.width  = c.clientWidth;
   canvas.height = Math.round(Math.min(430, c.clientWidth * 0.52));
+}
+
+function drawSpotlight(sp, W, H) {
+  const cx = sp.x * W, cy = sp.y * H;
+  const eff = Math.round(sp.intensity * sp.brightness);
+  let colorStr;
+  if (sp.ch === 'r') colorStr = `rgb(${eff},0,0)`;
+  else if (sp.ch === 'g') colorStr = `rgb(0,${eff},0)`;
+  else colorStr = `rgb(0,0,${eff})`;
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, RADIUS);
+  grad.addColorStop(0, colorStr);
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, RADIUS, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+}
+
+function drawBeam(sp, W, H) {
+  const cx = sp.x * W, cy = sp.y * H;
+  const eff = Math.round(sp.intensity * sp.brightness);
+  let rv, gv, bv;
+  if (sp.ch === 'r') { rv = eff; gv = 0; bv = 0; }
+  else if (sp.ch === 'g') { rv = 0; gv = eff; bv = 0; }
+  else { rv = 0; gv = 0; bv = eff; }
+  // Draw ~90 particles scattered inside the spotlight radius
+  for (let i = 0; i < 90; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    // Square-root distribution so particles fill area uniformly
+    const dist  = Math.sqrt(Math.random()) * RADIUS;
+    const px = cx + Math.cos(angle) * dist;
+    const py = cy + Math.sin(angle) * dist;
+    const alpha = (1 - dist / RADIUS) * (0.5 + Math.random() * 0.5);
+    const size  = 1 + Math.random() * 3.5;
+    ctx.beginPath();
+    ctx.arc(px, py, size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${rv},${gv},${bv},${alpha.toFixed(2)})`;
+    ctx.fill();
+  }
 }
 
 function drawFrame() {
@@ -718,19 +802,8 @@ function drawFrame() {
   ctx.fillRect(0, 0, W, H);
   ctx.globalCompositeOperation = 'screen';
   spotlights.forEach(sp => {
-    const cx = sp.x * W, cy = sp.y * H;
-    const eff = Math.round(sp.intensity * sp.brightness);
-    let colorStr;
-    if (sp.ch === 'r') colorStr = `rgb(${eff},0,0)`;
-    else if (sp.ch === 'g') colorStr = `rgb(0,${eff},0)`;
-    else colorStr = `rgb(0,0,${eff})`;
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, RADIUS);
-    grad.addColorStop(0, colorStr);
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.beginPath();
-    ctx.arc(cx, cy, RADIUS, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
-    ctx.fill();
+    if (beamMode) drawBeam(sp, W, H);
+    else drawSpotlight(sp, W, H);
   });
   ctx.globalCompositeOperation = 'source-over';
   requestAnimationFrame(drawFrame);
@@ -765,6 +838,12 @@ window.addEventListener('resize', resizeCanvas);
 
 document.getElementById('reset-btn').addEventListener('click', () => {
   spotlights.forEach((sp, i) => { sp.x = DEFAULTS[i].x; sp.y = DEFAULTS[i].y; });
+});
+
+document.getElementById('mode-btn').addEventListener('click', () => {
+  beamMode = !beamMode;
+  document.getElementById('mode-btn').textContent =
+    beamMode ? 'Switch to Spotlight' : 'Switch to Particle Beam';
 });
 
 // Drag logic
@@ -853,6 +932,9 @@ function renderPalette() {
   const type     = document.getElementById('palette-type').value;
   const a11y     = document.getElementById('accessible-mode').checked;
   const bgHex    = document.getElementById('accessible-bg').value;
+
+  // Spec: "Accent colors pulled from the currently selected/active palette"
+  document.documentElement.style.setProperty('--accent', baseHex);
 
   const raw = generatePalette(baseHex, type);
   currentPalette = [];
