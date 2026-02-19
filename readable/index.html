@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Readable — Color Contrast Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Hidden SVG filters for vision simulation -->
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"
+       style="position:absolute;width:0;height:0;overflow:hidden">
+    <defs>
+      <filter id="filter-protanopia">
+        <feColorMatrix type="matrix" values="
+          0.56667 0.43333 0       0 0
+          0.55833 0.44167 0       0 0
+          0       0.24167 0.75833 0 0
+          0       0       0       1 0"/>
+      </filter>
+      <filter id="filter-deuteranopia">
+        <feColorMatrix type="matrix" values="
+          0.625 0.375 0   0 0
+          0.7   0.3   0   0 0
+          0     0.3   0.7 0 0
+          0     0     0   1 0"/>
+      </filter>
+      <filter id="filter-tritanopia">
+        <feColorMatrix type="matrix" values="
+          0.95  0.05     0       0 0
+          0     0.43333  0.56667 0 0
+          0     0.475    0.525   0 0
+          0     0        0       1 0"/>
+      </filter>
+      <filter id="filter-monochromacy">
+        <feColorMatrix type="matrix" values="
+          0.2126 0.7152 0.0722 0 0
+          0.2126 0.7152 0.0722 0 0
+          0.2126 0.7152 0.0722 0 0
+          0      0      0      1 0"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <header class="site-header">
+    <h1>Readable</h1>
+    <p class="site-subtitle">Color Contrast Explorer</p>
+  </header>
+
+  <main class="layout">
+
+    <!-- ═══ Controls Panel ═══ -->
+    <aside class="controls-panel">
+
+      <!-- Presets -->
+      <section class="card" id="presets-section">
+        <h2 class="card-title">⚡ Presets</h2>
+        <div class="preset-grid">
+          <button class="preset-btn" data-bg="255,255,255" data-text="0,0,0">High Contrast</button>
+          <button class="preset-btn" data-bg="200,200,210" data-text="180,180,190">Low Contrast</button>
+          <button class="preset-btn" data-bg="10,40,80"    data-text="180,220,255">Ocean</button>
+          <button class="preset-btn" data-bg="255,200,100" data-text="120,30,10">Sunset</button>
+          <button class="preset-btn preset-btn--wide" data-bg="255,255,0" data-text="255,255,255">⚠️ WCAG Fail</button>
+        </div>
+      </section>
+
+      <!-- Background Color -->
+      <section class="card" id="bg-color-section">
+        <h2 class="card-title">🎨 Background Color</h2>
+        <div class="swatch-row">
+          <div class="color-swatch" id="bg-swatch"></div>
+          <span class="hex-label" id="bg-hex">#FFFFFF</span>
+        </div>
+        <div class="rgb-controls">
+          <div class="channel-row">
+            <label class="channel-label r-label">R</label>
+            <input type="range"  class="slider r-slider" id="bg-r-slider" min="0" max="255" value="255" />
+            <input type="number" class="num-input"        id="bg-r-num"    min="0" max="255" value="255" />
+          </div>
+          <div class="channel-row">
+            <label class="channel-label g-label">G</label>
+            <input type="range"  class="slider g-slider" id="bg-g-slider" min="0" max="255" value="255" />
+            <input type="number" class="num-input"        id="bg-g-num"    min="0" max="255" value="255" />
+          </div>
+          <div class="channel-row">
+            <label class="channel-label b-label">B</label>
+            <input type="range"  class="slider b-slider" id="bg-b-slider" min="0" max="255" value="255" />
+            <input type="number" class="num-input"        id="bg-b-num"    min="0" max="255" value="255" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Text Color -->
+      <section class="card" id="text-color-section">
+        <h2 class="card-title">✏️ Text Color</h2>
+        <div class="swatch-row">
+          <div class="color-swatch" id="text-swatch"></div>
+          <span class="hex-label" id="text-hex">#000000</span>
+        </div>
+        <div class="rgb-controls">
+          <div class="channel-row">
+            <label class="channel-label r-label">R</label>
+            <input type="range"  class="slider r-slider" id="text-r-slider" min="0" max="255" value="0" />
+            <input type="number" class="num-input"        id="text-r-num"    min="0" max="255" value="0" />
+          </div>
+          <div class="channel-row">
+            <label class="channel-label g-label">G</label>
+            <input type="range"  class="slider g-slider" id="text-g-slider" min="0" max="255" value="0" />
+            <input type="number" class="num-input"        id="text-g-num"    min="0" max="255" value="0" />
+          </div>
+          <div class="channel-row">
+            <label class="channel-label b-label">B</label>
+            <input type="range"  class="slider b-slider" id="text-b-slider" min="0" max="255" value="0" />
+            <input type="number" class="num-input"        id="text-b-num"    min="0" max="255" value="0" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Text Size -->
+      <section class="card" id="size-section">
+        <h2 class="card-title">📏 Text Size</h2>
+        <div class="size-controls">
+          <input type="range" class="slider size-slider" id="size-slider" min="10" max="72" value="18" />
+          <div class="size-value-row">
+            <input type="number" class="num-input size-num-input" id="size-num" min="10" max="72" value="18" />
+            <span class="unit-label">px</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vision Simulation -->
+      <section class="card" id="vision-section">
+        <h2 class="card-title">👁️ Vision Simulation</h2>
+        <div class="vision-pills">
+          <label class="pill-label">
+            <input type="radio" name="vision" value="normal" checked />
+            <span class="pill">Normal</span>
+          </label>
+          <label class="pill-label">
+            <input type="radio" name="vision" value="protanopia" />
+            <span class="pill">Protanopia</span>
+          </label>
+          <label class="pill-label">
+            <input type="radio" name="vision" value="deuteranopia" />
+            <span class="pill">Deuteranopia</span>
+          </label>
+          <label class="pill-label">
+            <input type="radio" name="vision" value="tritanopia" />
+            <span class="pill">Tritanopia</span>
+          </label>
+          <label class="pill-label">
+            <input type="radio" name="vision" value="monochromacy" />
+            <span class="pill">Monochromacy</span>
+          </label>
+        </div>
+        <p class="vision-note" id="vision-note" hidden>
+          Color controls disabled during simulation — transformations are not invertible.
+        </p>
+      </section>
+
+    </aside>
+
+    <!-- ═══ Display Panel ═══ -->
+    <div class="display-panel">
+
+      <!-- Text Preview -->
+      <section class="card preview-card">
+        <h2 class="card-title">👀 Preview</h2>
+        <div id="text-display">
+          <p>The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.</p>
+          <p>How vexingly quick daft zebras jump! The five boxing wizards jump quickly. Sphinx of black quartz, judge my vow.</p>
+          <p>Waltz, bad nymph, for quick jigs vex. Quick zephyrs blow, vexing daft Jim. Bright vixens jump; dozy fowl quack.</p>
+        </div>
+      </section>
+
+      <!-- Metrics -->
+      <section class="card metrics-card">
+        <h2 class="card-title">📊 Accessibility Metrics</h2>
+
+        <div class="metrics-grid">
+
+          <!-- Contrast Ratio -->
+          <div class="metric-block contrast-block">
+            <div class="big-ratio" id="contrast-ratio">21.00:1</div>
+            <div class="metric-label">Contrast Ratio</div>
+          </div>
+
+          <!-- WCAG Badges -->
+          <div class="metric-block badges-block">
+            <div class="badge pass" id="badge-normal-aa">
+              <div>
+                <div class="badge-name">Normal Text</div>
+                <div class="badge-threshold">AA ≥ 4.5:1</div>
+              </div>
+              <div class="badge-result">PASS ✓</div>
+            </div>
+            <div class="badge pass" id="badge-large-aa">
+              <div>
+                <div class="badge-name">Large Text</div>
+                <div class="badge-threshold">AA ≥ 3.0:1</div>
+              </div>
+              <div class="badge-result">PASS ✓</div>
+            </div>
+          </div>
+
+          <!-- Luminance -->
+          <div class="metric-block luminance-block">
+            <div class="lum-row">
+              <div class="lum-dot" id="bg-lum-dot"></div>
+              <div>
+                <div class="lum-label">Background Luminance</div>
+                <div class="lum-value" id="bg-luminance">1.0000</div>
+              </div>
+            </div>
+            <div class="lum-row">
+              <div class="lum-dot" id="text-lum-dot"></div>
+              <div>
+                <div class="lum-label">Text Luminance</div>
+                <div class="lum-value" id="text-luminance">0.0000</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
