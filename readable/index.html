@@ -120,48 +120,6 @@
         </div>
       </section>
 
-      <!-- Text Size -->
-      <section class="card" id="size-section">
-        <h2 class="card-title">📏 Text Size</h2>
-        <div class="size-controls">
-          <input type="range" class="slider size-slider" id="size-slider" min="10" max="72" value="18" />
-          <div class="size-value-row">
-            <input type="number" class="num-input size-num-input" id="size-num" min="10" max="72" value="18" />
-            <span class="unit-label">px</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Vision Simulation -->
-      <section class="card" id="vision-section">
-        <h2 class="card-title">👁️ Vision Simulation</h2>
-        <div class="vision-pills">
-          <label class="pill-label">
-            <input type="radio" name="vision" value="normal" checked />
-            <span class="pill">Normal</span>
-          </label>
-          <label class="pill-label">
-            <input type="radio" name="vision" value="protanopia" />
-            <span class="pill">Protanopia</span>
-          </label>
-          <label class="pill-label">
-            <input type="radio" name="vision" value="deuteranopia" />
-            <span class="pill">Deuteranopia</span>
-          </label>
-          <label class="pill-label">
-            <input type="radio" name="vision" value="tritanopia" />
-            <span class="pill">Tritanopia</span>
-          </label>
-          <label class="pill-label">
-            <input type="radio" name="vision" value="monochromacy" />
-            <span class="pill">Monochromacy</span>
-          </label>
-        </div>
-        <p class="vision-note" id="vision-note" hidden>
-          Color controls disabled during simulation — transformations are not invertible.
-        </p>
-      </section>
-
     </aside>
 
     <!-- ═══ Display Panel ═══ -->
@@ -226,6 +184,48 @@
           </div>
 
         </div>
+      </section>
+
+      <!-- Text Size -->
+      <section class="card" id="size-section">
+        <h2 class="card-title">📏 Text Size</h2>
+        <div class="size-controls">
+          <input type="range" class="slider size-slider" id="size-slider" min="10" max="72" value="18" />
+          <div class="size-value-row">
+            <input type="number" class="num-input size-num-input" id="size-num" min="10" max="72" value="18" />
+            <span class="unit-label">px</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vision Simulation -->
+      <section class="card" id="vision-section">
+        <h2 class="card-title">👁️ Vision Simulation</h2>
+        <div class="vision-pills">
+          <label class="pill-label">
+            <input type="radio" name="vision" value="normal" checked />
+            <span class="pill">Normal</span>
+          </label>
+          <label class="pill-label">
+            <input type="radio" name="vision" value="protanopia" />
+            <span class="pill">Protanopia</span>
+          </label>
+          <label class="pill-label">
+            <input type="radio" name="vision" value="deuteranopia" />
+            <span class="pill">Deuteranopia</span>
+          </label>
+          <label class="pill-label">
+            <input type="radio" name="vision" value="tritanopia" />
+            <span class="pill">Tritanopia</span>
+          </label>
+          <label class="pill-label">
+            <input type="radio" name="vision" value="monochromacy" />
+            <span class="pill">Monochromacy</span>
+          </label>
+        </div>
+        <p class="vision-note" id="vision-note" hidden>
+          Color controls disabled during simulation — transformations are not invertible.
+        </p>
       </section>
 
     </div>
