@@ -1018,6 +1018,61 @@
         .footer__star:nth-child(4) { animation-delay: 1.5s; background: var(--purple); }
         .footer__star:nth-child(5) { animation-delay: 2s; }
 
+        /* RGB palette icon */
+        .project-card__icon--rgb {
+            background:
+                /* R bar */
+                linear-gradient(#ff5555 0 0) 8px 10px / 48px 12px,
+                /* G bar */
+                linear-gradient(#55cc55 0 0) 8px 26px / 48px 12px,
+                /* B bar */
+                linear-gradient(#5599ff 0 0) 8px 42px / 48px 12px,
+                /* Label ticks */
+                linear-gradient(rgba(255,255,255,0.4) 0 0) 4px 10px / 4px 12px,
+                linear-gradient(rgba(255,255,255,0.4) 0 0) 4px 26px / 4px 12px,
+                linear-gradient(rgba(255,255,255,0.4) 0 0) 4px 42px / 4px 12px;
+            background-repeat: no-repeat;
+            animation: rgbCycle 3s ease-in-out infinite;
+        }
+
+        @keyframes rgbCycle {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 85, 85, 0.6)); }
+            33%       { filter: drop-shadow(0 0 8px rgba(85, 204, 85, 0.6)); }
+            66%       { filter: drop-shadow(0 0 8px rgba(85, 153, 255, 0.6)); }
+        }
+
+        /* Readable / book icon */
+        .project-card__icon--readable {
+            background:
+                /* Left page */
+                linear-gradient(#ddddcc 0 0) 4px 8px / 24px 48px,
+                /* Right page */
+                linear-gradient(#eeeedd 0 0) 36px 8px / 24px 48px,
+                /* Spine */
+                linear-gradient(#998866 0 0) 28px 4px / 8px 56px,
+                /* Text lines — left */
+                linear-gradient(#999 0 0) 8px 16px / 16px 2px,
+                linear-gradient(#999 0 0) 8px 22px / 16px 2px,
+                linear-gradient(#999 0 0) 8px 28px / 12px 2px,
+                linear-gradient(#999 0 0) 8px 34px / 16px 2px,
+                linear-gradient(#999 0 0) 8px 40px / 10px 2px,
+                linear-gradient(#999 0 0) 8px 46px / 14px 2px,
+                /* Text lines — right */
+                linear-gradient(#999 0 0) 40px 16px / 16px 2px,
+                linear-gradient(#999 0 0) 40px 22px / 12px 2px,
+                linear-gradient(#999 0 0) 40px 28px / 16px 2px,
+                linear-gradient(#999 0 0) 40px 34px / 16px 2px,
+                linear-gradient(#999 0 0) 40px 40px / 10px 2px,
+                linear-gradient(#999 0 0) 40px 46px / 14px 2px;
+            background-repeat: no-repeat;
+            animation: readableGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes readableGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 203, 107, 0.4)); }
+            50%       { filter: drop-shadow(0 0 12px rgba(255, 203, 107, 0.8)); }
+        }
+
         /* ============================================
            RESPONSIVE DESIGN
            ============================================ */
@@ -1255,6 +1310,34 @@
                             <div class="project-card__icon project-card__icon--neuron" role="img" aria-label="Pixel art brain neuron"></div>
                             <h3 class="project-card__title">Decision Neuron</h3>
                             <a href="decision-neuron/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- RGB Color Studio Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--rgb" role="img" aria-label="RGB color bars icon"></div>
+                            <h3 class="project-card__title">RGB Color Studio</h3>
+                            <a href="rgb-palette/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Readable Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--readable" role="img" aria-label="Open book icon"></div>
+                            <h3 class="project-card__title">Readable</h3>
+                            <a href="readable/index.html" class="project-card__link">View Project</a>
                         </div>
                     </article>
                 </div>
