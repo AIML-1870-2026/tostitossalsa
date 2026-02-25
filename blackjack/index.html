@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blackjack</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="table">
+    <header>
+      <h1>Blackjack</h1>
+      <div class="balance-display">Balance: $<span id="balance">1000</span></div>
+    </header>
+
+    <section class="dealer-area">
+      <h2>Dealer <span id="dealer-score" class="score"></span></h2>
+      <div id="dealer-hand" class="hand"></div>
+    </section>
+
+    <section class="player-area">
+      <h2>Player <span id="player-score" class="score"></span></h2>
+      <div id="player-hand" class="hand"></div>
+    </section>
+
+    <section class="bet-area">
+      <div class="chip-row">
+        <button class="chip" data-value="5">$5</button>
+        <button class="chip" data-value="10">$10</button>
+        <button class="chip" data-value="25">$25</button>
+        <button class="chip" data-value="50">$50</button>
+        <button class="chip" data-value="100">$100</button>
+      </div>
+      <div class="bet-display">Bet: $<span id="current-bet">0</span></div>
+      <button id="clear-bet-btn" class="action-btn secondary">Clear Bet</button>
+    </section>
+
+    <section class="controls">
+      <button id="deal-btn" class="action-btn primary">Deal</button>
+      <button id="hit-btn" class="action-btn primary" disabled>Hit</button>
+      <button id="stand-btn" class="action-btn primary" disabled>Stand</button>
+      <button id="double-btn" class="action-btn primary" disabled>Double</button>
+    </section>
+
+    <div id="message-overlay" class="message-overlay hidden">
+      <div class="message-box">
+        <p id="message-text"></p>
+        <button id="new-round-btn" class="action-btn primary">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="blackjack.js"></script>
+</body>
+</html>

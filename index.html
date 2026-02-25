@@ -1041,6 +1041,36 @@
             66%       { filter: drop-shadow(0 0 8px rgba(85, 153, 255, 0.6)); }
         }
 
+        /* Blackjack / playing card icon */
+        .project-card__icon--blackjack {
+            background:
+                /* Card body */
+                linear-gradient(#fffffe 0 0) 12px 6px / 40px 52px,
+                /* Card border */
+                linear-gradient(#ccc 0 0) 10px 4px / 44px 56px,
+                /* Suit symbol - spade top circle-left */
+                radial-gradient(circle, #1a1a2e 50%, transparent 51%) 24px 20px / 8px 8px,
+                /* Suit symbol - spade top circle-right */
+                radial-gradient(circle, #1a1a2e 50%, transparent 51%) 32px 20px / 8px 8px,
+                /* Suit symbol - spade top triangle peak */
+                linear-gradient(#1a1a2e 0 0) 27px 14px / 10px 12px,
+                /* Suit symbol - spade stem */
+                linear-gradient(#1a1a2e 0 0) 29px 30px / 6px 8px,
+                /* Suit symbol - spade base */
+                linear-gradient(#1a1a2e 0 0) 24px 38px / 16px 4px,
+                /* A rank top-left */
+                linear-gradient(#c0392b 0 0) 14px 10px / 6px 8px,
+                /* Background */
+                linear-gradient(#1a1626 0 0) 0 0 / 100% 100%;
+            background-repeat: no-repeat;
+            animation: blackjackGlow 2.5s ease-in-out infinite;
+        }
+
+        @keyframes blackjackGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(240, 208, 96, 0.4)); }
+            50%       { filter: drop-shadow(0 0 14px rgba(240, 208, 96, 0.9)); }
+        }
+
         /* Readable / book icon */
         .project-card__icon--readable {
             background:
@@ -1338,6 +1368,20 @@
                             <div class="project-card__icon project-card__icon--readable" role="img" aria-label="Open book icon"></div>
                             <h3 class="project-card__title">Readable</h3>
                             <a href="readable/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Blackjack Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--blackjack" role="img" aria-label="Pixel art playing card"></div>
+                            <h3 class="project-card__title">Blackjack</h3>
+                            <a href="blackjack/index.html" class="project-card__link">Play Game</a>
                         </div>
                     </article>
                 </div>
