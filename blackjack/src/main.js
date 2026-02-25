@@ -11,7 +11,7 @@ import { setButtons, disableAll } from './components/ActionBar.js';
 import { updateBalance }     from './components/ChipBalance.js';
 import { renderDeck }        from './components/DeckVisual.js';
 import { initCardStyleToggle } from './components/CardStyleToggle.js';
-import { renderTableChips, renderBetStack }  from './components/Table.js';
+import { renderBetStack }  from './components/Table.js';
 import { ENABLE_SPLIT, ENABLE_DOUBLE_DOWN, MIN_BET } from './config.js';
 
 const TOTAL_DECK_SIZE = 52 * 6;
@@ -25,7 +25,6 @@ const resultOverlay = document.getElementById('result-overlay');
 const muteBtn       = document.getElementById('mute-btn');
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-renderTableChips();
 initCardStyleToggle(redrawAll);
 initBetPanel(validateBetInput);
 renderBetStack(parseInt(document.getElementById('bet-input').value, 10) || 0);

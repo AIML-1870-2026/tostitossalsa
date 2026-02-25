@@ -468,28 +468,6 @@ body.high-contrast .card .card-svg {
 }
 .chip-btn[data-denom="500"] .chip-btn-label { text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 
-/* Chip stack on table */
-.table-chip-pile {
-  position: relative;
-  width: 36px;
-  height: 46px; /* 36px chip + 2 chips × 5px offset */
-  flex-shrink: 0;
-}
-
-.table-chip {
-  position: absolute;
-  left: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 3px solid rgba(255,255,255,.3);
-  box-shadow: 0 2px 4px rgba(0,0,0,.4);
-}
-.table-chip[data-denom="1"]   { background: radial-gradient(circle, #eee, #999); color: #333; text-shadow: none; }
-.table-chip[data-denom="5"]   { background: radial-gradient(circle, #e74c3c, #922b21); }
-.table-chip[data-denom="25"]  { background: radial-gradient(circle, #27ae60, #1a7a42); }
-.table-chip[data-denom="100"] { background: radial-gradient(circle, #2980b9, #1a5276); }
-.table-chip[data-denom="500"] { background: radial-gradient(circle, #8e44ad, #5b2c6f); }
 
 /* ===== Action Bar ===== */
 #action-bar {
