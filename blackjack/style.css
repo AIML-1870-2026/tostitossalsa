@@ -253,6 +253,7 @@ html, body {
   width: 44px;
   height: 44px;
   display: block;
+  object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,.55));
   transition: bottom .15s ease;
 }

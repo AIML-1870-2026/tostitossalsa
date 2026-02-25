@@ -2,10 +2,10 @@
 const CHIP_DENOMS = [1, 5, 25, 100, 500];
 
 const STACK_IMAGES = {
-  1:   'public/chips/chip_1.png',
-  5:   'public/chips/chip_5.png',
-  25:  'public/chips/chip_25.png',
-  100: 'public/chips/chip_100.png',
+  1:   'src/assets/chips/chip_1.png',
+  5:   'src/assets/chips/chip_5.png',
+  25:  'src/assets/chips/chip_25.png',
+  100: 'src/assets/chips/chip_100.png',
 };
 
 // Chip colors for denominations without a PNG (e.g. 500)
