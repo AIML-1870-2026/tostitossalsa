@@ -13,6 +13,9 @@ export function runDealer() {
 }
 
 // Resolve all player hands against dealer. Returns array of results.
+// Bet is already deducted from balance at deal time, so balanceReturn
+// is what gets credited back (original bet + any winnings).
+// delta is the net profit/loss for display only.
 export function resolveHands() {
   const dealerBJ = isBlackjack(state.dealerHand);
   const dealerTotal = handValue(state.dealerHand);
@@ -26,27 +29,28 @@ export function resolveHands() {
     const playerBJ = isBlackjack(hand) && state.playerHands.length === 1;
     const playerBust = isBust(hand);
 
-    let outcome, delta;
+    let outcome, delta, balanceReturn;
 
     if (playerBust) {
-      outcome = 'lose'; delta = -bet;
+      outcome = 'lose'; delta = -bet; balanceReturn = 0;
     } else if (playerBJ && dealerBJ) {
-      outcome = 'push'; delta = 0;
+      outcome = 'push'; delta = 0; balanceReturn = bet;
     } else if (playerBJ) {
-      outcome = 'blackjack'; delta = Math.floor(bet * BLACKJACK_PAYOUT);
+      const profit = Math.floor(bet * BLACKJACK_PAYOUT);
+      outcome = 'blackjack'; delta = profit; balanceReturn = bet + profit;
     } else if (dealerBJ) {
-      outcome = 'lose'; delta = -bet;
+      outcome = 'lose'; delta = -bet; balanceReturn = 0;
     } else if (dealerBusted) {
-      outcome = 'win'; delta = bet;
+      outcome = 'win'; delta = bet; balanceReturn = bet * 2;
     } else if (playerTotal > dealerTotal) {
-      outcome = 'win'; delta = bet;
+      outcome = 'win'; delta = bet; balanceReturn = bet * 2;
     } else if (playerTotal < dealerTotal) {
-      outcome = 'lose'; delta = -bet;
+      outcome = 'lose'; delta = -bet; balanceReturn = 0;
     } else {
-      outcome = 'push'; delta = 0;
+      outcome = 'push'; delta = 0; balanceReturn = bet;
     }
 
-    state.balance += delta;
+    state.balance += balanceReturn;
     results.push({ outcome, delta, bet });
   });
 

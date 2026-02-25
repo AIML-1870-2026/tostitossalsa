@@ -1,4 +1,5 @@
 // Web Audio API — programmatic sound effects (no external files needed)
+import { state } from '../game/gameState.js';
 
 let ctx = null;
 
@@ -85,6 +86,6 @@ export const sounds = {
 };
 
 export function play(name) {
-  if (!sounds[name]) return;
+  if (state.muted || !sounds[name]) return;
   try { sounds[name](); } catch (_) { /* AudioContext not ready */ }
 }

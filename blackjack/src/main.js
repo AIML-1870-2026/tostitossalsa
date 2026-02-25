@@ -15,6 +15,7 @@ import { renderTableChips }  from './components/Table.js';
 import { ENABLE_SPLIT, ENABLE_DOUBLE_DOWN, MIN_BET } from './config.js';
 
 const TOTAL_DECK_SIZE = 52 * 6;
+const FLY_MS = 220; // card flight duration in ms
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const dealerHandEl  = document.getElementById('dealer-hand');
@@ -65,6 +66,54 @@ function validateBetInput() {
   input.value = v;
 }
 
+// ── Fly Card Animation ────────────────────────────────────────────────────────
+// Launches a card-back element from the deck visual to targetEl, then calls onLand.
+function flyCard(targetEl, onLand) {
+  const deckEl = document.getElementById('deck-visual');
+  if (!deckEl || !targetEl) { onLand(); return; }
+
+  const cs  = getComputedStyle(document.documentElement);
+  const w   = parseInt(cs.getPropertyValue('--card-w')) || 72;
+  const h   = parseInt(cs.getPropertyValue('--card-h')) || 100;
+
+  const from = deckEl.getBoundingClientRect();
+  const to   = targetEl.getBoundingClientRect();
+
+  // Land after however many cards are already rendered in the target hand
+  const existingCards = targetEl.querySelectorAll('.card').length;
+  const toX = Math.min(to.left + existingCards * (w + 4), to.right - w);
+  const toY = to.bottom - h; // cards sit at flex-end
+
+  const flyer = document.createElement('div');
+  flyer.className = 'card';
+  Object.assign(flyer.style, {
+    position:      'fixed',
+    width:         w + 'px',
+    height:        h + 'px',
+    left:          from.left + 'px',
+    top:           from.top  + 'px',
+    zIndex:        '500',
+    pointerEvents: 'none',
+    margin:        '0',
+    animation:     'none',
+    background:    'linear-gradient(135deg, #1a237e, #283593)',
+    border:        '2px solid rgba(255,255,255,.2)',
+  });
+  document.body.appendChild(flyer);
+
+  // Double rAF ensures the starting position is painted before the transition begins
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    flyer.style.transition = `left ${FLY_MS}ms ease-out, top ${FLY_MS}ms ease-out`;
+    flyer.style.left = toX + 'px';
+    flyer.style.top  = toY + 'px';
+  }));
+
+  setTimeout(() => {
+    flyer.remove();
+    onLand();
+  }, FLY_MS + 30);
+}
+
 // ── Deal ──────────────────────────────────────────────────────────────────────
 function onDeal() {
   const bet = getBet();
@@ -79,44 +128,54 @@ function onDeal() {
   hideResult();
   resetRound();
 
+  // Clear previous round's cards immediately so they don't show during new fly-ins
+  dealerHandEl.innerHTML = '';
+  dealerScoreEl.textContent = '';
+  playerWrapEl.innerHTML = '';
+
   state.phase = 'DEALING';
   disableAll();
   document.getElementById('bet-input').disabled = true;
 
   play('shuffle');
 
-  // Deal: player, dealer, player, dealer (hole card face-down)
+  // Deal: player, dealer, player, dealer (hole card face-down) — each card waits for the previous to land
   setTimeout(() => {
-    dealCardTo('player', 0);
-    setTimeout(() => {
-      dealCardTo('dealer', false);
-      setTimeout(() => {
-        dealCardTo('player', 0);
-        setTimeout(() => {
-          dealCardTo('dealer', true); // hole card face-down
-          afterDeal();
-        }, 200);
-      }, 200);
-    }, 200);
-  }, 200);
+    dealCardTo('player', 0, () =>
+      dealCardTo('dealer', false, () =>
+        dealCardTo('player', 0, () =>
+          dealCardTo('dealer', true, afterDeal))));
+  }, 300);
 }
 
-function dealCardTo(target, playerHandOrFaceDown) {
+// Deals one card: starts the fly animation, then adds to state + re-renders on land.
+// done() is called after the card is rendered.
+function dealCardTo(target, playerHandOrFaceDown, done) {
   const card = deal(state.deck);
-  if (target === 'dealer') {
-    card.faceDown = Boolean(playerHandOrFaceDown);
-    state.dealerHand.push(card);
-    renderHand(dealerHandEl, state.dealerHand, true, dealerScoreEl);
-  } else {
-    state.playerHands[playerHandOrFaceDown].push(card);
-    renderPlayerHands(playerWrapEl, state.playerHands, state.bets, state.activeHandIndex);
-  }
   renderDeck(state.deck.length, TOTAL_DECK_SIZE);
   play('cardDeal');
+
+  if (target === 'dealer') {
+    card.faceDown = Boolean(playerHandOrFaceDown);
+    flyCard(dealerHandEl, () => {
+      state.dealerHand.push(card);
+      renderHand(dealerHandEl, state.dealerHand, true, dealerScoreEl);
+      if (done) done();
+    });
+  } else {
+    const handIndex = playerHandOrFaceDown;
+    // Target the specific .hand container if it exists, otherwise the wrap
+    const panels  = playerWrapEl.querySelectorAll('.hand');
+    const targetEl = panels[handIndex] || playerWrapEl;
+    flyCard(targetEl, () => {
+      state.playerHands[handIndex].push(card);
+      renderPlayerHands(playerWrapEl, state.playerHands, state.bets, state.activeHandIndex);
+      if (done) done();
+    });
+  }
 }
 
 function afterDeal() {
-  // Check player blackjack immediately
   if (isBlackjack(state.playerHands[0])) {
     play('blackjack');
     state.phase = 'DEALER_TURN';
@@ -143,14 +202,15 @@ function updateActionButtons() {
 
 function onHit() {
   const i = state.activeHandIndex;
-  dealCardTo('player', i);
-  if (isBust(state.playerHands[i])) {
-    play('bust');
-    advanceHand();
-    return;
-  }
-  if (state.splitAces) { advanceHand(); return; } // no extra hits on split aces
-  updateActionButtons();
+  dealCardTo('player', i, () => {
+    if (isBust(state.playerHands[i])) {
+      play('bust');
+      advanceHand();
+      return;
+    }
+    if (state.splitAces) { advanceHand(); return; }
+    updateActionButtons();
+  });
 }
 
 function onStand() {
@@ -163,8 +223,7 @@ function onDouble() {
   state.bets[i] *= 2;
   updateBalance(state.balance);
   play('chipPlace');
-  dealCardTo('player', i);
-  advanceHand(); // double always ends the hand
+  dealCardTo('player', i, advanceHand);
 }
 
 function onSplit() {
@@ -178,16 +237,18 @@ function onSplit() {
 
   if (hand[0].rank === 1) state.splitAces = true;
 
-  // Deal one card to each split hand
+  // Render the two split panels now so fly targets (.hand[0], .hand[1]) exist
+  renderPlayerHands(playerWrapEl, state.playerHands, state.bets, state.activeHandIndex);
+
   setTimeout(() => {
-    dealCardTo('player', 0);
-    setTimeout(() => {
-      dealCardTo('player', 1);
-      state.activeHandIndex = 0;
-      state.phase = 'SPLIT_TURN';
-      renderPlayerHands(playerWrapEl, state.playerHands, state.bets, state.activeHandIndex);
-      updateActionButtons();
-    }, 250);
+    dealCardTo('player', 0, () => {
+      dealCardTo('player', 1, () => {
+        state.activeHandIndex = 0;
+        state.phase = 'SPLIT_TURN';
+        renderPlayerHands(playerWrapEl, state.playerHands, state.bets, state.activeHandIndex);
+        updateActionButtons();
+      });
+    });
   }, 50);
 }
 
@@ -198,7 +259,6 @@ function advanceHand() {
     state.phase = 'SPLIT_TURN';
     renderPlayerHands(playerWrapEl, state.playerHands, state.bets, state.activeHandIndex);
     if (state.splitAces) {
-      // Aces get exactly one card — auto-advance
       setTimeout(advanceHand, 300);
       return;
     }
@@ -219,14 +279,14 @@ function runDealerTurn() {
 
   function drawNext() {
     if (handValue(state.dealerHand) < 17) {
-      setTimeout(() => {
-        const card = deal(state.deck);
+      const card = deal(state.deck);
+      renderDeck(state.deck.length, TOTAL_DECK_SIZE);
+      play('cardDeal');
+      flyCard(dealerHandEl, () => {
         state.dealerHand.push(card);
-        renderDeck(state.deck.length, TOTAL_DECK_SIZE);
-        play('cardDeal');
         renderHand(dealerHandEl, state.dealerHand, true, dealerScoreEl);
-        drawNext();
-      }, 500);
+        setTimeout(drawNext, 150);
+      });
     } else {
       setTimeout(resolveRound, 400);
     }
