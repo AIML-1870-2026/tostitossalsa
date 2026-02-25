@@ -76,6 +76,7 @@ export function renderBetStack(amount) {
         el.style.border = '3px solid rgba(255,255,255,.3)';
       }
       el.className = 'stacked-chip';
+      el.dataset.denom = denom;
       el.style.bottom = (i * OFFSET) + 'px';
       pile.appendChild(el);
     }

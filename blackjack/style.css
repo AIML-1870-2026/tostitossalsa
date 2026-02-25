@@ -22,12 +22,18 @@
   --card-h:     100px;
 }
 
-html, body {
-  height: 100%;
+html {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100%;
   font-family: 'Georgia', serif;
   background: var(--felt-dark);
   color: #f0e6c8;
-  overflow: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ===== Header ===== */
@@ -84,10 +90,9 @@ html, body {
 
 /* ===== Table ===== */
 #table {
-  position: fixed;
-  top: var(--header-h);
-  left: 0; right: 0;
-  bottom: calc(var(--bet-h) + var(--action-h));
+  margin-top: var(--header-h);
+  flex: 1;
+  min-height: calc(100vh - var(--header-h) - var(--bet-h) - var(--action-h));
   background:
     radial-gradient(ellipse at 50% 40%, var(--felt-light) 0%, var(--felt) 55%, var(--felt-dark) 100%);
   display: grid;
@@ -260,9 +265,31 @@ html, body {
   width: 44px;
   height: 44px;
   display: block;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,.55));
+  object-fit: cover;
+  border-radius: 50%;
   transition: bottom .15s ease;
+}
+
+/* Solid chip colors so stacks look opaque, not transparent */
+.stacked-chip[data-denom="1"]   {
+  background: var(--chip-1);
+  box-shadow: 0 4px 0 #999, 0 5px 8px rgba(0,0,0,.6);
+}
+.stacked-chip[data-denom="5"]   {
+  background: var(--chip-5);
+  box-shadow: 0 4px 0 #8e2318, 0 5px 8px rgba(0,0,0,.6);
+}
+.stacked-chip[data-denom="25"]  {
+  background: var(--chip-25);
+  box-shadow: 0 4px 0 #1a6b3a, 0 5px 8px rgba(0,0,0,.6);
+}
+.stacked-chip[data-denom="100"] {
+  background: var(--chip-100);
+  box-shadow: 0 4px 0 #1a5c8a, 0 5px 8px rgba(0,0,0,.6);
+}
+.stacked-chip[data-denom="500"] {
+  background: var(--chip-500);
+  box-shadow: 0 4px 0 #5b2c6f, 0 5px 8px rgba(0,0,0,.6);
 }
 
 #player-hands-wrap {
@@ -367,9 +394,6 @@ body.high-contrast .card .card-svg {
 
 /* ===== Bet Panel ===== */
 #bet-panel {
-  position: fixed;
-  bottom: var(--action-h);
-  left: 0; right: 0;
   height: var(--bet-h);
   background: linear-gradient(0deg, #0d2b12, #1a5c2a);
   border-top: 1px solid var(--gold-dark);
@@ -378,7 +402,6 @@ body.high-contrast .card .card-svg {
   align-items: center;
   padding: 0 20px;
   gap: 24px;
-  z-index: 50;
 }
 
 #bet-input-row {
@@ -471,8 +494,6 @@ body.high-contrast .card .card-svg {
 
 /* ===== Action Bar ===== */
 #action-bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
   height: var(--action-h);
   background: linear-gradient(0deg, #0a200f, #0d2b12);
   border-top: 2px solid var(--gold);
@@ -481,7 +502,6 @@ body.high-contrast .card .card-svg {
   justify-content: center;
   gap: 12px;
   padding: 0 20px;
-  z-index: 50;
 }
 
 .action-btn {
