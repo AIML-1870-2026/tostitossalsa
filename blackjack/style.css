@@ -449,7 +449,9 @@ body.high-contrast .card .card-svg {
   height: 80px;
   border-radius: 50%;
   border: none;
-  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #555;
   padding: 0;
   cursor: pointer;
   display: flex;
@@ -462,14 +464,13 @@ body.high-contrast .card .card-svg {
 .chip-btn:hover  { transform: translateY(-3px) scale(1.07); box-shadow: 0 6px 14px rgba(0,0,0,.6); }
 .chip-btn:active { transform: translateY(0) scale(1); }
 
-/* PNG image fills the button */
+/* PNG image fills the button — overflow:hidden on parent clips it, no border-radius needed */
 .chip-btn-img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50%;
   pointer-events: none;
 }
 
@@ -484,6 +485,12 @@ body.high-contrast .card .card-svg {
   pointer-events: none;
   line-height: 1;
 }
+
+/* Match each chip's color so edge anti-aliasing blends cleanly */
+.chip-btn[data-denom="1"]   { background: var(--chip-1); }
+.chip-btn[data-denom="5"]   { background: var(--chip-5); }
+.chip-btn[data-denom="25"]  { background: var(--chip-25); }
+.chip-btn[data-denom="100"] { background: var(--chip-100); }
 
 /* Fallback for chip_500 (no PNG asset) */
 .chip-btn[data-denom="500"] {
