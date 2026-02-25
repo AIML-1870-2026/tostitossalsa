@@ -450,7 +450,7 @@ body.high-contrast .card .card-svg {
   border: none;
   -webkit-appearance: none;
   appearance: none;
-  background: #555;
+  background: transparent;
   padding: 0;
   cursor: pointer;
   display: flex;
@@ -485,11 +485,11 @@ body.high-contrast .card .card-svg {
   line-height: 1;
 }
 
-/* Match each chip's color so edge anti-aliasing blends cleanly */
-.chip-btn[data-denom="1"]   { background: var(--chip-1); }
-.chip-btn[data-denom="5"]   { background: var(--chip-5); }
-.chip-btn[data-denom="25"]  { background: var(--chip-25); }
-.chip-btn[data-denom="100"] { background: var(--chip-100); }
+/* Chips with PNG assets use transparent background */
+.chip-btn[data-denom="1"],
+.chip-btn[data-denom="5"],
+.chip-btn[data-denom="25"],
+.chip-btn[data-denom="100"] { background: transparent; }
 
 /* Fallback for chip_500 (no PNG asset) */
 .chip-btn[data-denom="500"] {
