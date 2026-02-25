@@ -1,0 +1,9 @@
+{
+  "name": "blackjack",
+  "version": "1.0.0",
+  "description": "Browser-based Blackjack game with split, betting, sound effects, and card style toggle",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}

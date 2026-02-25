@@ -1,55 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blackjack</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="table">
-    <header>
-      <h1>Blackjack</h1>
-      <div class="balance-display">Balance: $<span id="balance">1000</span></div>
-    </header>
 
-    <section class="dealer-area">
-      <h2>Dealer <span id="dealer-score" class="score"></span></h2>
-      <div id="dealer-hand" class="hand"></div>
-    </section>
-
-    <section class="player-area">
-      <h2>Player <span id="player-score" class="score"></span></h2>
-      <div id="player-hand" class="hand"></div>
-    </section>
-
-    <section class="bet-area">
-      <div class="chip-row">
-        <button class="chip" data-value="5">$5</button>
-        <button class="chip" data-value="10">$10</button>
-        <button class="chip" data-value="25">$25</button>
-        <button class="chip" data-value="50">$50</button>
-        <button class="chip" data-value="100">$100</button>
+  <header id="header">
+    <div id="title">&#9824; Blackjack</div>
+    <div id="header-controls">
+      <div id="chip-balance-wrap">
+        Balance: <span id="balance-amount">1000</span>
       </div>
-      <div class="bet-display">Bet: $<span id="current-bet">0</span></div>
-      <button id="clear-bet-btn" class="action-btn secondary">Clear Bet</button>
-    </section>
-
-    <section class="controls">
-      <button id="deal-btn" class="action-btn primary">Deal</button>
-      <button id="hit-btn" class="action-btn primary" disabled>Hit</button>
-      <button id="stand-btn" class="action-btn primary" disabled>Stand</button>
-      <button id="double-btn" class="action-btn primary" disabled>Double</button>
-    </section>
-
-    <div id="message-overlay" class="message-overlay hidden">
-      <div class="message-box">
-        <p id="message-text"></p>
-        <button id="new-round-btn" class="action-btn primary">Play Again</button>
-      </div>
+      <button id="card-style-toggle" aria-label="Toggle card style">Traditional</button>
+      <button id="mute-btn" aria-label="Toggle sound">Sound ON</button>
     </div>
+  </header>
+
+  <main id="table">
+
+    <section id="dealer-zone" aria-label="Dealer area">
+      <div id="dealer-avatar-wrap">
+        <div id="dealer-avatar" aria-label="Dealer"></div>
+        <div id="dealer-status" class="dealer-status">Waiting...</div>
+      </div>
+      <div id="dealer-hand-wrap">
+        <div id="dealer-hand" class="hand" aria-label="Dealer hand" role="list"></div>
+        <div id="dealer-score" class="score" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="deck-chips-zone">
+      <div id="deck-visual" aria-label="Deck stack"></div>
+      <div id="table-chip-stacks" aria-label="Available chips"></div>
+    </section>
+
+    <section id="player-zone" aria-label="Player area">
+      <div id="player-hands-wrap"></div>
+    </section>
+
+  </main>
+
+  <div id="bet-panel" aria-label="Betting controls">
+    <div id="bet-input-row">
+      <label for="bet-input">Bet:</label>
+      <input type="number" id="bet-input" min="1" max="1000" value="10" aria-label="Bet amount">
+      <button id="clear-bet-btn" aria-label="Clear bet">Clear</button>
+    </div>
+    <div id="chip-quick-select" aria-label="Quick bet chips" role="group"></div>
   </div>
 
-  <script src="blackjack.js"></script>
+  <div id="action-bar" aria-label="Game actions">
+    <button id="btn-deal"   class="action-btn primary" aria-label="Deal">Deal</button>
+    <button id="btn-hit"    class="action-btn" disabled aria-label="Hit">Hit</button>
+    <button id="btn-stand"  class="action-btn" disabled aria-label="Stand">Stand</button>
+    <button id="btn-double" class="action-btn" disabled aria-label="Double Down">Double</button>
+    <button id="btn-split"  class="action-btn" disabled aria-label="Split">Split</button>
+  </div>
+
+  <div id="result-overlay" class="hidden" aria-live="assertive" role="alert"></div>
+
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
