@@ -462,18 +462,20 @@ body.high-contrast .card .card-svg {
 .chip-btn[data-denom="500"] .chip-btn-label { text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 
 /* Chip stack on table */
+.table-chip-pile {
+  position: relative;
+  width: 36px;
+  height: 46px; /* 36px chip + 2 chips × 5px offset */
+  flex-shrink: 0;
+}
+
 .table-chip {
+  position: absolute;
+  left: 0;
   width: 36px;
   height: 36px;
   border-radius: 50%;
   border: 3px solid rgba(255,255,255,.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .65rem;
-  font-weight: bold;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,.6);
   box-shadow: 0 2px 4px rgba(0,0,0,.4);
 }
 .table-chip[data-denom="1"]   { background: radial-gradient(circle, #eee, #999); color: #333; text-shadow: none; }

@@ -18,12 +18,17 @@ export function renderTableChips() {
   if (!container) return;
   container.innerHTML = '';
   for (const denom of CHIP_DENOMS) {
-    const chip = document.createElement('div');
-    chip.className = 'table-chip';
-    chip.dataset.denom = denom;
-    chip.textContent = denom >= 1000 ? `${denom / 1000}k` : denom;
-    chip.setAttribute('aria-label', `${denom} chip`);
-    container.appendChild(chip);
+    const pile = document.createElement('div');
+    pile.className = 'table-chip-pile';
+    pile.setAttribute('aria-label', `${denom} chip stack`);
+    for (let j = 0; j < 3; j++) {
+      const chip = document.createElement('div');
+      chip.className = 'table-chip';
+      chip.dataset.denom = denom;
+      chip.style.bottom = (j * 5) + 'px';
+      pile.appendChild(chip);
+    }
+    container.appendChild(pile);
   }
 }
 

@@ -28,10 +28,6 @@ export function initBetPanel(onBetChange) {
       btn.appendChild(img);
     }
 
-    const label = document.createElement('span');
-    label.className = 'chip-btn-label';
-    label.textContent = denom >= 1000 ? `${denom / 1000}k` : denom;
-    btn.appendChild(label);
 
     btn.addEventListener('click', () => {
       play('chipPlace');
