@@ -63,21 +63,23 @@ export function renderBetStack(amount) {
     pile.style.height = pileH + 'px';
 
     for (let i = 0; i < count; i++) {
-      let el;
-      if (STACK_IMAGES[denom]) {
-        el = document.createElement('img');
-        el.src = STACK_IMAGES[denom];
-        el.alt = `${denom} chip`;
-      } else {
-        el = document.createElement('div');
-        el.setAttribute('aria-label', `${denom} chip`);
-        el.style.background = CHIP_COLORS[denom] || '#555';
-        el.style.borderRadius = '50%';
-        el.style.border = '3px solid rgba(255,255,255,.3)';
-      }
+      const el = document.createElement('div');
       el.className = 'stacked-chip';
       el.dataset.denom = denom;
       el.style.bottom = (i * OFFSET) + 'px';
+      el.setAttribute('aria-label', `${denom} chip`);
+
+      if (STACK_IMAGES[denom]) {
+        const img = document.createElement('img');
+        img.src = STACK_IMAGES[denom];
+        img.alt = '';
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+        el.appendChild(img);
+      } else {
+        el.style.background = CHIP_COLORS[denom] || '#555';
+        el.style.border = '3px solid rgba(255,255,255,.3)';
+      }
+
       pile.appendChild(el);
     }
     container.appendChild(pile);

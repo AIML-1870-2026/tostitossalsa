@@ -264,9 +264,8 @@ body {
   left: 0;
   width: 44px;
   height: 44px;
-  display: block;
-  object-fit: cover;
   border-radius: 50%;
+  overflow: hidden;
   transition: bottom .15s ease;
 }
 
