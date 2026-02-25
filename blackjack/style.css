@@ -235,6 +235,26 @@ html, body {
   display: flex;
   align-items: flex-end;
   padding: 8px;
+  gap: 14px;
+}
+
+/* Stacked chip pile representing the current bet */
+#bet-chip-stack {
+  position: relative;
+  width: 44px;
+  flex-shrink: 0;
+  align-self: flex-end;
+  transition: height .15s ease;
+}
+
+.stacked-chip {
+  position: absolute;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.55));
+  transition: bottom .15s ease;
 }
 
 #player-hands-wrap {
@@ -393,29 +413,52 @@ body.high-contrast .card .card-svg {
 }
 
 .chip-btn {
-  width: 44px;
-  height: 44px;
+  position: relative;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  border: 3px solid rgba(255,255,255,.3);
-  font-weight: bold;
-  font-size: .8rem;
+  border: none;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,.4), inset 0 1px rgba(255,255,255,.2);
+  box-shadow: 0 2px 6px rgba(0,0,0,.5);
   transition: transform .1s, box-shadow .1s;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,.6);
+  overflow: hidden;
 }
-.chip-btn:hover  { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,.5); }
-.chip-btn:active { transform: translateY(0); }
+.chip-btn:hover  { transform: translateY(-3px) scale(1.07); box-shadow: 0 6px 14px rgba(0,0,0,.6); }
+.chip-btn:active { transform: translateY(0) scale(1); }
 
-.chip-btn[data-denom="1"]   { background: radial-gradient(circle at 35% 35%, #eee, #999); color: #333; text-shadow: none; }
-.chip-btn[data-denom="5"]   { background: radial-gradient(circle at 35% 35%, #e74c3c, #922b21); }
-.chip-btn[data-denom="25"]  { background: radial-gradient(circle at 35% 35%, #27ae60, #1a7a42); }
-.chip-btn[data-denom="100"] { background: radial-gradient(circle at 35% 35%, #2980b9, #1a5276); }
-.chip-btn[data-denom="500"] { background: radial-gradient(circle at 35% 35%, #8e44ad, #5b2c6f); }
+/* PNG image fills the button */
+.chip-btn-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Denomination label sits on top of the image */
+.chip-btn-label {
+  position: relative;
+  z-index: 1;
+  font-weight: bold;
+  font-size: .78rem;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.9);
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* Fallback for chip_500 (no PNG asset) */
+.chip-btn[data-denom="500"] {
+  background: radial-gradient(circle at 35% 35%, #8e44ad, #5b2c6f);
+}
+.chip-btn[data-denom="500"] .chip-btn-label { text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 
 /* Chip stack on table */
 .table-chip {

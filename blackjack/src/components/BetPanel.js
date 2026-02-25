@@ -3,6 +3,13 @@ import { play } from '../audio/soundManager.js';
 
 const CHIP_DENOMS = [1, 5, 25, 100, 500];
 
+const CHIP_IMAGES = {
+  1:   'public/chips/chip_1.png',
+  5:   'public/chips/chip_5.png',
+  25:  'public/chips/chip_25.png',
+  100: 'public/chips/chip_100.png',
+};
+
 export function initBetPanel(onBetChange) {
   const container = document.getElementById('chip-quick-select');
   container.innerHTML = '';
@@ -11,8 +18,21 @@ export function initBetPanel(onBetChange) {
     const btn = document.createElement('button');
     btn.className = 'chip-btn';
     btn.dataset.denom = denom;
-    btn.textContent = denom >= 1000 ? `${denom / 1000}k` : denom;
     btn.setAttribute('aria-label', `Add ${denom} chip`);
+
+    if (CHIP_IMAGES[denom]) {
+      const img = document.createElement('img');
+      img.src = CHIP_IMAGES[denom];
+      img.alt = '';
+      img.className = 'chip-btn-img';
+      btn.appendChild(img);
+    }
+
+    const label = document.createElement('span');
+    label.className = 'chip-btn-label';
+    label.textContent = denom >= 1000 ? `${denom / 1000}k` : denom;
+    btn.appendChild(label);
+
     btn.addEventListener('click', () => {
       play('chipPlace');
       const input = document.getElementById('bet-input');
