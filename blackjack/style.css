@@ -14,7 +14,7 @@
   --chip-100:   #2980b9;
   --chip-500:   #8e44ad;
   --header-h:   56px;
-  --bet-h:      120px;
+  --bet-h:      168px;
   --action-h:   72px;
   --radius:     8px;
   --shadow:     0 4px 16px rgba(0,0,0,.5);
@@ -422,8 +422,8 @@ body.high-contrast .card .card-svg {
 
 .chip-btn {
   position: relative;
-  width: 104px;
-  height: 104px;
+  width: 156px;
+  height: 156px;
   border-radius: 50%;
   border: none;
   background: transparent;
