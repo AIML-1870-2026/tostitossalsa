@@ -32,60 +32,53 @@ export function renderTableChips() {
   }
 }
 
-// Render a stacked chip pile representing `amount` in the #bet-chip-stack element.
+// Render separate stacked piles per denomination in the #bet-chip-stack element.
 export function renderBetStack(amount) {
   const container = document.getElementById('bet-chip-stack');
   if (!container) return;
   container.innerHTML = '';
 
-  if (!amount || amount <= 0) {
-    container.style.height = '0';
-    return;
-  }
+  if (!amount || amount <= 0) return;
 
-  // Decompose amount into chips (greedy, highest first)
   const denomOrder = [500, 100, 25, 5, 1];
-  const chips = [];
+  const MAX_PER_PILE = 10;
+  const CHIP_SIZE = 44;
+  const OFFSET    = 9;
+
+  // Count chips per denomination (greedy decomposition)
+  const counts = {};
   let remaining = amount;
   for (const d of denomOrder) {
-    while (remaining >= d) {
-      chips.push(d);
-      remaining -= d;
-    }
+    counts[d] = 0;
+    while (remaining >= d) { counts[d]++; remaining -= d; }
   }
 
-  // Cap visual stack at 20 chips
-  const MAX_CHIPS = 20;
-  const displayChips = chips.slice(0, MAX_CHIPS);
+  for (const denom of denomOrder) {
+    const count = Math.min(counts[denom], MAX_PER_PILE);
+    if (count === 0) continue;
 
-  const CHIP_SIZE = 44;
-  const OFFSET    = 9;   // px each chip rises above the previous
-  const stackH    = CHIP_SIZE + (displayChips.length - 1) * OFFSET;
+    const pileH = CHIP_SIZE + (count - 1) * OFFSET;
+    const pile = document.createElement('div');
+    pile.className = 'bet-chip-pile';
+    pile.style.height = pileH + 'px';
 
-  container.style.height = stackH + 'px';
-
-  displayChips.forEach((denom, i) => {
-    let el;
-    if (STACK_IMAGES[denom]) {
-      el = document.createElement('img');
-      el.src = STACK_IMAGES[denom];
-      el.alt = `${denom} chip`;
-    } else {
-      el = document.createElement('div');
-      el.setAttribute('aria-label', `${denom} chip`);
-      el.style.background = CHIP_COLORS[denom] || '#555';
-      el.style.borderRadius = '50%';
-      el.style.border = '3px solid rgba(255,255,255,.3)';
-      el.style.display = 'flex';
-      el.style.alignItems = 'center';
-      el.style.justifyContent = 'center';
-      el.style.color = '#fff';
-      el.style.fontSize = '.65rem';
-      el.style.fontWeight = 'bold';
-      el.textContent = denom >= 1000 ? `${denom / 1000}k` : denom;
+    for (let i = 0; i < count; i++) {
+      let el;
+      if (STACK_IMAGES[denom]) {
+        el = document.createElement('img');
+        el.src = STACK_IMAGES[denom];
+        el.alt = `${denom} chip`;
+      } else {
+        el = document.createElement('div');
+        el.setAttribute('aria-label', `${denom} chip`);
+        el.style.background = CHIP_COLORS[denom] || '#555';
+        el.style.borderRadius = '50%';
+        el.style.border = '3px solid rgba(255,255,255,.3)';
+      }
+      el.className = 'stacked-chip';
+      el.style.bottom = (i * OFFSET) + 'px';
+      pile.appendChild(el);
     }
-    el.className = 'stacked-chip';
-    el.style.bottom = (i * OFFSET) + 'px';
-    container.appendChild(el);
-  });
+    container.appendChild(pile);
+  }
 }

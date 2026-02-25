@@ -14,7 +14,7 @@
   --chip-100:   #2980b9;
   --chip-500:   #8e44ad;
   --header-h:   56px;
-  --bet-h:      88px;
+  --bet-h:      120px;
   --action-h:   72px;
   --radius:     8px;
   --shadow:     0 4px 16px rgba(0,0,0,.5);
@@ -240,11 +240,18 @@ html, body {
 
 /* Stacked chip pile representing the current bet */
 #bet-chip-stack {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.bet-chip-pile {
   position: relative;
   width: 44px;
   flex-shrink: 0;
-  align-self: flex-end;
-  transition: height .15s ease;
 }
 
 .stacked-chip {
@@ -415,8 +422,8 @@ body.high-contrast .card .card-svg {
 
 .chip-btn {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
   border: none;
   background: transparent;
