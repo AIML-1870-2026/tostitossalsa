@@ -268,6 +268,9 @@ body {
   border: none;
   overflow: hidden;
   transition: bottom .15s ease;
+  pointer-events: none;
+  cursor: default;
+  user-select: none;
 }
 
 /* Chips with PNG assets use transparent background */
@@ -450,8 +453,10 @@ body.high-contrast .card .card-svg {
   transition: transform .1s;
   overflow: hidden;
 }
-.chip-btn:hover  { transform: translateY(-3px) scale(1.07); }
-.chip-btn:active { transform: translateY(0) scale(1); }
+.chip-btn:hover        { transform: translateY(-3px) scale(1.07); }
+.chip-btn:active       { transform: translateY(0) scale(1); }
+.chip-btn:focus,
+.chip-btn:focus-visible { outline: none; box-shadow: none; }
 
 /* PNG image fills the button — overflow:hidden on parent clips it, no border-radius needed */
 .chip-btn-img {
