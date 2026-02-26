@@ -271,6 +271,7 @@ body {
   pointer-events: none;
   cursor: default;
   user-select: none;
+  background: transparent;
 }
 
 /* Chips with PNG assets use transparent background */

@@ -8,6 +8,7 @@ const CHIP_IMAGES = {
   5:   'src/assets/chips/chip_5.png',
   25:  'src/assets/chips/chip_25.png',
   100: 'src/assets/chips/chip_100.png',
+  500: 'src/assets/chips/chip_500.png',
 };
 
 export function initBetPanel(onBetChange) {
