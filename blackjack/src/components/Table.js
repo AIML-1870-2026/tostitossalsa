@@ -6,12 +6,9 @@ const STACK_IMAGES = {
   5:   'src/assets/chips/chip_5.png',
   25:  'src/assets/chips/chip_25.png',
   100: 'src/assets/chips/chip_100.png',
+  500: 'src/assets/chips/chip_500.png',
 };
 
-// Chip colors for denominations without a PNG (e.g. 500)
-const CHIP_COLORS = {
-  500: '#8e44ad',
-};
 
 export function renderTableChips() {
   const container = document.getElementById('table-chip-stacks');

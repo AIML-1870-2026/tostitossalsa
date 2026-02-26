@@ -279,10 +279,7 @@ body {
 .stacked-chip[data-denom="5"]   { background: transparent; box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 5px 8px rgba(0,0,0,.6); }
 .stacked-chip[data-denom="25"]  { background: transparent; box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 5px 8px rgba(0,0,0,.6); }
 .stacked-chip[data-denom="100"] { background: transparent; box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 5px 8px rgba(0,0,0,.6); }
-.stacked-chip[data-denom="500"] {
-  background: var(--chip-500);
-  box-shadow: 0 4px 0 #5b2c6f, 0 5px 8px rgba(0,0,0,.6);
-}
+.stacked-chip[data-denom="500"] { background: transparent; box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 5px 8px rgba(0,0,0,.6); }
 
 #player-hands-wrap {
   display: flex;
@@ -485,13 +482,8 @@ body.high-contrast .card .card-svg {
 .chip-btn[data-denom="1"],
 .chip-btn[data-denom="5"],
 .chip-btn[data-denom="25"],
-.chip-btn[data-denom="100"] { background: transparent; }
-
-/* Fallback for chip_500 (no PNG asset) */
-.chip-btn[data-denom="500"] {
-  background: radial-gradient(circle at 35% 35%, #8e44ad, #5b2c6f);
-}
-.chip-btn[data-denom="500"] .chip-btn-label { text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.chip-btn[data-denom="100"],
+.chip-btn[data-denom="500"] { background: transparent; }
 
 
 /* ===== Action Bar ===== */
