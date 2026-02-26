@@ -70,7 +70,7 @@ export function renderBetStack(amount) {
         const img = document.createElement('img');
         img.src = STACK_IMAGES[denom];
         img.alt = '';
-        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+        img.className = 'stacked-chip-img';
         el.appendChild(img);
       } else {
         el.style.background = CHIP_COLORS[denom] || '#555';

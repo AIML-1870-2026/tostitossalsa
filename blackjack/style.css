@@ -266,20 +266,26 @@ body {
   height: 44px;
   border-radius: 50%;
   border: none;
+  outline: none;
   overflow: hidden;
   transition: bottom .15s ease;
   pointer-events: none;
   cursor: default;
   user-select: none;
   background: transparent;
+  padding: 0;
+  box-shadow: none;
 }
 
-/* Chips with PNG assets use transparent background */
-.stacked-chip[data-denom="1"]   { background: transparent; box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 5px 8px rgba(0,0,0,.6); }
-.stacked-chip[data-denom="5"]   { background: transparent; box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 5px 8px rgba(0,0,0,.6); }
-.stacked-chip[data-denom="25"]  { background: transparent; box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 5px 8px rgba(0,0,0,.6); }
-.stacked-chip[data-denom="100"] { background: transparent; box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 5px 8px rgba(0,0,0,.6); }
-.stacked-chip[data-denom="500"] { background: transparent; box-shadow: 0 4px 0 rgba(0,0,0,.4), 0 5px 8px rgba(0,0,0,.6); }
+/* PNG image fills the stacked chip — mirrors .chip-btn-img */
+.stacked-chip-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
 
 #player-hands-wrap {
   display: flex;
