@@ -437,6 +437,7 @@ body.high-contrast .card .card-svg {
   height: 80px;
   border-radius: 50%;
   border: none;
+  outline: none;
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
@@ -445,11 +446,11 @@ body.high-contrast .card .card-svg {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,.5);
-  transition: transform .1s, box-shadow .1s;
+  box-shadow: none;
+  transition: transform .1s;
   overflow: hidden;
 }
-.chip-btn:hover  { transform: translateY(-3px) scale(1.07); box-shadow: 0 6px 14px rgba(0,0,0,.6); }
+.chip-btn:hover  { transform: translateY(-3px) scale(1.07); }
 .chip-btn:active { transform: translateY(0) scale(1); }
 
 /* PNG image fills the button — overflow:hidden on parent clips it, no border-radius needed */
