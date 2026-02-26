@@ -77,7 +77,6 @@ export function renderBetStack(amount) {
         el.appendChild(img);
       } else {
         el.style.background = CHIP_COLORS[denom] || '#555';
-        el.style.border = '3px solid rgba(255,255,255,.3)';
       }
 
       pile.appendChild(el);
