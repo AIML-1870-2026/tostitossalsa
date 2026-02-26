@@ -277,10 +277,9 @@ body {
   box-shadow: none;
 }
 
-/* PNG image fills the stacked chip — mirrors .chip-btn-img */
+/* PNG image fills the stacked chip */
 .stacked-chip-img {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
