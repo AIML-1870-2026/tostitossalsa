@@ -126,6 +126,13 @@ function returnCardsToDeck(onDone) {
       };
 
       if (faceDown) {
+        // Normalize: remove class so '?' pseudo-element doesn't show
+        clone.innerHTML = '';
+        clone.classList.remove('face-down');
+        Object.assign(clone.style, {
+          background: 'linear-gradient(135deg, #1a237e, #283593)',
+          border:     '2px solid rgba(255,255,255,.2)',
+        });
         doFly();
       } else {
         // Phase 1: rotate to edge (card "disappears")
@@ -133,11 +140,14 @@ function returnCardsToDeck(onDone) {
         clone.style.transform  = 'perspective(400px) rotateY(90deg)';
 
         setTimeout(() => {
-          // Mid-flip: swap to face-down appearance instantly
+          // Mid-flip: swap to card-back appearance (inline styles — avoids '?' from .face-down::after)
           clone.style.transition = 'none';
           clone.style.transform  = 'perspective(400px) rotateY(-90deg)';
           clone.innerHTML = '';
-          clone.classList.add('face-down');
+          Object.assign(clone.style, {
+            background: 'linear-gradient(135deg, #1a237e, #283593)',
+            border:     '2px solid rgba(255,255,255,.2)',
+          });
 
           // Phase 2: complete the flip (-90° → 0°)
           requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -410,13 +420,15 @@ function resolveRound() {
 
   showResult(results);
 
-  setTimeout(() => {
+  resultAutoHideTimer = setTimeout(() => {
     hideResult();
     enterIdle();
   }, 3000);
 }
 
 // ── Result Overlay ────────────────────────────────────────────────────────────
+let resultAutoHideTimer = null;
+
 function showResult(results) {
   resultOverlay.innerHTML = '';
   for (const r of results) {
@@ -438,7 +450,9 @@ function hideResult() {
 
 document.addEventListener('click', () => {
   if (resultOverlay.classList.contains('show')) {
+    clearTimeout(resultAutoHideTimer);
     hideResult();
+    enterIdle();
   }
 });
 
