@@ -15,7 +15,9 @@ import { renderBetStack }  from './components/Table.js';
 import { ENABLE_SPLIT, ENABLE_DOUBLE_DOWN, MIN_BET } from './config.js';
 
 const TOTAL_DECK_SIZE = 52 * 6;
-const FLY_MS = 220; // card flight duration in ms
+const FLY_MS       = 220; // card flight duration in ms
+const FLIP_HALF_MS = 150; // ms per half of the return-flip animation
+const RETURN_STAGGER = 45; // ms between cards starting their return
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const dealerHandEl  = document.getElementById('dealer-hand');
@@ -65,6 +67,88 @@ function validateBetInput() {
   if (v > state.balance) v = state.balance;
   input.value = v;
   renderBetStack(v);
+}
+
+// ── Return Cards to Deck Animation ───────────────────────────────────────────
+// Flips every visible card face-down and flies it back to the deck, then calls onDone.
+function returnCardsToDeck(onDone) {
+  const deckEl = document.getElementById('deck-visual');
+  const allCardEls = [
+    ...dealerHandEl.querySelectorAll('.card'),
+    ...playerWrapEl.querySelectorAll('.card'),
+  ];
+
+  if (allCardEls.length === 0 || !deckEl) { onDone(); return; }
+
+  const deckRect = deckEl.getBoundingClientRect();
+
+  // Snapshot positions + clone before clearing DOM
+  const snapshots = allCardEls.map(el => ({
+    rect:     el.getBoundingClientRect(),
+    faceDown: el.classList.contains('face-down'),
+    clone:    el.cloneNode(true),
+  }));
+
+  // Clear originals — fixed-pos clones take over visually
+  dealerHandEl.innerHTML = '';
+  playerWrapEl.innerHTML = '';
+
+  let completed = 0;
+  const total = snapshots.length;
+
+  snapshots.forEach(({ rect, faceDown, clone }, i) => {
+    Object.assign(clone.style, {
+      position:        'fixed',
+      width:           rect.width  + 'px',
+      height:          rect.height + 'px',
+      left:            rect.left   + 'px',
+      top:             rect.top    + 'px',
+      zIndex:          '400',
+      pointerEvents:   'none',
+      margin:          '0',
+      transformOrigin: 'center center',
+      transition:      'none',
+      transform:       '',
+    });
+    document.body.appendChild(clone);
+
+    setTimeout(() => {
+      const doFly = () => {
+        clone.style.transition = `left ${FLY_MS}ms ease-in, top ${FLY_MS}ms ease-in, transform ${FLY_MS}ms ease-in`;
+        clone.style.left      = deckRect.left + 'px';
+        clone.style.top       = deckRect.top  + 'px';
+        clone.style.transform = 'scale(0.75)';
+        setTimeout(() => {
+          clone.remove();
+          completed++;
+          if (completed === total) onDone();
+        }, FLY_MS + 20);
+      };
+
+      if (faceDown) {
+        doFly();
+      } else {
+        // Phase 1: rotate to edge (card "disappears")
+        clone.style.transition = `transform ${FLIP_HALF_MS}ms ease-in`;
+        clone.style.transform  = 'perspective(400px) rotateY(90deg)';
+
+        setTimeout(() => {
+          // Mid-flip: swap to face-down appearance instantly
+          clone.style.transition = 'none';
+          clone.style.transform  = 'perspective(400px) rotateY(-90deg)';
+          clone.innerHTML = '';
+          clone.classList.add('face-down');
+
+          // Phase 2: complete the flip (-90° → 0°)
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            clone.style.transition = `transform ${FLIP_HALF_MS}ms ease-out`;
+            clone.style.transform  = 'perspective(400px) rotateY(0deg)';
+            setTimeout(doFly, FLIP_HALF_MS + 10);
+          }));
+        }, FLIP_HALF_MS);
+      }
+    }, i * RETURN_STAGGER);
+  });
 }
 
 // ── Fly Card Animation ────────────────────────────────────────────────────────
@@ -127,26 +211,34 @@ function onDeal() {
   state.balance -= bet;
   updateBalance(state.balance);
   hideResult();
-  resetRound();
-
-  // Clear previous round's cards immediately so they don't show during new fly-ins
-  dealerHandEl.innerHTML = '';
-  dealerScoreEl.textContent = '';
-  playerWrapEl.innerHTML = '';
 
   state.phase = 'DEALING';
   disableAll();
   document.getElementById('bet-input').disabled = true;
 
-  play('shuffle');
+  function startNewRound() {
+    resetRound();
+    dealerHandEl.innerHTML = '';
+    dealerScoreEl.textContent = '';
+    playerWrapEl.innerHTML = '';
+    play('shuffle');
+    // Deal: player, dealer, player, dealer (hole card face-down) — each card waits for the previous to land
+    setTimeout(() => {
+      dealCardTo('player', 0, () =>
+        dealCardTo('dealer', false, () =>
+          dealCardTo('player', 0, () =>
+            dealCardTo('dealer', true, afterDeal))));
+    }, 300);
+  }
 
-  // Deal: player, dealer, player, dealer (hole card face-down) — each card waits for the previous to land
-  setTimeout(() => {
-    dealCardTo('player', 0, () =>
-      dealCardTo('dealer', false, () =>
-        dealCardTo('player', 0, () =>
-          dealCardTo('dealer', true, afterDeal))));
-  }, 300);
+  const hasCards = dealerHandEl.querySelectorAll('.card').length > 0 ||
+                   playerWrapEl.querySelectorAll('.card').length > 0;
+
+  if (hasCards) {
+    returnCardsToDeck(startNewRound);
+  } else {
+    startNewRound();
+  }
 }
 
 // Deals one card: starts the fly animation, then adds to state + re-renders on land.
@@ -343,6 +435,12 @@ function hideResult() {
   resultOverlay.classList.remove('show');
   resultOverlay.classList.add('hidden');
 }
+
+document.addEventListener('click', () => {
+  if (resultOverlay.classList.contains('show')) {
+    hideResult();
+  }
+});
 
 function resultDisplay(r) {
   const map = {
