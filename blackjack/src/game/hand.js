@@ -30,15 +30,22 @@ export function isBust(cards) {
   return handValue(cards) > 21;
 }
 
-// Natural blackjack: exactly 2 cards totalling 21
+// Natural blackjack: exactly 2 cards totalling 21 (checks all cards, including face-down)
 export function isBlackjack(cards) {
-  return cards.length === 2 && handValue(cards) === 21;
+  if (cards.length !== 2) return false;
+  let total = 0, aces = 0;
+  for (const c of cards) {
+    if (c.rank === 1) { aces++; total += 11; }
+    else { total += rankValue(c.rank); }
+  }
+  while (total > 21 && aces > 0) { total -= 10; aces--; }
+  return total === 21;
 }
 
-// Two cards share the same numeric value (pairs, face cards, aces)
+// Two cards share the same rank (must be identical rank, not just same value)
 export function canSplit(cards) {
   if (cards.length !== 2) return false;
-  return rankValue(cards[0].rank) === rankValue(cards[1].rank);
+  return cards[0].rank === cards[1].rank;
 }
 
 // Display string e.g. "17" or "soft 17"

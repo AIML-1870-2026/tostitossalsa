@@ -484,7 +484,7 @@ function resolveRound() {
 
   resultAutoHideTimer = setTimeout(() => {
     hideResult();
-    enterIdle();
+    returnCardsToDeck(enterIdle);
   }, 3000);
 }
 
@@ -514,7 +514,7 @@ document.addEventListener('click', () => {
   if (resultOverlay.classList.contains('show')) {
     clearTimeout(resultAutoHideTimer);
     hideResult();
-    enterIdle();
+    returnCardsToDeck(enterIdle);
   }
 });
 
