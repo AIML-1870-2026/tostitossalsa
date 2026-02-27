@@ -529,6 +529,13 @@ body.high-contrast .card .card-svg {
   background: linear-gradient(135deg, var(--gold), #e8c060);
 }
 
+.insurance-label {
+  color: #f39c12;
+  font-size: .88rem;
+  font-style: italic;
+  letter-spacing: .3px;
+}
+
 /* ===== Result Overlay ===== */
 #result-overlay {
   position: fixed;

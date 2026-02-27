@@ -53,11 +53,14 @@
   </div>
 
   <div id="action-bar" aria-label="Game actions">
-    <button id="btn-deal"   class="action-btn primary" aria-label="Deal">Deal</button>
-    <button id="btn-hit"    class="action-btn" disabled aria-label="Hit">Hit</button>
-    <button id="btn-stand"  class="action-btn" disabled aria-label="Stand">Stand</button>
-    <button id="btn-double" class="action-btn" disabled aria-label="Double Down">Double</button>
-    <button id="btn-split"  class="action-btn" disabled aria-label="Split">Split</button>
+    <button id="btn-deal"         class="action-btn primary" aria-label="Deal">Deal</button>
+    <button id="btn-hit"          class="action-btn" disabled aria-label="Hit">Hit</button>
+    <button id="btn-stand"        class="action-btn" disabled aria-label="Stand">Stand</button>
+    <button id="btn-double"       class="action-btn" disabled aria-label="Double Down">Double</button>
+    <button id="btn-split"        class="action-btn" disabled aria-label="Split">Split</button>
+    <span   id="insurance-label"  class="insurance-label" hidden>Dealer shows Ace — Insurance?</span>
+    <button id="btn-insurance"    class="action-btn primary" hidden aria-label="Take Insurance">Insurance</button>
+    <button id="btn-no-insurance" class="action-btn" hidden aria-label="Decline Insurance">No Thanks</button>
   </div>
 
   <div id="result-overlay" class="hidden" aria-live="assertive" role="alert"></div>

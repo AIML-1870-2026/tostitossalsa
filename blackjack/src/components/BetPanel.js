@@ -48,6 +48,18 @@ export function initBetPanel(onBetChange) {
   document.getElementById('bet-input').addEventListener('input', onBetChange);
 }
 
+export function lockBetPanel() {
+  document.getElementById('bet-input').disabled = true;
+  document.getElementById('clear-bet-btn').disabled = true;
+  document.querySelectorAll('.chip-btn').forEach(btn => btn.disabled = true);
+}
+
+export function unlockBetPanel() {
+  document.getElementById('bet-input').disabled = false;
+  document.getElementById('clear-bet-btn').disabled = false;
+  document.querySelectorAll('.chip-btn').forEach(btn => btn.disabled = false);
+}
+
 export function getBet() {
   const v = parseInt(document.getElementById('bet-input').value, 10);
   return isNaN(v) || v < 1 ? 0 : v;

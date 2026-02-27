@@ -15,6 +15,8 @@ export const state = {
   muted: false,
   lastResults: [],        // [{outcome:'win'|'lose'|'push'|'blackjack', delta:number}]
   splitAces: false,       // no extra hits allowed on split aces
+  insuranceBet: 0,        // amount wagered on insurance (0 if not taken)
+  insurancePayout: 0,     // net delta from insurance for result display
 };
 
 export function resetRound() {
@@ -25,4 +27,6 @@ export function resetRound() {
   state.activeHandIndex = 0;
   state.lastResults = [];
   state.splitAces = false;
+  state.insuranceBet = 0;
+  state.insurancePayout = 0;
 }

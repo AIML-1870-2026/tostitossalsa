@@ -6,8 +6,8 @@ import { resolveHands }  from './game/rules.js';
 import { play }              from './audio/soundManager.js';
 import { renderHand, renderPlayerHands } from './components/Hand.js';
 import { setDealerMood }     from './components/DealerAvatar.js';
-import { initBetPanel, getBet, setBetInputMax } from './components/BetPanel.js';
-import { setButtons, disableAll } from './components/ActionBar.js';
+import { initBetPanel, getBet, setBetInputMax, lockBetPanel, unlockBetPanel } from './components/BetPanel.js';
+import { setButtons, disableAll, showInsurancePrompt } from './components/ActionBar.js';
 import { updateBalance }     from './components/ChipBalance.js';
 import { renderDeck }        from './components/DeckVisual.js';
 import { initCardStyleToggle } from './components/CardStyleToggle.js';
@@ -41,6 +41,8 @@ document.getElementById('btn-hit').addEventListener('click',    onHit);
 document.getElementById('btn-stand').addEventListener('click',  onStand);
 document.getElementById('btn-double').addEventListener('click', onDouble);
 document.getElementById('btn-split').addEventListener('click',  onSplit);
+document.getElementById('btn-insurance').addEventListener('click',    onInsuranceTake);
+document.getElementById('btn-no-insurance').addEventListener('click', onInsuranceDecline);
 
 enterIdle();
 
@@ -50,7 +52,7 @@ function enterIdle() {
   setDealerMood('neutral');
   setButtons({ deal: true, hit: false, stand: false, double: false, split: false });
   setBetInputMax(state.balance);
-  document.getElementById('bet-input').disabled = false;
+  unlockBetPanel();
   updateBalance(state.balance);
   renderDeck(TOTAL_DECK_SIZE, TOTAL_DECK_SIZE);
 
@@ -224,7 +226,7 @@ function onDeal() {
 
   state.phase = 'DEALING';
   disableAll();
-  document.getElementById('bet-input').disabled = true;
+  lockBetPanel();
 
   function startNewRound() {
     resetRound();
@@ -279,6 +281,14 @@ function dealCardTo(target, playerHandOrFaceDown, done) {
 }
 
 function afterDeal() {
+  const dealerUpCard = state.dealerHand[0];
+  const maxIns = Math.min(Math.floor(state.currentBet / 2), state.balance);
+
+  if (dealerUpCard.rank === 1 && maxIns >= 1) {
+    enterInsurance(maxIns);
+    return;
+  }
+
   if (isBlackjack(state.playerHands[0])) {
     play('blackjack');
     state.phase = 'DEALER_TURN';
@@ -286,6 +296,53 @@ function afterDeal() {
     return;
   }
   enterPlayerTurn();
+}
+
+// ── Insurance Phase ────────────────────────────────────────────────────────────
+function enterInsurance(maxIns) {
+  state.phase = 'INSURANCE';
+  disableAll();
+  showInsurancePrompt(true, maxIns);
+}
+
+function onInsuranceTake() {
+  const amount = Math.min(Math.floor(state.currentBet / 2), state.balance);
+  state.insuranceBet = amount;
+  state.balance -= amount;
+  updateBalance(state.balance);
+  play('chipPlace');
+  showInsurancePrompt(false);
+  resolveInsurance();
+}
+
+function onInsuranceDecline() {
+  state.insuranceBet = 0;
+  showInsurancePrompt(false);
+  resolveInsurance();
+}
+
+function resolveInsurance() {
+  const dealerHasBJ = isBlackjack(state.dealerHand);
+
+  if (state.insuranceBet > 0) {
+    if (dealerHasBJ) {
+      // Insurance pays 2:1 — return stake + profit
+      state.balance += state.insuranceBet * 3;
+      state.insurancePayout = state.insuranceBet * 2;
+    } else {
+      // Insurance lost (already deducted when taken)
+      state.insurancePayout = -state.insuranceBet;
+    }
+    updateBalance(state.balance);
+  }
+
+  if (dealerHasBJ || isBlackjack(state.playerHands[0])) {
+    if (isBlackjack(state.playerHands[0])) play('blackjack');
+    state.phase = 'DEALER_TURN';
+    setTimeout(runDealerTurn, 400);
+  } else {
+    enterPlayerTurn();
+  }
 }
 
 // ── Player Turn ───────────────────────────────────────────────────────────────
@@ -407,6 +464,11 @@ function resolveRound() {
   const allWon  = results.every(r => r.outcome === 'win' || r.outcome === 'blackjack');
   setDealerMood(allLost ? 'happy' : allWon ? 'sad' : 'neutral');
 
+  // Prepend insurance result line for display (after mood check to not skew it)
+  if (state.insurancePayout !== 0) {
+    results.unshift({ outcome: 'insurance', delta: state.insurancePayout });
+  }
+
   if (!state.muted) {
     const hasBJ   = results.some(r => r.outcome === 'blackjack');
     const hasWin  = results.some(r => r.outcome === 'win');
@@ -457,6 +519,11 @@ document.addEventListener('click', () => {
 });
 
 function resultDisplay(r) {
+  if (r.outcome === 'insurance') {
+    return r.delta > 0
+      ? { text: `Insurance  +${r.delta}`, cls: 'result-win'  }
+      : { text: `Insurance  ${r.delta}`,  cls: 'result-lose' };
+  }
   const map = {
     win:       { text: `Win  +${r.delta}`,        cls: 'result-win'  },
     blackjack: { text: `Blackjack!  +${r.delta}`, cls: 'result-bj'   },
