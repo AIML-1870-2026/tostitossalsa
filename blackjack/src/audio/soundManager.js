@@ -1,6 +1,13 @@
 // Web Audio API — programmatic sound effects (no external files needed)
 import { state } from '../game/gameState.js';
 
+// Cryptographically secure RNG using OS entropy (casino-grade)
+function cryptoRandom() {
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return buf[0] / 0x100000000; // [0, 1)
+}
+
 let ctx = null;
 
 function getCtx() {
@@ -27,7 +34,7 @@ function noise(duration, gain = 0.15) {
   const bufLen = ac.sampleRate * duration;
   const buf = ac.createBuffer(1, bufLen, ac.sampleRate);
   const data = buf.getChannelData(0);
-  for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+  for (let i = 0; i < bufLen; i++) data[i] = cryptoRandom() * 2 - 1;
   const src = ac.createBufferSource();
   src.buffer = buf;
   const vol = ac.createGain();
@@ -74,7 +81,7 @@ export const sounds = {
     tone(660, 'sine', 0.08, 0.15);
   },
   shuffle() {
-    for (let i = 0; i < 6; i++) noise(0.06, 0.08 + Math.random() * 0.06);
+    for (let i = 0; i < 6; i++) noise(0.06, 0.08 + cryptoRandom() * 0.06);
   },
   split() {
     tone(880, 'triangle', 0.1, 0.2);

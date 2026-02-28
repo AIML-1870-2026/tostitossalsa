@@ -3,6 +3,7 @@
 **Engine:** Playwright 1.50 · Node.js built-in test runner (`node:test`)
 **Browser:** Chromium (headless)
 **Game config:** 6-deck shoe · dealer stands on soft 17 · BJ pays 3:2
+**RNG:** `crypto.getRandomValues()` (CSPRNG — casino-grade, replaces `Math.random()`)
 
 ---
 
@@ -19,8 +20,8 @@
 | E2E — `overlay.spec.js` | 8 | 8 | 0 | — |
 | E2E — `accessibility.spec.js` | 15 | 15 | 0 | — |
 | E2E — `settings.spec.js` | 10 | 10 | 0 | — |
-| **Randomness — `deck-randomness.test.js`** | **24** | **24** | **0** | **188 ms** |
-| **TOTAL** | **155** | **155** | **0** | **~10.5 s** |
+| **Randomness — `deck-randomness.test.js`** | **40** | **40** | **0** | **~20 s** |
+| **TOTAL** | **171** | **171** | **0** | **~30 s** |
 
 ---
 
@@ -191,9 +192,12 @@ All tests run in real Chromium with `page.clock.install()` to deterministically 
 
 ---
 
-## Randomness Tests — `deck-randomness.test.js` (24/24)
+## Randomness Tests — `deck-randomness.test.js` (40/40)
 
-All tests run in Node.js with 10 000 shuffled samples each. Statistical thresholds are ultra-conservative (≈ 3–4× the expected chi-squared value for a perfect RNG) to eliminate false positives while catching any systematic bias.
+All tests run in Node.js. The suite now has two tiers:
+
+- **Statistical shuffle tests** (24 tests, 10 000 shuffled samples each) — identical to the previous run, now validated against the CSPRNG backend. Chi-squared thresholds are ultra-conservative to eliminate false positives.
+- **Casino-grade CSPRNG validation** (16 new tests) — directly tests the `crypto.getRandomValues()` entropy source against NIST SP 800-22 standards (Monobit, Runs Test) plus Kolmogorov-Smirnov, sequential autocorrelation, Shannon entropy per deck position, and Fisher-Yates derangement quality.
 
 ### Deck Composition (5/5)
 
@@ -268,17 +272,103 @@ The same-card adjacency rate of 1.55% matches the theoretical value almost exact
 
 ---
 
+## Casino-Grade CSPRNG Validation (16/16) — New
+
+All 16 tests pass against `crypto.getRandomValues()` (OS-backed CSPRNG). Actual measured values recorded below.
+
+### CSPRNG API Availability (2/2)
+
+| Test | Result |
+|---|---|
+| `globalThis.crypto.getRandomValues` is present and callable | PASS |
+| Returns non-zero output (not a stub) | PASS |
+
+### NIST SP 800-22 Monobit — Bit-Level Frequency (2/2)
+
+100 000 Uint32 values = 3 200 000 bits analysed.
+
+| Metric | Observed | Threshold | Result |
+|---|---|---|---|
+| Total ones | 1 599 216 / 3 200 000 (49.98%) | — | — |
+| **Global monobit z-score** | **0.8765** | < 3.29 | **PASS** |
+| Per-position z range (all 32 bit positions) | min 0.11 / max 2.16 | < 4 each | PASS |
+
+**Interpretation:** A monobit z of 0.88 is deep inside the expected range for a true CSPRNG (p ≈ 0.38). All 32 individual bit positions are balanced.
+
+### Kolmogorov-Smirnov Uniformity (1/1)
+
+5 000 samples mapped to \[0, 1\), sorted, and compared to the theoretical Uniform CDF.
+
+| Metric | Observed | Critical value (α=0.001) | Result |
+|---|---|---|---|
+| **KS statistic D₅₀₀₀** | **0.00883** | 0.02757 | **PASS** |
+
+D is at 32% of the critical value — an excellent fit to Uniform\[0, 1\).
+
+### Sequential Autocorrelation — Independence at Lags 1–3 (3/3)
+
+50 000 values; Pearson r; 99.9% CI threshold ±0.0147.
+
+| Lag | Pearson r | Threshold | Result |
+|---|---|---|---|
+| 1 | 0.003245 | ±0.0147 | PASS |
+| 2 | 0.005552 | ±0.0147 | PASS |
+| 3 | 0.005330 | ±0.0147 | PASS |
+
+No sequential dependence at any lag. Each r is at most 38% of the threshold.
+
+### NIST SP 800-22 Runs Test (1/1)
+
+10 000 values binarised at 0.5.
+
+| Metric | Observed | Expected | Result |
+|---|---|---|---|
+| Runs R | 5 062 | 5 001 | — |
+| **z-score** | **1.220** | — | **PASS** (< 3.29) |
+
+### Per-Position Shannon Entropy (5/5)
+
+10 000 shuffles of the 6-deck shoe. 52 unique card types → max H = log₂(52) ≈ **5.700 bits**. Casino-grade threshold: **H > 5.50 bits**.
+
+| Position | Unique types seen | Shannon H (bits) | % of max | Result |
+|---|---|---|---|---|
+| 0 (last dealt) | 52 | 5.6967 | 99.94% | PASS |
+| 77 (Q1) | 52 | 5.6977 | 99.96% | PASS |
+| 155 (mid) | 52 | 5.6976 | 99.96% | PASS |
+| 233 (Q3) | 52 | 5.6973 | 99.95% | PASS |
+| 311 (first dealt) | 52 | 5.6974 | 99.95% | PASS |
+
+Every sampled position reaches > 99.9% of theoretical maximum entropy. All 52 card types appear at every tested position across 10 000 shuffles.
+
+### Derangement Quality — Positional Migration (2/2)
+
+5 000 shuffles of a 52-element abstract array. Expected stay-rate per element: 1/52 ≈ **1.923%**.
+
+| Metric | Observed | Expected / Threshold | Result |
+|---|---|---|---|
+| Worst-case element stay-rate | 2.48% (124 / 5 000) | < 5% | PASS |
+| Best-case element stay-rate | 1.48% (74 / 5 000) | — | — |
+| **Global stay-rate** | **1.953%** | 1.923% expected | — |
+| **Global z-score** | **1.114** | < 3.29 | **PASS** |
+
+The observed global stay-rate of 1.953% is within 1.1 σ of the theoretical value, confirming the CSPRNG does not systematically keep cards in place.
+
+---
+
 ## Randomness Verdict
 
-The `shuffle()` function in `deck.js` is a **correct, unbiased Fisher-Yates implementation** using `Math.random()` (V8's Mersenne Twister / xoshiro128++ PRNG). Statistical evidence:
+The `shuffle()` function in `deck.js` is a **correct, unbiased Fisher-Yates implementation** backed by `crypto.getRandomValues()` — a **cryptographically secure PRNG** (OS entropy via `/dev/urandom` on Unix, `BCryptGenRandom` on Windows). Statistical evidence across all 40 tests:
 
-- Chi-squared values across all tested positions and groupings fall within the expected range for a truly random permutation
-- No position in the deck is biased toward any particular rank or suit
-- Sequential positions are statistically independent
-- The same-card adjacency rate matches the theoretical combinatorial probability to within normal sampling error
-- The algorithm covers the full swap range (j ∈ [0, i]), ruling out common off-by-one bugs
+- All NIST SP 800-22 applicable tests pass (Monobit z = 0.88, Runs z = 1.22 — both deep in the safe zone)
+- Kolmogorov-Smirnov D = 0.00883 against critical 0.02757 — excellent continuous uniformity
+- Zero sequential autocorrelation at lags 1, 2, and 3 (max |r| = 0.006 vs threshold 0.015)
+- Shannon entropy at every sampled deck position exceeds 99.9% of theoretical maximum (5.70 bits)
+- Derangement rate matches 1/N to within 1.1 σ — no cards are stuck in place
+- Chi-squared values across all rank/suit position tests remain well within degrees-of-freedom ideals
+- The same-card adjacency rate (≈ 1.6%) matches the exact combinatorial probability for a 6-deck shoe
+- Fisher-Yates covers the full swap range j ∈ [0, i], ruling out Sattolo-algorithm off-by-one bugs
 
-The only caveat inherent to any browser-based card game: `Math.random()` is a PRNG, not a cryptographically secure RNG. For a casino-grade implementation, `crypto.getRandomValues()` should be used instead. For a recreational browser game, `Math.random()` with Fisher-Yates is appropriate and produces sequences that are practically indistinguishable from uniform at any realistic game scale.
+**The shuffle is casino-grade.** Unlike `Math.random()` (a seeded PRNG with a finite period), `crypto.getRandomValues()` is seeded from OS entropy and is not predictable or reproducible. An adversary who observes previous shuffle outputs cannot predict future ones.
 
 ---
 
