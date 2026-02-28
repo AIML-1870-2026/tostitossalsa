@@ -19,8 +19,13 @@ export const state = {
   insurancePayout: 0,     // net delta from insurance for result display
 };
 
+// Test hook: expose live state so Playwright can read phase and inject test decks
+if (typeof window !== 'undefined') window.__gameState = state;
+
 export function resetRound() {
-  state.deck = buildDeck();
+  // Test hook: Playwright tests can set window.__testDeck to inject a known card sequence
+  const injected = typeof window !== 'undefined' && window.__testDeck;
+  state.deck = injected ? (window.__testDeck = null, injected) : buildDeck();
   state.dealerHand = [];
   state.playerHands = [[]];
   state.bets = [state.currentBet];
