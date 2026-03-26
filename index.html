@@ -1103,6 +1103,38 @@
             50%       { filter: drop-shadow(0 0 12px rgba(255, 203, 107, 0.8)); }
         }
 
+        /* Weather Dashboard icon */
+        .project-card__icon--weather {
+            background:
+                /* Sun circle */
+                radial-gradient(circle, #f9d71c 50%, transparent 51%) 46px 8px / 16px 16px,
+                /* Sun ray top */
+                linear-gradient(#f9d71c 0 0) 52px 2px / 4px 4px,
+                /* Sun ray right */
+                linear-gradient(#f9d71c 0 0) 64px 14px / 4px 4px,
+                /* Sun ray bottom-right */
+                linear-gradient(#f9d71c 0 0) 62px 24px / 4px 4px,
+                /* Main cloud body */
+                radial-gradient(circle, #b0c4de 50%, transparent 51%) 24px 28px / 28px 28px,
+                radial-gradient(circle, #b0c4de 50%, transparent 51%) 36px 24px / 24px 24px,
+                radial-gradient(circle, #b0c4de 50%, transparent 51%) 46px 28px / 20px 20px,
+                linear-gradient(#b0c4de 0 0) 12px 36px / 42px 14px,
+                /* Rain drops */
+                linear-gradient(#6ab0f5 0 0) 18px 52px / 4px 8px,
+                linear-gradient(#6ab0f5 0 0) 28px 54px / 4px 8px,
+                linear-gradient(#6ab0f5 0 0) 38px 52px / 4px 8px,
+                linear-gradient(#6ab0f5 0 0) 48px 54px / 4px 8px,
+                /* Background */
+                linear-gradient(#0f172a 0 0) 0 0 / 100% 100%;
+            background-repeat: no-repeat;
+            animation: weatherGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes weatherGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(107, 176, 245, 0.4)); }
+            50%       { filter: drop-shadow(0 0 14px rgba(107, 176, 245, 0.85)); }
+        }
+
         /* ============================================
            RESPONSIVE DESIGN
            ============================================ */
@@ -1382,6 +1414,20 @@
                             <div class="project-card__icon project-card__icon--blackjack" role="img" aria-label="Pixel art playing card"></div>
                             <h3 class="project-card__title">Blackjack</h3>
                             <a href="blackjack/index.html" class="project-card__link">Play Game</a>
+                        </div>
+                    </article>
+
+                    <!-- Weather Dashboard Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--weather" role="img" aria-label="Pixel art sun and rain cloud"></div>
+                            <h3 class="project-card__title">Weather Dashboard</h3>
+                            <a href="weather-dashboard/index.html" class="project-card__link">View Project</a>
                         </div>
                     </article>
                 </div>

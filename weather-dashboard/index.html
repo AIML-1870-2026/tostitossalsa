@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Dashboard</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="api-key-banner" class="api-key-banner hidden">
+    Add your OpenWeatherMap API key: open <code>app.js</code> and replace <code>YOUR_API_KEY_HERE</code> with your key.
+  </div>
+
+  <header class="header">
+    <h1 class="logo">Weather Dashboard</h1>
+    <div class="search-row">
+      <div class="search-bar">
+        <input type="text" id="city-input" placeholder="Search for a city..." autocomplete="off" />
+        <button id="search-btn">Search</button>
+      </div>
+      <button id="unit-toggle" class="unit-toggle">Switch to °C</button>
+    </div>
+    <p id="error-msg" class="error-msg hidden"></p>
+  </header>
+
+  <main>
+
+    <div id="prompt" class="prompt">
+      <p>Search for a city to see weather data</p>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Fetching weather data…</p>
+    </div>
+
+    <div id="dashboard" class="dashboard hidden">
+
+      <div class="top-row">
+
+        <section class="card current-weather">
+          <div class="current-top">
+            <div class="current-city-block">
+              <h2 id="city-name"></h2>
+              <p id="condition-desc" class="condition-desc"></p>
+            </div>
+            <img id="weather-icon" src="" alt="Weather condition icon" class="weather-icon" />
+          </div>
+          <div class="current-temps">
+            <span id="current-temp" class="big-temp"></span>
+            <span id="feels-like" class="feels-like"></span>
+          </div>
+          <div class="current-details">
+            <div class="detail-item">
+              <span class="detail-label">Humidity</span>
+              <span id="humidity" class="detail-value"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Wind</span>
+              <span id="wind" class="detail-value"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card air-quality">
+          <h3 class="panel-title">Air Quality</h3>
+          <div class="aqi-row">
+            <span id="aqi-badge" class="aqi-badge"></span>
+            <span id="aqi-label" class="aqi-label"></span>
+          </div>
+          <div class="aqi-details">
+            <div class="detail-item">
+              <span class="detail-label">PM2.5</span>
+              <span id="pm25" class="detail-value"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">PM10</span>
+              <span id="pm10" class="detail-value"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">CO</span>
+              <span id="co" class="detail-value"></span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <section class="card hourly-forecast">
+        <h3 class="panel-title">Hourly Forecast</h3>
+        <div id="hourly-strip" class="hourly-strip"></div>
+      </section>
+
+      <section class="card five-day-forecast">
+        <h3 class="panel-title">5-Day Forecast</h3>
+        <div id="forecast-row" class="forecast-row"></div>
+      </section>
+
+      <section class="card map-panel">
+        <h3 class="panel-title">Weather Map</h3>
+        <div class="map-controls">
+          <button class="map-layer-btn active" data-layer="precipitation_new">Precipitation</button>
+          <button class="map-layer-btn" data-layer="temp_new">Temperature</button>
+          <button class="map-layer-btn" data-layer="wind_new">Wind Speed</button>
+        </div>
+        <div id="weather-map"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
