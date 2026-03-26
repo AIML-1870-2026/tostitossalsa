@@ -1,11 +1,6 @@
 const DEFAULT_API_KEY = "2539f612faa49566e6e9e6f4f114bcaa";
 const BASE_URL = "https://api.openweathermap.org/data/2.5";
 
-function getApiKey() {
-  const custom = apiKeyInputEl ? apiKeyInputEl.value.trim() : "";
-  return custom || DEFAULT_API_KEY;
-}
-
 // ── DOM References ──
 const apiKeyInputEl  = document.getElementById("api-key-input");
 const cityInput      = document.getElementById("city-input");
@@ -34,6 +29,12 @@ const hourlyStripEl  = document.getElementById("hourly-strip");
 const forecastRowEl  = document.getElementById("forecast-row");
 const mapLayerBtns   = document.querySelectorAll(".map-layer-btn");
 
+// ── API key helper (defined after DOM refs) ──
+function getApiKey() {
+  const custom = apiKeyInputEl ? apiKeyInputEl.value.trim() : "";
+  return custom || DEFAULT_API_KEY;
+}
+
 // ── State ──
 let isFahrenheit   = true;
 let cachedWeather  = null;
@@ -43,9 +44,9 @@ let owmLayer       = null;
 let activeMapLayer = "precipitation_new";
 
 // ── Event Listeners ──
-searchBtn.addEventListener("click", search);
+searchBtn.addEventListener("click", handleSearch);
 cityInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") search();
+  if (e.key === "Enter") handleSearch();
 });
 unitToggleBtn.addEventListener("click", toggleUnits);
 mapLayerBtns.forEach((btn) => {
@@ -98,7 +99,7 @@ function showPrompt() {
 }
 
 // ── Main search ──
-async function search() {
+async function handleSearch() {
   const city = cityInput.value.trim();
   if (!city) return;
 
