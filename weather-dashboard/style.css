@@ -54,23 +54,6 @@ body::before {
   display: none !important;
 }
 
-/* ── API Key Banner ── */
-.api-key-banner {
-  background: #7c3000;
-  border-bottom: 1px solid #ff9800;
-  color: #ffe082;
-  padding: 0.75rem 1.5rem;
-  text-align: center;
-  font-size: 0.9rem;
-}
-
-.api-key-banner code {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.85em;
-}
-
 /* ── Header ── */
 .header {
   padding: 1.5rem 2rem 1rem;
@@ -84,6 +67,45 @@ body::before {
   color: var(--accent-teal);
   margin-bottom: 1rem;
   letter-spacing: -0.5px;
+}
+
+.api-key-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.api-key-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.api-key-input {
+  flex: 1;
+  max-width: 420px;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: monospace;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.api-key-input:focus {
+  border-color: var(--accent-purple);
+}
+
+.api-key-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
 }
 
 .search-row {
@@ -481,6 +503,10 @@ body::before {
 
   .logo {
     font-size: 1.4rem;
+  }
+
+  .api-key-input {
+    max-width: 100%;
   }
 
   .search-row {

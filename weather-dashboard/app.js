@@ -1,8 +1,13 @@
-const API_KEY = "YOUR_API_KEY_HERE";
+const DEFAULT_API_KEY = "2539f612faa49566e6e9e6f4f114bcaa";
 const BASE_URL = "https://api.openweathermap.org/data/2.5";
 
+function getApiKey() {
+  const custom = apiKeyInputEl ? apiKeyInputEl.value.trim() : "";
+  return custom || DEFAULT_API_KEY;
+}
+
 // ── DOM References ──
-const apiKeyBanner   = document.getElementById("api-key-banner");
+const apiKeyInputEl  = document.getElementById("api-key-input");
 const cityInput      = document.getElementById("city-input");
 const searchBtn      = document.getElementById("search-btn");
 const unitToggleBtn  = document.getElementById("unit-toggle");
@@ -36,11 +41,6 @@ let cachedForecast = null;
 let leafletMap     = null;
 let owmLayer       = null;
 let activeMapLayer = "precipitation_new";
-
-// ── Init ──
-if (API_KEY === "YOUR_API_KEY_HERE") {
-  apiKeyBanner.classList.remove("hidden");
-}
 
 // ── Event Listeners ──
 searchBtn.addEventListener("click", search);
@@ -108,8 +108,8 @@ async function search() {
   try {
     // Fire current weather and forecast in parallel (both use city name query)
     const [weatherRes, forecastRes] = await Promise.all([
-      fetch(`${BASE_URL}/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`),
-      fetch(`${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`),
+      fetch(`${BASE_URL}/weather?q=${encodeURIComponent(city)}&appid=${getApiKey()}&units=metric`),
+      fetch(`${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${getApiKey()}&units=metric`),
     ]);
 
     if (!weatherRes.ok) {
@@ -199,7 +199,7 @@ const AQI_COLORS = ["", "#4caf50", "#8bc34a", "#ffeb3b", "#ff9800", "#f44336"];
 async function fetchAndRenderAirQuality(lat, lon) {
   try {
     const res = await fetch(
-      `${BASE_URL}/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
+      `${BASE_URL}/air_pollution?lat=${lat}&lon=${lon}&appid=${getApiKey()}`
     );
     if (!res.ok) return;
     const data = await res.json();
@@ -257,7 +257,7 @@ function updateMapLayer() {
   }
 
   owmLayer = L.tileLayer(
-    `https://tile.openweathermap.org/map/${activeMapLayer}/{z}/{x}/{y}.png?appid=${API_KEY}`,
+    `https://tile.openweathermap.org/map/${activeMapLayer}/{z}/{x}/{y}.png?appid=${getApiKey()}`,
     { opacity: 0.7, maxZoom: 18 }
   );
   owmLayer.addTo(leafletMap);

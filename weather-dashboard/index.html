@@ -9,12 +9,19 @@
 </head>
 <body>
 
-  <div id="api-key-banner" class="api-key-banner hidden">
-    Add your OpenWeatherMap API key: open <code>app.js</code> and replace <code>YOUR_API_KEY_HERE</code> with your key.
-  </div>
-
   <header class="header">
     <h1 class="logo">Weather Dashboard</h1>
+    <div class="api-key-row">
+      <label for="api-key-input" class="api-key-label">API Key</label>
+      <input
+        type="text"
+        id="api-key-input"
+        class="api-key-input"
+        placeholder="Uses default key — paste your own to override"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
     <div class="search-row">
       <div class="search-bar">
         <input type="text" id="city-input" placeholder="Search for a city..." autocomplete="off" />
