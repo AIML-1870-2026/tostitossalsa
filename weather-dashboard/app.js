@@ -29,6 +29,33 @@ const hourlyStripEl  = document.getElementById("hourly-strip");
 const forecastRowEl  = document.getElementById("forecast-row");
 const mapLayerBtns   = document.querySelectorAll(".map-layer-btn");
 
+// ── Weather icon mapping (OWM code → Basmilius animated SVG) ──
+const OWM_ICON_MAP = {
+  "01d": "clear-day",
+  "01n": "clear-night",
+  "02d": "partly-cloudy-day",
+  "02n": "partly-cloudy-night",
+  "03d": "cloudy",
+  "03n": "cloudy",
+  "04d": "overcast",
+  "04n": "overcast",
+  "09d": "drizzle",
+  "09n": "drizzle",
+  "10d": "rain",
+  "10n": "rain",
+  "11d": "thunderstorms-rain",
+  "11n": "thunderstorms-rain",
+  "13d": "snow",
+  "13n": "snow",
+  "50d": "fog",
+  "50n": "fog",
+};
+
+function weatherIconUrl(owmIcon) {
+  const name = OWM_ICON_MAP[owmIcon] ?? "cloudy";
+  return `https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/all/${name}.svg`;
+}
+
 // ── API key helper (defined after DOM refs) ──
 function getApiKey() {
   const custom = apiKeyInputEl ? apiKeyInputEl.value.trim() : "";
@@ -39,6 +66,7 @@ function getApiKey() {
 let isFahrenheit   = true;
 let cachedWeather  = null;
 let cachedForecast = null;
+let cachedHourly   = null;
 let leafletMap     = null;
 let owmLayer       = null;
 let activeMapLayer = "precipitation_new";
@@ -107,30 +135,39 @@ async function handleSearch() {
   showLoading();
 
   try {
-    // Fire current weather and forecast in parallel (both use city name query)
-    const [weatherRes, forecastRes] = await Promise.all([
-      fetch(`${BASE_URL}/weather?q=${encodeURIComponent(city)}&appid=${getApiKey()}&units=metric`),
-      fetch(`${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${getApiKey()}&units=metric`),
-    ]);
-
+    // Fetch current weather first to get lat/lon for One Call API
+    const weatherRes = await fetch(
+      `${BASE_URL}/weather?q=${encodeURIComponent(city)}&appid=${getApiKey()}&units=metric`
+    );
     if (!weatherRes.ok) {
       throw new Error(weatherRes.status === 404 ? "City not found." : `Weather API error (${weatherRes.status}).`);
     }
+    cachedWeather = await weatherRes.json();
+    const { lat, lon } = cachedWeather.coord;
+
+    // Fire forecast, One Call (hourly), and AQI in parallel now that we have coords
+    const [forecastRes, oneCallRes] = await Promise.all([
+      fetch(`${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${getApiKey()}&units=metric`),
+      fetch(`${BASE_URL}/onecall?lat=${lat}&lon=${lon}&appid=${getApiKey()}&units=metric&exclude=current,minutely,daily,alerts`),
+    ]);
+
     if (!forecastRes.ok) {
       throw new Error(`Forecast API error (${forecastRes.status}).`);
     }
-
-    cachedWeather  = await weatherRes.json();
     cachedForecast = await forecastRes.json();
 
+    // One Call hourly is best-effort — fall back to 3-hour forecast if unavailable
+    cachedHourly = null;
+    if (oneCallRes.ok) {
+      const oneCallData = await oneCallRes.json();
+      cachedHourly = oneCallData.hourly ?? null;
+    }
+
     renderCurrentWeather(cachedWeather);
-    renderForecast(cachedForecast);
+    renderForecast(cachedForecast, cachedHourly);
     showDashboard();
 
-    const { lat, lon } = cachedWeather.coord;
     centerMap(lat, lon);
-
-    // Air quality requires lat/lon from current weather response
     fetchAndRenderAirQuality(lat, lon);
 
   } catch (err) {
@@ -143,7 +180,7 @@ async function handleSearch() {
 function renderCurrentWeather(data) {
   cityNameEl.textContent      = `${data.name}, ${data.sys.country}`;
   conditionDescEl.textContent = data.weather[0].description;
-  weatherIconEl.src           = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+  weatherIconEl.src           = weatherIconUrl(data.weather[0].icon);
   weatherIconEl.alt           = data.weather[0].description;
   currentTempEl.textContent   = displayTemp(data.main.temp);
   feelsLikeEl.textContent     = `Feels like ${displayTemp(data.main.feels_like)}`;
@@ -152,22 +189,27 @@ function renderCurrentWeather(data) {
 }
 
 // ── Render: forecast (hourly strip + 5-day) ──
-function renderForecast(data) {
-  const hourlyItems = data.list.slice(0, 8);
+function renderForecast(data, hourlyData) {
+  // One Call hourly gives true 1-hour intervals; fall back to 3-hour forecast data
+  const useOneCall = Array.isArray(hourlyData) && hourlyData.length > 0;
+  const hourlyItems = useOneCall ? hourlyData.slice(0, 12) : data.list.slice(0, 4);
+
   hourlyStripEl.innerHTML = hourlyItems.map((item) => {
     const time = new Date(item.dt * 1000).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
+    // One Call hourly stores temp directly; forecast stores it under main.temp
+    const temp = useOneCall ? item.temp : item.main.temp;
     return `
       <div class="hourly-item">
         <span class="hourly-time">${time}</span>
         <img
-          src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png"
+          src="${weatherIconUrl(item.weather[0].icon)}"
           alt="${item.weather[0].description}"
           class="hourly-icon"
         />
-        <span class="hourly-temp">${displayTemp(item.main.temp)}</span>
+        <span class="hourly-temp">${displayTemp(temp)}</span>
       </div>`;
   }).join("");
 
@@ -181,7 +223,7 @@ function renderForecast(data) {
       <div class="forecast-card">
         <span class="forecast-day">${day}</span>
         <img
-          src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png"
+          src="${weatherIconUrl(item.weather[0].icon)}"
           alt="${item.weather[0].description}"
           class="forecast-icon"
         />
@@ -227,7 +269,7 @@ function toggleUnits() {
   isFahrenheit = !isFahrenheit;
   unitToggleBtn.textContent = isFahrenheit ? "Switch to °C" : "Switch to °F";
   if (cachedWeather)  renderCurrentWeather(cachedWeather);
-  if (cachedForecast) renderForecast(cachedForecast);
+  if (cachedForecast) renderForecast(cachedForecast, cachedHourly);
 }
 
 // ── Map ──

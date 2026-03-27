@@ -59,6 +59,9 @@ body::before {
   padding: 1.5rem 2rem 1rem;
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
 }
 
 .logo {
