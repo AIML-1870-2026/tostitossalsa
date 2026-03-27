@@ -56,7 +56,19 @@ function weatherIconUrl(owmIcon) {
   return `https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/all/${name}.svg`;
 }
 
-// ── API key helper (defined after DOM refs) ──
+// ── API key: load persisted key on startup ──
+const STORAGE_KEY = "owm_api_key";
+if (apiKeyInputEl) {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) apiKeyInputEl.value = saved;
+
+  apiKeyInputEl.addEventListener("input", () => {
+    const val = apiKeyInputEl.value.trim();
+    if (val) localStorage.setItem(STORAGE_KEY, val);
+    else localStorage.removeItem(STORAGE_KEY);
+  });
+}
+
 function getApiKey() {
   const custom = apiKeyInputEl ? apiKeyInputEl.value.trim() : "";
   return custom || DEFAULT_API_KEY;
@@ -140,7 +152,9 @@ async function handleSearch() {
       `${BASE_URL}/weather?q=${encodeURIComponent(city)}&appid=${getApiKey()}&units=metric`
     );
     if (!weatherRes.ok) {
-      throw new Error(weatherRes.status === 404 ? "City not found." : `Weather API error (${weatherRes.status}).`);
+      if (weatherRes.status === 404) throw new Error("City not found.");
+      if (weatherRes.status === 401) throw new Error("Invalid API key. Check your key and try again.");
+      throw new Error(`Weather API error (${weatherRes.status}).`);
     }
     cachedWeather = await weatherRes.json();
     const { lat, lon } = cachedWeather.coord;
