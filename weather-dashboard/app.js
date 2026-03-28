@@ -25,35 +25,11 @@ const pm25El         = document.getElementById("pm25");
 const pm10El         = document.getElementById("pm10");
 const coEl           = document.getElementById("co");
 
-const hourlyStripEl  = document.getElementById("hourly-strip");
 const forecastRowEl  = document.getElementById("forecast-row");
 const mapLayerBtns   = document.querySelectorAll(".map-layer-btn");
 
-// ── Weather icon mapping (OWM code → Basmilius animated SVG) ──
-const OWM_ICON_MAP = {
-  "01d": "clear-day",
-  "01n": "clear-night",
-  "02d": "partly-cloudy-day",
-  "02n": "partly-cloudy-night",
-  "03d": "cloudy",
-  "03n": "cloudy",
-  "04d": "overcast",
-  "04n": "overcast",
-  "09d": "drizzle",
-  "09n": "drizzle",
-  "10d": "rain",
-  "10n": "rain",
-  "11d": "thunderstorms-rain",
-  "11n": "thunderstorms-rain",
-  "13d": "snow",
-  "13n": "snow",
-  "50d": "fog",
-  "50n": "fog",
-};
-
 function weatherIconUrl(owmIcon) {
-  const name = OWM_ICON_MAP[owmIcon] ?? "cloudy";
-  return `https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/all/${name}.svg`;
+  return `https://openweathermap.org/img/wn/${owmIcon}@2x.png`;
 }
 
 // ── API key: load persisted key on startup ──
@@ -78,7 +54,6 @@ function getApiKey() {
 let isFahrenheit   = true;
 let cachedWeather  = null;
 let cachedForecast = null;
-let cachedHourly   = null;
 let leafletMap     = null;
 let owmLayer       = null;
 let activeMapLayer = "precipitation_new";
@@ -159,26 +134,17 @@ async function handleSearch() {
     cachedWeather = await weatherRes.json();
     const { lat, lon } = cachedWeather.coord;
 
-    // Fire forecast, One Call (hourly), and AQI in parallel now that we have coords
-    const [forecastRes, oneCallRes] = await Promise.all([
-      fetch(`${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${getApiKey()}&units=metric`),
-      fetch(`${BASE_URL}/onecall?lat=${lat}&lon=${lon}&appid=${getApiKey()}&units=metric&exclude=current,minutely,daily,alerts`),
-    ]);
+    const forecastRes = await fetch(
+      `${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${getApiKey()}&units=metric`
+    );
 
     if (!forecastRes.ok) {
       throw new Error(`Forecast API error (${forecastRes.status}).`);
     }
     cachedForecast = await forecastRes.json();
 
-    // One Call hourly is best-effort — fall back to 3-hour forecast if unavailable
-    cachedHourly = null;
-    if (oneCallRes.ok) {
-      const oneCallData = await oneCallRes.json();
-      cachedHourly = oneCallData.hourly ?? null;
-    }
-
     renderCurrentWeather(cachedWeather);
-    renderForecast(cachedForecast, cachedHourly);
+    renderForecast(cachedForecast);
     showDashboard();
 
     centerMap(lat, lon);
@@ -202,31 +168,8 @@ function renderCurrentWeather(data) {
   windEl.textContent          = displayWind(data.wind.speed);
 }
 
-// ── Render: forecast (hourly strip + 5-day) ──
-function renderForecast(data, hourlyData) {
-  // One Call hourly gives true 1-hour intervals; fall back to 3-hour forecast data
-  const useOneCall = Array.isArray(hourlyData) && hourlyData.length > 0;
-  const hourlyItems = useOneCall ? hourlyData.slice(0, 12) : data.list.slice(0, 4);
-
-  hourlyStripEl.innerHTML = hourlyItems.map((item) => {
-    const time = new Date(item.dt * 1000).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    // One Call hourly stores temp directly; forecast stores it under main.temp
-    const temp = useOneCall ? item.temp : item.main.temp;
-    return `
-      <div class="hourly-item">
-        <span class="hourly-time">${time}</span>
-        <img
-          src="${weatherIconUrl(item.weather[0].icon)}"
-          alt="${item.weather[0].description}"
-          class="hourly-icon"
-        />
-        <span class="hourly-temp">${displayTemp(temp)}</span>
-      </div>`;
-  }).join("");
-
+// ── Render: 5-day forecast ──
+function renderForecast(data) {
   const noonItems = data.list
     .filter((item) => item.dt_txt.includes("12:00:00"))
     .slice(0, 5);
@@ -283,7 +226,7 @@ function toggleUnits() {
   isFahrenheit = !isFahrenheit;
   unitToggleBtn.textContent = isFahrenheit ? "Switch to °C" : "Switch to °F";
   if (cachedWeather)  renderCurrentWeather(cachedWeather);
-  if (cachedForecast) renderForecast(cachedForecast, cachedHourly);
+  if (cachedForecast) renderForecast(cachedForecast);
 }
 
 // ── Map ──
