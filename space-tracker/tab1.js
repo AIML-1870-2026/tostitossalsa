@@ -30,7 +30,7 @@
     const lat = seededRng(numericId) * 180 - 90;
     const lng = seededRng(numericId + 1) * 360 - 180;
     const altitude = Math.max(0.1, Math.min(missKm / 500000, 2.0));
-    const color = neo.is_potentially_hazardous_asteroid ? '#ef4444' : '#22c55e';
+    const color = neo.is_potentially_hazardous_asteroid ? '#ef4444' : '#ffffff';
 
     return {
       lat,
@@ -178,14 +178,19 @@
       .backgroundColor('#0a0c14')
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-      .pointsData(points)
-      .pointLat(d => d.lat)
-      .pointLng(d => d.lng)
-      .pointAltitude(d => d.altitude)
-      .pointColor(d => d.color)
-      .pointRadius(d => d.radius)
-      .pointLabel(d => d.label)
-      .onPointClick(point => showTooltip(point));
+      .customLayerData(points)
+      .customThreeObject(d => {
+        const THREE = window.THREE;
+        const size = d.isMoon ? 0.6 : 0.3;
+        const geo = new THREE.SphereGeometry(size, 8, 8);
+        const mat = new THREE.MeshBasicMaterial({ color: d.color });
+        return new THREE.Mesh(geo, mat);
+      })
+      .customThreeObjectUpdate((obj, d) => {
+        Object.assign(obj.position, globeInstance.getCoords(d.lat, d.lng, d.altitude));
+      })
+      .customLayerLabel(d => d.label)
+      .onCustomLayerClick(point => showTooltip(point));
 
     // Disable auto-rotation
     if (typeof globeInstance.controls === 'function') {
@@ -216,7 +221,7 @@
           labelEl.textContent = offset === 6 ? 'Today' : formatDateDisplay(date);
         }
         const newPoints = buildPoints(currentNeos, iso);
-        globeInstance.pointsData(newPoints);
+        globeInstance.customLayerData(newPoints);
       });
     }
 
