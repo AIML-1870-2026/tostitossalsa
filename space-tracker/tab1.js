@@ -181,7 +181,7 @@
       .customLayerData(points)
       .customThreeObject(d => {
         const THREE = window.THREE;
-        const size = d.isMoon ? 0.6 : 0.3;
+        const size = d.isMoon ? 2.5 : 1.5;
         const geo = new THREE.SphereGeometry(size, 8, 8);
         const mat = new THREE.MeshBasicMaterial({ color: d.color });
         return new THREE.Mesh(geo, mat);
@@ -263,7 +263,7 @@
       const date = getDateForOffset(offset);
       const iso = formatDateISO(date);
       const newPoints = buildPoints(currentNeos, iso);
-      globeInstance.pointsData(newPoints);
+      globeInstance.customLayerData(newPoints);
     },
   };
 
