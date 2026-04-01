@@ -96,6 +96,11 @@
     const neo = point.neo;
     if (!neo) return;
 
+    if (window.AppState) {
+      window.AppState.selectedNeoId = neo.id;
+    }
+    refreshCurrentLayer();
+
     const tooltip = document.getElementById('asteroid-tooltip');
     const nameEl = document.getElementById('tooltip-name');
     const bodyEl = document.getElementById('tooltip-body');
@@ -140,8 +145,21 @@
 
   function buildPoints(neos, dateISO) {
     const filtered = filterByDate(neos, dateISO);
-    const astPoints = filtered.map(neoToPoint).filter(Boolean);
+    const selectedId = window.AppState && window.AppState.selectedNeoId;
+    const astPoints = filtered.map(neoToPoint).filter(Boolean).map(p => ({
+      ...p,
+      isSelected: selectedId ? String(p.neo.id) === String(selectedId) : false,
+    }));
     return [moonPoint(), ...astPoints];
+  }
+
+  function refreshCurrentLayer() {
+    if (!globeInstance) return;
+    const sliderEl = document.getElementById('time-slider');
+    const offset = parseInt((sliderEl && sliderEl.value) || 6, 10);
+    const date = getDateForOffset(offset);
+    const iso = formatDateISO(date);
+    globeInstance.customLayerData(buildPoints(currentNeos, iso));
   }
 
   // ---------------------------------------------------------------------------
@@ -181,9 +199,10 @@
       .customLayerData(points)
       .customThreeObject(d => {
         const THREE = window.THREE;
-        const size = d.isMoon ? 2.5 : 1.5;
+        const size = d.isMoon ? 2.5 : d.isSelected ? 2.5 : 1.5;
+        const color = d.isSelected ? '#facc15' : d.color;
         const geo = new THREE.SphereGeometry(size, 8, 8);
-        const mat = new THREE.MeshBasicMaterial({ color: d.color });
+        const mat = new THREE.MeshBasicMaterial({ color });
         return new THREE.Mesh(geo, mat);
       })
       .customThreeObjectUpdate((obj, d) => {
@@ -256,14 +275,7 @@
 
     refresh(neos) {
       currentNeos = neos || [];
-      if (!globeInstance) return;
-
-      const sliderEl = document.getElementById('time-slider');
-      const offset = parseInt((sliderEl && sliderEl.value) || 6, 10);
-      const date = getDateForOffset(offset);
-      const iso = formatDateISO(date);
-      const newPoints = buildPoints(currentNeos, iso);
-      globeInstance.customLayerData(newPoints);
+      refreshCurrentLayer();
     },
   };
 
