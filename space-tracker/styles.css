@@ -123,6 +123,145 @@ button {
   height: 100%;
 }
 
+/* --- Settings Button -------------------------------------- */
+#settings-btn {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px 10px;
+  transition: color var(--transition), border-color var(--transition);
+  flex-shrink: 0;
+}
+
+#settings-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+/* --- Settings Modal --------------------------------------- */
+#settings-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#settings-modal.hidden {
+  display: none;
+}
+
+#settings-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-tooltip);
+  padding: 28px 32px;
+  width: 420px;
+  max-width: 92vw;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#settings-header h2 {
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+#settings-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+#settings-close:hover {
+  color: var(--text-primary);
+}
+
+#settings-panel label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+#api-key-input {
+  width: 100%;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+}
+
+#api-key-input:focus {
+  border-color: var(--accent);
+}
+
+#api-key-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+#settings-actions {
+  display: flex;
+  gap: 10px;
+}
+
+#api-key-save {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 7px 18px;
+}
+
+#api-key-save:hover {
+  background: var(--accent-dim);
+}
+
+#api-key-clear {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 7px 18px;
+}
+
+#api-key-clear:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+#api-key-status {
+  font-size: 12px;
+  color: var(--safe-green);
+  min-height: 16px;
+}
+
 /* --- Tab Buttons ------------------------------------------ */
 .tab-btn {
   background: transparent;

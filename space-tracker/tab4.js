@@ -103,13 +103,9 @@
     async init() {
       const loadingEl = document.getElementById('forecast-loading');
 
-      // Define 5 weekly batches: today → today+6, today+7 → today+13, etc.
+      // One-week batch: today → today+6
       const batches = [
-        { start: 0,  end: 6  },
-        { start: 7,  end: 13 },
-        { start: 14, end: 20 },
-        { start: 21, end: 27 },
-        { start: 28, end: 34 },
+        { start: 0, end: 6 },
       ];
 
       for (const batch of batches) {

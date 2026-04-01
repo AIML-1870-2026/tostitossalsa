@@ -11,8 +11,12 @@
 // API Config
 // ---------------------------------------------------------------------------
 
-const NASA_API_KEY = 'MDMI6mpt5gwXOdo41B8CC4rri1aacCtVQeacCFOB';
+const NASA_API_KEY_DEFAULT = 'MDMI6mpt5gwXOdo41B8CC4rri1aacCtVQeacCFOB';
 const NEO_BASE = 'https://api.nasa.gov/neo/rest/v1';
+
+function getApiKey() {
+  return localStorage.getItem('nasa_api_key') || NASA_API_KEY_DEFAULT;
+}
 
 // ---------------------------------------------------------------------------
 // Global state
@@ -74,7 +78,7 @@ function hideError() {
  * On error, calls showError() and returns [].
  */
 async function fetchFeedRange(startDate, endDate) {
-  const url = `${NEO_BASE}/feed?start_date=${startDate}&end_date=${endDate}&api_key=${NASA_API_KEY}`;
+  const url = `${NEO_BASE}/feed?start_date=${startDate}&end_date=${endDate}&api_key=${getApiKey()}`;
   try {
     const res = await fetch(url);
     if (!res.ok) {
@@ -101,7 +105,7 @@ async function fetchFeedRange(startDate, endDate) {
  * Fetches /neo/{id} and returns the full asteroid object, or null on error.
  */
 async function fetchAsteroidProfile(id) {
-  const url = `${NEO_BASE}/neo/${id}?api_key=${NASA_API_KEY}`;
+  const url = `${NEO_BASE}/neo/${id}?api_key=${getApiKey()}`;
   try {
     const res = await fetch(url);
     if (!res.ok) {
@@ -159,18 +163,75 @@ window.navigateToTab = function (tabNum, neoId = null) {
     window.Tab1.refresh(window.AppState.neos);
   }
 
-  if (tabNum === 3 && window.Tab3 && typeof window.Tab3.selectAsteroid === 'function' && neoId !== null) {
-    window.Tab3.selectAsteroid(neoId);
+  if (tabNum === 3 && window.Tab3 && typeof window.Tab3.selectAsteroid === 'function') {
+    const idToSelect = neoId !== null ? neoId : window.AppState.selectedNeoId;
+    if (idToSelect) {
+      // Skip the API fetch if the same asteroid is already rendered in the detail panel
+      const alreadyLoaded = String(idToSelect) === String(window.AppState.selectedNeoId)
+        && !document.getElementById('detail-content')?.classList.contains('hidden');
+      if (!alreadyLoaded || neoId !== null) {
+        window.Tab3.selectAsteroid(idToSelect);
+      }
+    }
   }
 };
 
-// Wire up tab button clicks
+// Wire up tab button clicks and settings modal
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       window.navigateToTab(parseInt(btn.dataset.tab, 10));
     });
   });
+
+  // Settings modal
+  const modal = document.getElementById('settings-modal');
+  const settingsBtn = document.getElementById('settings-btn');
+  const closeBtn = document.getElementById('settings-close');
+  const apiInput = document.getElementById('api-key-input');
+  const saveBtn = document.getElementById('api-key-save');
+  const clearBtn = document.getElementById('api-key-clear');
+  const statusEl = document.getElementById('api-key-status');
+
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      if (apiInput) apiInput.value = localStorage.getItem('nasa_api_key') || '';
+      if (statusEl) statusEl.textContent = '';
+      if (modal) modal.classList.remove('hidden');
+    });
+  }
+
+  function closeModal() {
+    if (modal) modal.classList.add('hidden');
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  if (saveBtn && apiInput && statusEl) {
+    saveBtn.addEventListener('click', () => {
+      const key = apiInput.value.trim();
+      if (key) {
+        localStorage.setItem('nasa_api_key', key);
+        statusEl.textContent = 'API key saved.';
+      } else {
+        localStorage.removeItem('nasa_api_key');
+        statusEl.textContent = 'Using default API key.';
+      }
+    });
+  }
+
+  if (clearBtn && apiInput && statusEl) {
+    clearBtn.addEventListener('click', () => {
+      localStorage.removeItem('nasa_api_key');
+      if (apiInput) apiInput.value = '';
+      statusEl.textContent = 'Reset to default API key.';
+    });
+  }
 });
 
 // ---------------------------------------------------------------------------
