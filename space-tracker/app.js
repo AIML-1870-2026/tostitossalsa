@@ -11,7 +11,7 @@
 // API Config
 // ---------------------------------------------------------------------------
 
-const NASA_API_KEY = 'DEMO_KEY';
+const NASA_API_KEY = 'MDMI6mpt5gwXOdo41B8CC4rri1aacCtVQeacCFOB';
 const NEO_BASE = 'https://api.nasa.gov/neo/rest/v1';
 
 // ---------------------------------------------------------------------------
