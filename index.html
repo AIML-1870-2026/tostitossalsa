@@ -1135,6 +1135,35 @@
             50%       { filter: drop-shadow(0 0 14px rgba(107, 176, 245, 0.85)); }
         }
 
+        .project-card__icon--space-tracker {
+            background:
+                /* Planet body */
+                radial-gradient(circle, #c792ea 50%, transparent 51%) 28px 24px / 28px 28px,
+                /* Planet ring left */
+                linear-gradient(#ffcb6b 0 0) 10px 36px / 20px 4px,
+                /* Planet ring right */
+                linear-gradient(#ffcb6b 0 0) 58px 36px / 20px 4px,
+                /* Star top-left */
+                radial-gradient(circle, #fffffe 50%, transparent 51%) 10px 10px / 6px 6px,
+                /* Star top-right */
+                radial-gradient(circle, #fffffe 50%, transparent 51%) 68px 14px / 4px 4px,
+                /* Star bottom-right */
+                radial-gradient(circle, #82aaff 50%, transparent 51%) 72px 52px / 5px 5px,
+                /* Star bottom-left */
+                radial-gradient(circle, #fffffe 50%, transparent 51%) 8px 60px / 4px 4px,
+                /* Small moon */
+                radial-gradient(circle, #f4f4f5 50%, transparent 51%) 62px 24px / 10px 10px,
+                /* Background */
+                linear-gradient(#0f172a 0 0) 0 0 / 100% 100%;
+            background-repeat: no-repeat;
+            animation: spaceTrackerGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes spaceTrackerGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(199, 146, 234, 0.4)); }
+            50%       { filter: drop-shadow(0 0 14px rgba(199, 146, 234, 0.85)); }
+        }
+
         /* ============================================
            RESPONSIVE DESIGN
            ============================================ */
@@ -1428,6 +1457,20 @@
                             <div class="project-card__icon project-card__icon--weather" role="img" aria-label="Pixel art sun and rain cloud"></div>
                             <h3 class="project-card__title">Weather Dashboard</h3>
                             <a href="weather-dashboard/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Space Tracker Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--space-tracker" role="img" aria-label="Pixel art planet with rings"></div>
+                            <h3 class="project-card__title">Space Tracker</h3>
+                            <a href="space-tracker/index.html" class="project-card__link">View Project</a>
                         </div>
                     </article>
                 </div>

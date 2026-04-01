@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEO Watch — Near Earth Object Dashboard</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://unpkg.com/globe.gl" defer></script>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Header -->
+  <header id="site-header">
+    <div id="logo">NEO Watch</div>
+    <nav id="tab-nav">
+      <button class="tab-btn active" data-tab="1">🌍 3D Earth</button>
+      <button class="tab-btn" data-tab="2">📋 This Week</button>
+      <button class="tab-btn" data-tab="3">🔍 Asteroid Detail</button>
+      <button class="tab-btn" data-tab="4">🔭 Forecast</button>
+    </nav>
+  </header>
+
+  <!-- Tab 1: 3D Globe -->
+  <div id="tab-1" class="tab-panel active">
+    <div id="globe-container"></div>
+    <div id="time-slider-container">
+      <label for="time-slider">Date:</label>
+      <input type="range" id="time-slider" min="0" max="6" value="6" step="1">
+      <span id="time-label"></span>
+    </div>
+    <div id="asteroid-tooltip" class="hidden">
+      <button id="tooltip-close">×</button>
+      <h3 id="tooltip-name"></h3>
+      <div id="tooltip-body"></div>
+      <button id="tooltip-profile-btn">View Full Profile →</button>
+    </div>
+  </div>
+
+  <!-- Tab 2: This Week -->
+  <div id="tab-2" class="tab-panel hidden">
+    <div id="tab2-header">
+      <h2>This Week's Close Approaches</h2>
+    </div>
+    <div id="table-container">
+      <table id="neo-table">
+        <thead>
+          <tr>
+            <th data-col="name" class="sortable">Name <span class="sort-icon">↕</span></th>
+            <th data-col="miss_km" class="sortable">Miss Distance <span class="sort-icon">↕</span></th>
+            <th data-col="diameter" class="sortable">Est. Size (m) <span class="sort-icon">↕</span></th>
+            <th data-col="velocity" class="sortable">Velocity (km/s) <span class="sort-icon">↕</span></th>
+            <th data-col="date" class="sortable">Approach Date <span class="sort-icon">↕</span></th>
+            <th data-col="hazard" class="sortable">Hazard <span class="sort-icon">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="neo-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 3: Asteroid Detail -->
+  <div id="tab-3" class="tab-panel hidden">
+    <div id="detail-layout">
+      <aside id="asteroid-sidebar">
+        <h3>This Week's NEOs</h3>
+        <ul id="sidebar-list"></ul>
+      </aside>
+      <main id="asteroid-detail-panel">
+        <div id="detail-placeholder">
+          <p>Select an asteroid from the sidebar to view its profile.</p>
+        </div>
+        <div id="detail-content" class="hidden">
+          <div id="detail-overview"></div>
+          <div id="detail-approaches"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Tab 4: Forecast -->
+  <div id="tab-4" class="tab-panel hidden">
+    <div id="tab4-header">
+      <h2>30-Day Forecast</h2>
+    </div>
+    <div id="forecast-grid"></div>
+    <div id="forecast-loading" class="hidden">
+      <div class="spinner"></div>
+      <p>Loading more asteroids…</p>
+    </div>
+  </div>
+
+  <!-- Global error banner -->
+  <div id="error-banner" class="hidden">
+    <span id="error-message"></span>
+    <button id="error-close">×</button>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+<script src="tab1.js"></script>
+<script src="tab2.js"></script>
+<script src="tab3.js"></script>
+<script src="tab4.js"></script>
+
+</body>
+</html>
