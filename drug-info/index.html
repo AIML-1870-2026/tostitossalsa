@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drug Safety Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">⬡ DrugSafety Explorer</div>
+    <div class="tagline">OpenFDA Adverse Event Dashboard &nbsp;·&nbsp; Educational Use Only</div>
+  </header>
+
+  <!-- DISCLAIMER BANNER -->
+  <div id="banner">
+    <p>⚠️ This tool displays FDA-reported data which is voluntary, self-reported, and may be incomplete. It is for <strong>educational purposes only</strong>. Always consult a healthcare professional.</p>
+    <button id="dismiss-banner" title="Dismiss">✕</button>
+  </div>
+
+  <!-- SEARCH -->
+  <section class="search-section">
+    <div class="search-label">Search Drug Safety Data</div>
+    <form class="search-row" id="search-form" autocomplete="off">
+      <div class="inputs-wrap">
+        <div class="input-group">
+          <label for="drug1">Drug 1</label>
+          <input class="drug-input" id="drug1" type="text" placeholder="e.g. ibuprofen" />
+        </div>
+        <div class="input-group">
+          <label for="drug2">Drug 2 <span style="opacity:.5">(optional — compare)</span></label>
+          <input class="drug-input" id="drug2" type="text" placeholder="e.g. aspirin" />
+        </div>
+      </div>
+      <button class="search-btn" type="submit">Search →</button>
+    </form>
+  </section>
+
+  <!-- RESULTS -->
+  <main id="results">
+    <div class="empty-state">
+      <div class="empty-rx">Rx</div>
+      <p>Enter a drug name above to explore its FDA safety profile.</p>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <em>This product uses publicly available data from the U.S. Food and Drug Administration (FDA). FDA is not responsible for the product and does not endorse or recommend this or any other product.</em>
+    &nbsp;·&nbsp; Data: <a href="https://open.fda.gov" target="_blank" rel="noopener">OpenFDA API</a>
+  </footer>
+
+  <!-- SHARED MODAL -->
+  <div id="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div class="modal-title" id="modal-title"></div>
+        <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

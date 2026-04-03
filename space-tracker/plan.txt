@@ -2,4 +2,3 @@
 Right now, when you select an asteroid on the map or the asteroid detail menu, the selected asteroid
 doesn't carry from one page to the next, please make it so a single asteroid is selected across both tabs
 make it so you can add your own api
-make the calendar one week

@@ -1164,6 +1164,30 @@
             50%       { filter: drop-shadow(0 0 14px rgba(199, 146, 234, 0.85)); }
         }
 
+        /* Drug Info / pill icon */
+        .project-card__icon--drug-info {
+            background:
+                /* Pill left half */
+                radial-gradient(ellipse 50% 100% at 25% 50%, #ff6b9d 100%, transparent 100%) 12px 20px / 24px 24px,
+                /* Pill right half */
+                radial-gradient(ellipse 50% 100% at 75% 50%, #82aaff 100%, transparent 100%) 36px 20px / 24px 24px,
+                /* Dividing line */
+                linear-gradient(#fffffe 0 0) 34px 20px / 4px 24px,
+                /* Cross vertical */
+                linear-gradient(#fffffe 0 0) 54px 38px / 4px 14px,
+                /* Cross horizontal */
+                linear-gradient(#fffffe 0 0) 48px 44px / 16px 4px,
+                /* Background */
+                linear-gradient(#0f172a 0 0) 0 0 / 100% 100%;
+            background-repeat: no-repeat;
+            animation: drugInfoGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes drugInfoGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 107, 157, 0.4)); }
+            50%       { filter: drop-shadow(0 0 14px rgba(130, 170, 255, 0.85)); }
+        }
+
         /* ============================================
            RESPONSIVE DESIGN
            ============================================ */
@@ -1471,6 +1495,20 @@
                             <div class="project-card__icon project-card__icon--space-tracker" role="img" aria-label="Pixel art planet with rings"></div>
                             <h3 class="project-card__title">Space Tracker</h3>
                             <a href="space-tracker/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Drug Info Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--drug-info" role="img" aria-label="Pixel art pill and cross"></div>
+                            <h3 class="project-card__title">Drug Info</h3>
+                            <a href="drug-info/index.html" class="project-card__link">View Project</a>
                         </div>
                     </article>
                 </div>
