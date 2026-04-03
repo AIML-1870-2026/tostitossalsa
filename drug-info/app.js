@@ -220,7 +220,7 @@ function renderEvents(reactions, total) {
       '<div class="bar-label" title="' + r.term + '">' + r.term + '</div>' +
       '<div class="bar-track"><div class="bar-fill' + (i < 3 ? ' top' : '') +
       '" style="width:' + barPct + '%"></div></div>' +
-      '<div class="bar-count">' + fmt(r.count) + '<span class="pct"> ' + ofTotal + '</span></div>' +
+      '<div class="bar-count"><div>' + fmt(r.count) + '</div><div class="bar-pct">' + ofTotal + '</div></div>' +
       '</div>';
   }).join('');
 
@@ -237,15 +237,17 @@ function renderEvents(reactions, total) {
 function renderOutcomes(outcomes, total) {
   const rows = outcomes.map(({ label, count, danger }) => {
     const pct = (total > 0 && count > 0) ? ((count / total) * 100).toFixed(2) + '%' : '—';
-    return '<tr><td>' + label + '</td>' +
-      '<td class="outcome-count' + (danger ? ' danger' : '') + '">' +
-      fmt(count) + '<span class="pct"> ' + pct + '</span></td></tr>';
+    return '<tr>' +
+      '<td>' + label + '</td>' +
+      '<td class="outcome-count' + (danger ? ' danger' : '') + '">' + fmt(count) + '</td>' +
+      '<td class="outcome-pct">' + pct + '</td>' +
+      '</tr>';
   }).join('');
 
   return '<div class="card">' +
     '<div class="card-header"><span class="card-title">Outcome Severity</span>' +
     '<button class="help-btn" data-help="outcomes">?</button></div>' +
-    '<table class="outcome-table"><thead><tr><th>Outcome</th><th>Reports</th></tr></thead>' +
+    '<table class="outcome-table"><thead><tr><th>Outcome</th><th>Reports</th><th>% of Reports</th></tr></thead>' +
     '<tbody>' + rows + '</tbody></table>' +
     '</div>';
 }
