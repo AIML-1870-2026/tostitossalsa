@@ -214,12 +214,13 @@ function renderEvents(reactions, total) {
 
   const maxCount = reactions[0]?.count || 1;
   const bars = reactions.map((r, i) => {
-    const pct = ((r.count / maxCount) * 100).toFixed(1);
+    const barPct  = ((r.count / maxCount) * 100).toFixed(1);
+    const ofTotal = total > 0 ? ((r.count / total) * 100).toFixed(2) + '%' : '—';
     return '<div class="bar-row">' +
       '<div class="bar-label" title="' + r.term + '">' + r.term + '</div>' +
       '<div class="bar-track"><div class="bar-fill' + (i < 3 ? ' top' : '') +
-      '" style="width:' + pct + '%"></div></div>' +
-      '<div class="bar-count">' + fmt(r.count) + '</div>' +
+      '" style="width:' + barPct + '%"></div></div>' +
+      '<div class="bar-count">' + fmt(r.count) + '<span class="pct"> ' + ofTotal + '</span></div>' +
       '</div>';
   }).join('');
 
@@ -233,11 +234,13 @@ function renderEvents(reactions, total) {
 }
 
 // ── RENDER: OUTCOME TABLE ────────────────────────────
-function renderOutcomes(outcomes) {
-  const rows = outcomes.map(({ label, count, danger }) =>
-    '<tr><td>' + label + '</td>' +
-    '<td class="outcome-count' + (danger ? ' danger' : '') + '">' + fmt(count) + '</td></tr>'
-  ).join('');
+function renderOutcomes(outcomes, total) {
+  const rows = outcomes.map(({ label, count, danger }) => {
+    const pct = (total > 0 && count > 0) ? ((count / total) * 100).toFixed(2) + '%' : '—';
+    return '<tr><td>' + label + '</td>' +
+      '<td class="outcome-count' + (danger ? ' danger' : '') + '">' +
+      fmt(count) + '<span class="pct"> ' + pct + '</span></td></tr>';
+  }).join('');
 
   return '<div class="card">' +
     '<div class="card-header"><span class="card-title">Outcome Severity</span>' +
@@ -264,7 +267,7 @@ function renderColumn(drugName, data) {
   return '<div class="drug-column">' +
     '<div class="col-header">' + displayName + '</div>' +
     '<div class="top-row">' + renderProfile(data.ndc) + renderEvents(data.reactions, data.total) + '</div>' +
-    renderOutcomes(data.outcomes) +
+    renderOutcomes(data.outcomes, data.total) +
     '</div>';
 }
 

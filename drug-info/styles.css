@@ -384,6 +384,12 @@ header {
 
 .outcome-count.danger { color: var(--danger); }
 
+.pct {
+  font-size: 0.65em;
+  color: var(--muted);
+  margin-left: 0.1em;
+}
+
 /* ── SKELETON LOADERS ────────────────────────────── */
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
