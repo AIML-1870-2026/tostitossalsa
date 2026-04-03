@@ -197,8 +197,6 @@ function renderProfile(ndc) {
       '<span class="p-value">' + (route || '—') + '</span></div>' +
       '<div class="p-item"><span class="p-label">Active Ingredients</span>' +
       '<div class="tags">' + (ingredients || '<span class="p-value">—</span>') + '</div></div>' +
-      '<div class="p-item"><span class="p-label">Marketing Status</span>' +
-      '<span class="status-badge">' + (ndc.marketing_status || '—') + '</span></div>' +
     '</div></div>';
 }
 
