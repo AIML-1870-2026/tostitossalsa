@@ -49,7 +49,7 @@ body {
 }
 
 /* ----------------------------------------------------------
-   Main App Wrapper
+   Main App Wrapper / Two-Column Grid
    ---------------------------------------------------------- */
 #app {
   width: 100%;
@@ -57,6 +57,22 @@ body {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  width: 100%;
+  max-width: 1400px;
+  align-items: start;
+}
+
+.left-col,
+.right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 /* ----------------------------------------------------------
@@ -168,6 +184,33 @@ select {
   /* inherits .card */
 }
 
+.key-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.key-row input[type="text"],
+.key-row input[type="password"] {
+  border-color: var(--cyan);
+  font-family: 'VT323', monospace;
+  letter-spacing: 0.04em;
+  padding: 12px 14px;
+}
+
+.key-row input[type="text"]:focus,
+.key-row input[type="password"]:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(130, 170, 255, 0.2),
+              0 0 12px rgba(130, 170, 255, 0.15);
+}
+
+.key-actions {
+  margin-top: 8px;
+}
+
+/* Legacy class kept for compat */
 .key-inputs-row {
   display: flex;
   gap: 16px;
@@ -177,20 +220,6 @@ select {
 .key-inputs-row .key-field {
   flex: 1;
   min-width: 0;
-}
-
-.key-inputs-row input[type="text"],
-.key-inputs-row input[type="password"] {
-  border-color: var(--cyan);
-  font-family: 'VT323', monospace;
-  letter-spacing: 0.04em;
-}
-
-.key-inputs-row input[type="text"]:focus,
-.key-inputs-row input[type="password"]:focus {
-  border-color: var(--cyan);
-  box-shadow: 0 0 0 3px rgba(130, 170, 255, 0.2),
-              0 0 12px rgba(130, 170, 255, 0.15);
 }
 
 /* File upload area */
@@ -259,16 +288,19 @@ select {
 /* ----------------------------------------------------------
    Controls Section — Provider / Model selects
    ---------------------------------------------------------- */
-.controls-row {
+.controls-row,
+.control-row {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
   margin-bottom: 16px;
 }
 
-.controls-row .control-field {
+.controls-row .control-field,
+.control-row .control-group,
+.control-group {
   flex: 1;
-  min-width: 160px;
+  min-width: 140px;
 }
 
 #provider-select {
@@ -364,12 +396,15 @@ select {
 
 /* Compare sub-section (two-column provider/model pickers) */
 #compare-section {
-  display: none;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
   margin-top: 8px;
   padding-top: 16px;
   border-top: 1px solid rgba(130, 170, 255, 0.1);
+}
+
+.compare-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 /* CORS warnings */
@@ -459,7 +494,7 @@ select {
    Schema Section
    ---------------------------------------------------------- */
 #schema-section {
-  display: none;
+  /* visibility controlled by .hidden class */
 }
 
 #schema-input {
@@ -694,16 +729,18 @@ select {
    Compare Mode Output — Two-Column Grid
    ---------------------------------------------------------- */
 #compare-output-section {
-  display: none;
+  /* visibility controlled by .hidden class */
 }
 
-.compare-grid {
+.compare-grid,
+.compare-output-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-.compare-col {
+.compare-col,
+.compare-output-col {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -793,8 +830,14 @@ a.back:hover {
 }
 
 /* ----------------------------------------------------------
-   Responsive — screens < 600px
+   Responsive — collapse to single column at 900px
    ---------------------------------------------------------- */
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 600px) {
   body {
     padding: 24px 14px 48px;
@@ -808,15 +851,14 @@ a.back:hover {
     flex-direction: column;
   }
 
-  .controls-row {
+  .controls-row,
+  .control-row {
     flex-direction: column;
   }
 
-  #compare-section {
-    grid-template-columns: 1fr;
-  }
-
-  .compare-grid {
+  .compare-columns,
+  .compare-grid,
+  .compare-output-columns {
     grid-template-columns: 1fr;
   }
 

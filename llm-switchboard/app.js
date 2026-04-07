@@ -215,7 +215,7 @@ async function callOpenAI(key, model, prompt, isStructured, schemaJson) {
     throw new Error('API key missing or invalid. Check your key and try again.');
   }
   if (response.status === 429) {
-    throw new Error('Rate limit hit. Wait a moment and try again.');
+    throw new Error('Rate limit or quota exceeded. Wait a moment and try again — or check that your API key has active billing/credits.');
   }
   if (!response.ok) {
     throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
@@ -263,7 +263,7 @@ async function callAnthropic(key, model, prompt, isStructured, schemaJson) {
     throw new Error('API key missing or invalid. Check your key and try again.');
   }
   if (response.status === 429) {
-    throw new Error('Rate limit hit. Wait a moment and try again.');
+    throw new Error('Rate limit or quota exceeded. Wait a moment and try again — or check that your API key has active billing/credits.');
   }
   if (!response.ok) {
     throw new Error(`Anthropic API error: ${response.status} ${response.statusText}`);
