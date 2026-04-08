@@ -454,50 +454,42 @@ function openCorsModal() { show(corsModal); }
 function closeCorsModal() { hide(corsModal); }
 function closeModelsModal() { hide(modelsModal); }
 
-const TEXT_MODEL_ALLOWLIST = /^(gpt-4o(-mini)?(-\d{4}-\d{2}-\d{2})?|gpt-4o-mini(-\d{4}-\d{2}-\d{2})?|gpt-4(-turbo)?(-\d{4}-\d{2}-\d{2})?(-preview)?|gpt-4-\d{4}-preview|gpt-3\.5-turbo(-\d+k)?(-\d{4}-\d{2}-\d{2})?(-instruct)?|o1(-mini|-preview)?(-\d{4}-\d{2}-\d{2})?|o3(-mini)?(-\d{4}-\d{2}-\d{2})?|o4(-mini)?(-\d{4}-\d{2}-\d{2})?)$/i;
+const EXTENDED_MODELS = {
+  openai: [
+    'gpt-4o',
+    'gpt-4o-mini',
+    'gpt-4-turbo',
+    'gpt-3.5-turbo',
+    'o1',
+    'o1-mini',
+    'o1-preview',
+    'o3',
+    'o3-mini',
+    'o4-mini'
+  ]
+};
 
-async function openModelsModal(provider, targetSelectEl) {
-  const key = keys[provider];
+function openModelsModal(provider, targetSelectEl) {
   modelsModalTitle.textContent = provider.toUpperCase() + ' — All Models';
-  modelsModalBody.innerHTML = '<span class="models-loading">Loading...</span>';
   show(modelsModal);
 
-  if (provider === 'openai') {
-    if (!key) {
-      modelsModalBody.innerHTML = '<span class="models-error">Enter your OpenAI API key first.</span>';
-      return;
-    }
-    try {
-      const resp = await fetch('https://api.openai.com/v1/models', {
-        headers: { 'Authorization': 'Bearer ' + key }
-      });
-      if (!resp.ok) throw new Error('API error ' + resp.status);
-      const data = await resp.json();
-      const ids = data.data
-        .map(m => m.id)
-        .filter(id => TEXT_MODEL_ALLOWLIST.test(id))
-        .sort();
-      modelsModalBody.innerHTML = ids.map(id =>
-        `<div class="model-list-item" data-model="${escapeHtml(id)}">${escapeHtml(id)}</div>`
-      ).join('');
-      modelsModalBody.querySelectorAll('.model-list-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const chosen = item.dataset.model;
-          // Add option if not already present
-          if (![...targetSelectEl.options].some(o => o.value === chosen)) {
-            const opt = document.createElement('option');
-            opt.value = chosen;
-            opt.textContent = chosen;
-            targetSelectEl.appendChild(opt);
-          }
-          targetSelectEl.value = chosen;
-          closeModelsModal();
-        });
-      });
-    } catch (e) {
-      modelsModalBody.innerHTML = `<span class="models-error">Failed to load models: ${escapeHtml(e.message)}</span>`;
-    }
-  }
+  const ids = EXTENDED_MODELS[provider] || [];
+  modelsModalBody.innerHTML = ids.map(id =>
+    `<div class="model-list-item" data-model="${escapeHtml(id)}">${escapeHtml(id)}</div>`
+  ).join('');
+  modelsModalBody.querySelectorAll('.model-list-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const chosen = item.dataset.model;
+      if (![...targetSelectEl.options].some(o => o.value === chosen)) {
+        const opt = document.createElement('option');
+        opt.value = chosen;
+        opt.textContent = chosen;
+        targetSelectEl.appendChild(opt);
+      }
+      targetSelectEl.value = chosen;
+      closeModelsModal();
+    });
+  });
 }
 
 // ── UI wiring ───────────────────────────────────
