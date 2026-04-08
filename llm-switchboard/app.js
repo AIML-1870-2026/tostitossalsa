@@ -454,7 +454,7 @@ function openCorsModal() { show(corsModal); }
 function closeCorsModal() { hide(corsModal); }
 function closeModelsModal() { hide(modelsModal); }
 
-const TEXT_MODEL_ALLOWLIST = /^(gpt-4o(-mini)?(-\d{4}-\d{2}-\d{2})?|gpt-4o-mini(-\d{4}-\d{2}-\d{2})?|gpt-4(-turbo)?(-\d{4}-\d{2}-\d{2})?(-preview)?|gpt-4-\d{4}-preview|gpt-3\.5-turbo(-\d+k)?(-\d{4}-\d{2}-\d{2})?(-instruct)?|o1(-mini|-preview)?(-\d{4}-\d{2}-\d{2})?|o3(-mini)?(-\d{4}-\d{2}-\d{2})?|o4(-mini)?(-\d{4}-\d{2}-\d{2})?)/i;
+const TEXT_MODEL_ALLOWLIST = /^(gpt-4o(-mini)?(-\d{4}-\d{2}-\d{2})?|gpt-4o-mini(-\d{4}-\d{2}-\d{2})?|gpt-4(-turbo)?(-\d{4}-\d{2}-\d{2})?(-preview)?|gpt-4-\d{4}-preview|gpt-3\.5-turbo(-\d+k)?(-\d{4}-\d{2}-\d{2})?(-instruct)?|o1(-mini|-preview)?(-\d{4}-\d{2}-\d{2})?|o3(-mini)?(-\d{4}-\d{2}-\d{2})?|o4(-mini)?(-\d{4}-\d{2}-\d{2})?)$/i;
 
 async function openModelsModal(provider, targetSelectEl) {
   const key = keys[provider];
