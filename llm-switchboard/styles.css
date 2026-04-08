@@ -654,7 +654,9 @@ select {
 #output-2 pre {
   display: block;
   padding: 10px 14px;
-  overflow-x: auto;
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
   border-left: 3px solid var(--cyan);
   margin: 6px 0;
 }
