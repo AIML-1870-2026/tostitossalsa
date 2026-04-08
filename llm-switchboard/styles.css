@@ -411,6 +411,7 @@ select {
 .anthropic-disabled-banner {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   background: rgba(255, 85, 114, 0.1);
   border: 1px solid rgba(255, 85, 114, 0.4);
@@ -420,7 +421,8 @@ select {
   font-family: 'VT323', monospace;
   font-size: 1rem;
   margin-top: 10px;
-  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .btn-why {
@@ -432,7 +434,6 @@ select {
   border-radius: var(--radius-sm);
   padding: 2px 8px;
   cursor: pointer;
-  white-space: nowrap;
   transition: background var(--transition), color var(--transition);
 }
 
@@ -888,6 +889,7 @@ select {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
 /* Column headers */

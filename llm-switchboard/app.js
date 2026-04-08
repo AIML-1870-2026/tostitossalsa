@@ -454,7 +454,7 @@ function openCorsModal() { show(corsModal); }
 function closeCorsModal() { hide(corsModal); }
 function closeModelsModal() { hide(modelsModal); }
 
-const IMAGE_MODEL_PATTERNS = /dall-e|tts|whisper|embedding|embed|moderation|babbage|davinci|text-search|text-similarity|code-search/i;
+const IMAGE_MODEL_PATTERNS = /dall-e|tts|whisper|embedding|embed|moderation|babbage|davinci|text-search|text-similarity|code-search|realtime|audio-preview|audio-latest|gpt-4o-audio|computer-use|gpt-image|omni-moderation/i;
 
 async function openModelsModal(provider, targetSelectEl) {
   const key = keys[provider];
