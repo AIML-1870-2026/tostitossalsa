@@ -454,7 +454,7 @@ function openCorsModal() { show(corsModal); }
 function closeCorsModal() { hide(corsModal); }
 function closeModelsModal() { hide(modelsModal); }
 
-const IMAGE_MODEL_PATTERNS = /dall-e|tts|whisper|embedding|embed|moderation|babbage|davinci|text-search|text-similarity|code-search|realtime|audio-preview|audio-latest|gpt-4o-audio|computer-use|gpt-image|omni-moderation/i;
+const TEXT_MODEL_ALLOWLIST = /^(gpt-4o(-mini)?(-\d{4}-\d{2}-\d{2})?|gpt-4o-mini(-\d{4}-\d{2}-\d{2})?|gpt-4(-turbo)?(-\d{4}-\d{2}-\d{2})?(-preview)?|gpt-4-\d{4}-preview|gpt-3\.5-turbo(-\d+k)?(-\d{4}-\d{2}-\d{2})?(-instruct)?|o1(-mini|-preview)?(-\d{4}-\d{2}-\d{2})?|o3(-mini)?(-\d{4}-\d{2}-\d{2})?|o4(-mini)?(-\d{4}-\d{2}-\d{2})?)/i;
 
 async function openModelsModal(provider, targetSelectEl) {
   const key = keys[provider];
@@ -475,7 +475,7 @@ async function openModelsModal(provider, targetSelectEl) {
       const data = await resp.json();
       const ids = data.data
         .map(m => m.id)
-        .filter(id => !IMAGE_MODEL_PATTERNS.test(id))
+        .filter(id => TEXT_MODEL_ALLOWLIST.test(id))
         .sort();
       modelsModalBody.innerHTML = ids.map(id =>
         `<div class="model-list-item" data-model="${escapeHtml(id)}">${escapeHtml(id)}</div>`
