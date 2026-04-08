@@ -39,7 +39,6 @@ const providerSelect        = $('provider-select');
 const modelSelect           = $('model-select');
 const modelSelectGroup      = $('model-select-group');
 const anthropicDisabledSingle = $('anthropic-disabled-single');
-const seeMoreSingle         = $('see-more-single');
 const compareToggle         = $('compare-toggle');
 const compareSection        = $('compare-section');
 const compareProvider1      = $('compare-provider-1');
@@ -50,16 +49,9 @@ const modelSelectGroup1     = $('model-select-group-1');
 const modelSelectGroup2     = $('model-select-group-2');
 const anthropicDisabled1    = $('anthropic-disabled-1');
 const anthropicDisabled2    = $('anthropic-disabled-2');
-const seeMore1              = $('see-more-1');
-const seeMore2              = $('see-more-2');
-
 // Modals
 const corsModal             = $('cors-modal');
 const corsModalClose        = $('cors-modal-close');
-const modelsModal           = $('models-modal');
-const modelsModalClose      = $('models-modal-close');
-const modelsModalTitle      = $('models-modal-title');
-const modelsModalBody       = $('models-modal-body');
 
 // Mode buttons
 const btnUnstructured = $('btn-unstructured');
@@ -452,49 +444,10 @@ function handleFileUpload(file) {
 
 function openCorsModal() { show(corsModal); }
 function closeCorsModal() { hide(corsModal); }
-function closeModelsModal() { hide(modelsModal); }
-
-const EXTENDED_MODELS = {
-  openai: [
-    'gpt-4o',
-    'gpt-4o-mini',
-    'gpt-4-turbo',
-    'gpt-3.5-turbo',
-    'o1',
-    'o1-mini',
-    'o1-preview',
-    'o3',
-    'o3-mini',
-    'o4-mini'
-  ]
-};
-
-function openModelsModal(provider, targetSelectEl) {
-  modelsModalTitle.textContent = provider.toUpperCase() + ' — All Models';
-  show(modelsModal);
-
-  const ids = EXTENDED_MODELS[provider] || [];
-  modelsModalBody.innerHTML = ids.map(id =>
-    `<div class="model-list-item" data-model="${escapeHtml(id)}">${escapeHtml(id)}</div>`
-  ).join('');
-  modelsModalBody.querySelectorAll('.model-list-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const chosen = item.dataset.model;
-      if (![...targetSelectEl.options].some(o => o.value === chosen)) {
-        const opt = document.createElement('option');
-        opt.value = chosen;
-        opt.textContent = chosen;
-        targetSelectEl.appendChild(opt);
-      }
-      targetSelectEl.value = chosen;
-      closeModelsModal();
-    });
-  });
-}
 
 // ── UI wiring ───────────────────────────────────
 
-function updateProviderUI(provider, modelSelectEl, modelGroupEl, disabledBannerEl, seeMoreBtn) {
+function updateProviderUI(provider, modelSelectEl, modelGroupEl, disabledBannerEl) {
   if (provider === 'anthropic') {
     hide(modelGroupEl);
     show(disabledBannerEl);
@@ -503,10 +456,6 @@ function updateProviderUI(provider, modelSelectEl, modelGroupEl, disabledBannerE
     show(modelGroupEl);
     hide(disabledBannerEl);
     populateModelSelect(modelSelectEl, provider);
-    if (seeMoreBtn) {
-      if (provider) show(seeMoreBtn);
-      else hide(seeMoreBtn);
-    }
   }
 }
 
@@ -561,15 +510,15 @@ function wireEvents() {
 
   // Provider selects
   providerSelect.addEventListener('change', () => {
-    updateProviderUI(providerSelect.value, modelSelect, modelSelectGroup, anthropicDisabledSingle, seeMoreSingle);
+    updateProviderUI(providerSelect.value, modelSelect, modelSelectGroup, anthropicDisabledSingle);
   });
 
   compareProvider1.addEventListener('change', () => {
-    updateProviderUI(compareProvider1.value, compareModel1, modelSelectGroup1, anthropicDisabled1, seeMore1);
+    updateProviderUI(compareProvider1.value, compareModel1, modelSelectGroup1, anthropicDisabled1);
   });
 
   compareProvider2.addEventListener('change', () => {
-    updateProviderUI(compareProvider2.value, compareModel2, modelSelectGroup2, anthropicDisabled2, seeMore2);
+    updateProviderUI(compareProvider2.value, compareModel2, modelSelectGroup2, anthropicDisabled2);
   });
 
   // "Find out why" buttons
@@ -577,18 +526,11 @@ function wireEvents() {
   $('why-btn-1').addEventListener('click', openCorsModal);
   $('why-btn-2').addEventListener('click', openCorsModal);
 
-  // "See more models" buttons
-  seeMoreSingle.addEventListener('click', () => openModelsModal(providerSelect.value, modelSelect));
-  seeMore1.addEventListener('click', () => openModelsModal(compareProvider1.value, compareModel1));
-  seeMore2.addEventListener('click', () => openModelsModal(compareProvider2.value, compareModel2));
-
   // Modal close buttons
   corsModalClose.addEventListener('click', closeCorsModal);
-  modelsModalClose.addEventListener('click', closeModelsModal);
 
   // Close modals on overlay click
   corsModal.addEventListener('click', e => { if (e.target === corsModal) closeCorsModal(); });
-  modelsModal.addEventListener('click', e => { if (e.target === modelsModal) closeModelsModal(); });
 
   // Mode buttons
   btnUnstructured.addEventListener('click', () => setMode('unstructured'));
@@ -637,13 +579,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Populate model selects if a provider is already selected (e.g. from browser autofill)
   if (providerSelect.value) {
-    updateProviderUI(providerSelect.value, modelSelect, modelSelectGroup, anthropicDisabledSingle, seeMoreSingle);
+    updateProviderUI(providerSelect.value, modelSelect, modelSelectGroup, anthropicDisabledSingle);
   }
   if (compareProvider1.value) {
-    updateProviderUI(compareProvider1.value, compareModel1, modelSelectGroup1, anthropicDisabled1, seeMore1);
+    updateProviderUI(compareProvider1.value, compareModel1, modelSelectGroup1, anthropicDisabled1);
   }
   if (compareProvider2.value) {
-    updateProviderUI(compareProvider2.value, compareModel2, modelSelectGroup2, anthropicDisabled2, seeMore2);
+    updateProviderUI(compareProvider2.value, compareModel2, modelSelectGroup2, anthropicDisabled2);
   }
 
   wireEvents();
