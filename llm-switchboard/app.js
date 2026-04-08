@@ -37,15 +37,29 @@ const clearKeysBtn      = $('clear-keys-btn');
 const singleControls        = $('single-controls');
 const providerSelect        = $('provider-select');
 const modelSelect           = $('model-select');
-const anthropicCorsWarning  = $('anthropic-cors-warning');
+const modelSelectGroup      = $('model-select-group');
+const anthropicDisabledSingle = $('anthropic-disabled-single');
+const seeMoreSingle         = $('see-more-single');
 const compareToggle         = $('compare-toggle');
 const compareSection        = $('compare-section');
 const compareProvider1      = $('compare-provider-1');
 const compareProvider2      = $('compare-provider-2');
 const compareModel1         = $('compare-model-1');
 const compareModel2         = $('compare-model-2');
-const compareCorsWarning1   = $('compare-cors-warning-1');
-const compareCorsWarning2   = $('compare-cors-warning-2');
+const modelSelectGroup1     = $('model-select-group-1');
+const modelSelectGroup2     = $('model-select-group-2');
+const anthropicDisabled1    = $('anthropic-disabled-1');
+const anthropicDisabled2    = $('anthropic-disabled-2');
+const seeMore1              = $('see-more-1');
+const seeMore2              = $('see-more-2');
+
+// Modals
+const corsModal             = $('cors-modal');
+const corsModalClose        = $('cors-modal-close');
+const modelsModal           = $('models-modal');
+const modelsModalClose      = $('models-modal-close');
+const modelsModalTitle      = $('models-modal-title');
+const modelsModalBody       = $('models-modal-body');
 
 // Mode buttons
 const btnUnstructured = $('btn-unstructured');
@@ -275,11 +289,11 @@ async function callAnthropic(key, model, prompt, isStructured, schemaJson) {
 }
 
 async function callProvider(provider, model, prompt, isStructured, schemaJson) {
+  if (provider === 'anthropic') throw new Error('Anthropic is disabled in this browser-based app.');
   const key = keys[provider];
   if (!key) throw new Error('API key missing or invalid. Check your key and try again.');
 
   if (provider === 'openai') return callOpenAI(key, model, prompt, isStructured, schemaJson);
-  if (provider === 'anthropic') return callAnthropic(key, model, prompt, isStructured, schemaJson);
   throw new Error('Unknown provider: ' + provider);
 }
 
@@ -434,14 +448,53 @@ function handleFileUpload(file) {
   reader.readAsText(file);
 }
 
+// ── Modal helpers ────────────────────────────────
+
+function openCorsModal() { show(corsModal); }
+function closeCorsModal() { hide(corsModal); }
+function closeModelsModal() { hide(modelsModal); }
+
+async function openModelsModal(provider) {
+  const key = keys[provider];
+  modelsModalTitle.textContent = provider.toUpperCase() + ' — All Models';
+  modelsModalBody.innerHTML = '<span class="models-loading">Loading...</span>';
+  show(modelsModal);
+
+  if (provider === 'openai') {
+    if (!key) {
+      modelsModalBody.innerHTML = '<span class="models-error">Enter your OpenAI API key first.</span>';
+      return;
+    }
+    try {
+      const resp = await fetch('https://api.openai.com/v1/models', {
+        headers: { 'Authorization': 'Bearer ' + key }
+      });
+      if (!resp.ok) throw new Error('API error ' + resp.status);
+      const data = await resp.json();
+      const ids = data.data.map(m => m.id).sort();
+      modelsModalBody.innerHTML = ids.map(id =>
+        `<div class="model-list-item">${escapeHtml(id)}</div>`
+      ).join('');
+    } catch (e) {
+      modelsModalBody.innerHTML = `<span class="models-error">Failed to load models: ${escapeHtml(e.message)}</span>`;
+    }
+  }
+}
+
 // ── UI wiring ───────────────────────────────────
 
-function updateProviderUI(provider, modelSelectEl, corsWarningEl) {
-  populateModelSelect(modelSelectEl, provider);
+function updateProviderUI(provider, modelSelectEl, modelGroupEl, disabledBannerEl, seeMoreBtn) {
   if (provider === 'anthropic') {
-    show(corsWarningEl);
+    hide(modelGroupEl);
+    show(disabledBannerEl);
   } else {
-    hide(corsWarningEl);
+    show(modelGroupEl);
+    hide(disabledBannerEl);
+    populateModelSelect(modelSelectEl, provider);
+    if (seeMoreBtn) {
+      if (provider) show(seeMoreBtn);
+      else hide(seeMoreBtn);
+    }
   }
 }
 
@@ -496,16 +549,34 @@ function wireEvents() {
 
   // Provider selects
   providerSelect.addEventListener('change', () => {
-    updateProviderUI(providerSelect.value, modelSelect, anthropicCorsWarning);
+    updateProviderUI(providerSelect.value, modelSelect, modelSelectGroup, anthropicDisabledSingle, seeMoreSingle);
   });
 
   compareProvider1.addEventListener('change', () => {
-    updateProviderUI(compareProvider1.value, compareModel1, compareCorsWarning1);
+    updateProviderUI(compareProvider1.value, compareModel1, modelSelectGroup1, anthropicDisabled1, seeMore1);
   });
 
   compareProvider2.addEventListener('change', () => {
-    updateProviderUI(compareProvider2.value, compareModel2, compareCorsWarning2);
+    updateProviderUI(compareProvider2.value, compareModel2, modelSelectGroup2, anthropicDisabled2, seeMore2);
   });
+
+  // "Find out why" buttons
+  $('why-btn-single').addEventListener('click', openCorsModal);
+  $('why-btn-1').addEventListener('click', openCorsModal);
+  $('why-btn-2').addEventListener('click', openCorsModal);
+
+  // "See more models" buttons
+  seeMoreSingle.addEventListener('click', () => openModelsModal(providerSelect.value));
+  seeMore1.addEventListener('click', () => openModelsModal(compareProvider1.value));
+  seeMore2.addEventListener('click', () => openModelsModal(compareProvider2.value));
+
+  // Modal close buttons
+  corsModalClose.addEventListener('click', closeCorsModal);
+  modelsModalClose.addEventListener('click', closeModelsModal);
+
+  // Close modals on overlay click
+  corsModal.addEventListener('click', e => { if (e.target === corsModal) closeCorsModal(); });
+  modelsModal.addEventListener('click', e => { if (e.target === modelsModal) closeModelsModal(); });
 
   // Mode buttons
   btnUnstructured.addEventListener('click', () => setMode('unstructured'));
@@ -554,13 +625,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Populate model selects if a provider is already selected (e.g. from browser autofill)
   if (providerSelect.value) {
-    updateProviderUI(providerSelect.value, modelSelect, anthropicCorsWarning);
+    updateProviderUI(providerSelect.value, modelSelect, modelSelectGroup, anthropicDisabledSingle, seeMoreSingle);
   }
   if (compareProvider1.value) {
-    updateProviderUI(compareProvider1.value, compareModel1, compareCorsWarning1);
+    updateProviderUI(compareProvider1.value, compareModel1, modelSelectGroup1, anthropicDisabled1, seeMore1);
   }
   if (compareProvider2.value) {
-    updateProviderUI(compareProvider2.value, compareModel2, compareCorsWarning2);
+    updateProviderUI(compareProvider2.value, compareModel2, modelSelectGroup2, anthropicDisabled2, seeMore2);
   }
 
   wireEvents();

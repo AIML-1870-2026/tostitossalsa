@@ -407,19 +407,159 @@ select {
   gap: 16px;
 }
 
-/* CORS warnings */
-#anthropic-cors-warning,
-#compare-cors-warning-1,
-#compare-cors-warning-2 {
-  display: none;
-  background: rgba(255, 203, 107, 0.1);
-  border: 1px solid rgba(255, 203, 107, 0.4);
+/* Anthropic disabled banner */
+.anthropic-disabled-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 85, 114, 0.1);
+  border: 1px solid rgba(255, 85, 114, 0.4);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
-  color: var(--yellow);
-  font-size: 0.95rem;
+  color: var(--red);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
   margin-top: 10px;
-  line-height: 1.4;
+  letter-spacing: 0.06em;
+}
+
+.btn-why {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition);
+}
+
+.btn-why:hover {
+  background: var(--red);
+  color: var(--bg-deep);
+}
+
+/* See more button */
+.btn-see-more {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  background: transparent;
+  color: var(--cyan);
+  border: 1px solid rgba(130, 170, 255, 0.4);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+  transition: background var(--transition), color var(--transition);
+}
+
+.btn-see-more:hover {
+  background: rgba(130, 170, 255, 0.12);
+  border-color: var(--cyan);
+}
+
+/* ----------------------------------------------------------
+   Modals
+   ---------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-box {
+  background: var(--bg-card);
+  border: var(--card-border);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  max-width: 580px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+.modal-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  color: var(--cyan);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.modal-body {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.btn-modal-close {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid rgba(130, 170, 255, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  cursor: pointer;
+  align-self: flex-end;
+  letter-spacing: 0.05em;
+  transition: background var(--transition), color var(--transition);
+}
+
+.btn-modal-close:hover {
+  background: rgba(130, 170, 255, 0.1);
+  color: var(--text-light);
+}
+
+/* Models list inside models modal */
+.models-modal-body {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.model-list-item {
+  font-family: 'VT323', monospace;
+  font-size: 1.05rem;
+  color: var(--text-light);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(130, 170, 255, 0.08);
+  background: var(--bg-mid);
+}
+
+.model-list-item:hover {
+  border-color: rgba(130, 170, 255, 0.3);
+  color: var(--cyan);
+}
+
+.models-loading,
+.models-error {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  padding: 10px;
+}
+
+.models-error {
+  color: var(--red);
 }
 
 /* ----------------------------------------------------------
