@@ -411,28 +411,27 @@ select {
 .anthropic-disabled-banner {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   background: rgba(255, 85, 114, 0.1);
   border: 1px solid rgba(255, 85, 114, 0.4);
   border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  padding: 6px 10px;
   color: var(--red);
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
+  font-family: 'VT323', monospace;
+  font-size: 1rem;
   margin-top: 10px;
-  letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 
 .btn-why {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.4rem;
+  font-family: 'VT323', monospace;
+  font-size: 1rem;
   background: transparent;
   color: var(--red);
   border: 1px solid var(--red);
   border-radius: var(--radius-sm);
-  padding: 5px 10px;
+  padding: 2px 8px;
   cursor: pointer;
-  letter-spacing: 0.05em;
   white-space: nowrap;
   transition: background var(--transition), color var(--transition);
 }
@@ -543,11 +542,14 @@ select {
   border-radius: var(--radius-sm);
   border: 1px solid rgba(130, 170, 255, 0.08);
   background: var(--bg-mid);
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
 }
 
 .model-list-item:hover {
   border-color: rgba(130, 170, 255, 0.3);
   color: var(--cyan);
+  background: rgba(130, 170, 255, 0.06);
 }
 
 .models-loading,

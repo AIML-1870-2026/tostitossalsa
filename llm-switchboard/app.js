@@ -454,7 +454,9 @@ function openCorsModal() { show(corsModal); }
 function closeCorsModal() { hide(corsModal); }
 function closeModelsModal() { hide(modelsModal); }
 
-async function openModelsModal(provider) {
+const IMAGE_MODEL_PATTERNS = /dall-e|tts|whisper|embedding|embed|moderation|babbage|davinci|text-search|text-similarity|code-search/i;
+
+async function openModelsModal(provider, targetSelectEl) {
   const key = keys[provider];
   modelsModalTitle.textContent = provider.toUpperCase() + ' — All Models';
   modelsModalBody.innerHTML = '<span class="models-loading">Loading...</span>';
@@ -471,10 +473,27 @@ async function openModelsModal(provider) {
       });
       if (!resp.ok) throw new Error('API error ' + resp.status);
       const data = await resp.json();
-      const ids = data.data.map(m => m.id).sort();
+      const ids = data.data
+        .map(m => m.id)
+        .filter(id => !IMAGE_MODEL_PATTERNS.test(id))
+        .sort();
       modelsModalBody.innerHTML = ids.map(id =>
-        `<div class="model-list-item">${escapeHtml(id)}</div>`
+        `<div class="model-list-item" data-model="${escapeHtml(id)}">${escapeHtml(id)}</div>`
       ).join('');
+      modelsModalBody.querySelectorAll('.model-list-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const chosen = item.dataset.model;
+          // Add option if not already present
+          if (![...targetSelectEl.options].some(o => o.value === chosen)) {
+            const opt = document.createElement('option');
+            opt.value = chosen;
+            opt.textContent = chosen;
+            targetSelectEl.appendChild(opt);
+          }
+          targetSelectEl.value = chosen;
+          closeModelsModal();
+        });
+      });
     } catch (e) {
       modelsModalBody.innerHTML = `<span class="models-error">Failed to load models: ${escapeHtml(e.message)}</span>`;
     }
@@ -567,9 +586,9 @@ function wireEvents() {
   $('why-btn-2').addEventListener('click', openCorsModal);
 
   // "See more models" buttons
-  seeMoreSingle.addEventListener('click', () => openModelsModal(providerSelect.value));
-  seeMore1.addEventListener('click', () => openModelsModal(compareProvider1.value));
-  seeMore2.addEventListener('click', () => openModelsModal(compareProvider2.value));
+  seeMoreSingle.addEventListener('click', () => openModelsModal(providerSelect.value, modelSelect));
+  seeMore1.addEventListener('click', () => openModelsModal(compareProvider1.value, compareModel1));
+  seeMore2.addEventListener('click', () => openModelsModal(compareProvider2.value, compareModel2));
 
   // Modal close buttons
   corsModalClose.addEventListener('click', closeCorsModal);
