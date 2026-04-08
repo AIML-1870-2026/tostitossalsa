@@ -487,6 +487,7 @@ function updateProviderUI(provider, modelSelectEl, modelGroupEl, disabledBannerE
   if (provider === 'anthropic') {
     hide(modelGroupEl);
     show(disabledBannerEl);
+    modelSelectEl.innerHTML = '<option value="">— select model —</option>';
   } else {
     show(modelGroupEl);
     hide(disabledBannerEl);
