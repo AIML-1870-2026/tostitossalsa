@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Switchboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+<h1>LLM Switchboard</h1>
+        <p class="subtitle">Compare &amp; explore language models</p>
+    </header>
+
+    <main>
+
+        <div class="left-col">
+
+        <!-- ═══════════════════════════════════════════════
+             KEY MANAGEMENT SECTION
+        ════════════════════════════════════════════════ -->
+        <section id="key-section" class="card">
+            <h2 class="section-title">🔑 Key Management</h2>
+
+            <div class="key-row">
+                <label for="openai-key">OpenAI API Key</label>
+                <input
+                    type="text"
+                    id="openai-key"
+                    placeholder="sk-..."
+                    autocomplete="off"
+                    spellcheck="false"
+                />
+            </div>
+
+            <div class="key-row">
+                <label for="anthropic-key">Anthropic API Key</label>
+                <input
+                    type="text"
+                    id="anthropic-key"
+                    placeholder="sk-ant-..."
+                    autocomplete="off"
+                    spellcheck="false"
+                />
+            </div>
+
+            <div class="key-row">
+                <label for="file-upload">Import from file (.env / .csv)</label>
+                <input
+                    type="file"
+                    id="file-upload"
+                    accept=".env,.csv,text/plain"
+                />
+            </div>
+
+            <div class="key-actions">
+                <button id="clear-keys-btn" class="btn btn-danger">✕ Clear Keys</button>
+            </div>
+
+            <div id="privacy-badge" class="privacy-badge">
+                Your keys never leave your browser — stored in memory only, never saved.
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             CONTROLS SECTION
+        ════════════════════════════════════════════════ -->
+        <section class="card" id="controls-section">
+            <h2 class="section-title">⚙️ Controls</h2>
+
+            <!-- Compare mode toggle -->
+            <div class="compare-toggle-row">
+                <label class="toggle-label" for="compare-toggle">
+                    <input type="checkbox" id="compare-toggle" />
+                    <span class="toggle-switch"></span>
+                    Compare Mode
+                </label>
+            </div>
+
+            <!-- Single provider/model controls (hidden in compare mode) -->
+            <div id="single-controls">
+                <div class="control-row">
+                    <div class="control-group">
+                        <label for="provider-select">Provider</label>
+                        <select id="provider-select">
+                            <option value="">— select provider —</option>
+                            <option value="openai">OpenAI</option>
+                            <option value="anthropic">Anthropic</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group" id="model-select-group">
+                        <label for="model-select">Model</label>
+                        <select id="model-select">
+                            <option value="">— select model —</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="anthropic-disabled-single" class="anthropic-disabled-banner hidden">
+                    <span>⊘ Anthropic disabled</span>
+                    <button class="btn-why" id="why-btn-single">Find out why</button>
+                </div>
+            </div>
+
+            <!-- Compare mode controls (shown when compare-toggle is checked) -->
+            <div id="compare-section" class="hidden">
+                <div class="compare-columns">
+                    <div class="compare-col">
+                        <h3 class="col-label">Model A</h3>
+                        <div class="control-group">
+                            <label for="compare-provider-1">Provider</label>
+                            <select id="compare-provider-1">
+                                <option value="">— select provider —</option>
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Anthropic</option>
+                            </select>
+                        </div>
+                        <div class="control-group" id="model-select-group-1">
+                            <label for="compare-model-1">Model</label>
+                            <select id="compare-model-1">
+                                <option value="">— select model —</option>
+                            </select>
+                        </div>
+                        <div id="anthropic-disabled-1" class="anthropic-disabled-banner hidden">
+                            <span>⊘ Anthropic disabled</span>
+                            <button class="btn-why" id="why-btn-1">Find out why</button>
+                        </div>
+                    </div>
+
+                    <div class="compare-col">
+                        <h3 class="col-label">Model B</h3>
+                        <div class="control-group">
+                            <label for="compare-provider-2">Provider</label>
+                            <select id="compare-provider-2">
+                                <option value="">— select provider —</option>
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Anthropic</option>
+                            </select>
+                        </div>
+                        <div class="control-group" id="model-select-group-2">
+                            <label for="compare-model-2">Model</label>
+                            <select id="compare-model-2">
+                                <option value="">— select model —</option>
+                            </select>
+                        </div>
+                        <div id="anthropic-disabled-2" class="anthropic-disabled-banner hidden">
+                            <span>⊘ Anthropic disabled</span>
+                            <button class="btn-why" id="why-btn-2">Find out why</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode toggle: Unstructured vs Structured -->
+            <div id="mode-toggle" class="mode-toggle">
+                <button id="btn-unstructured" class="mode-btn active">Unstructured</button>
+                <button id="btn-structured" class="mode-btn">Structured Output</button>
+            </div>
+        </section>
+
+        </div><!-- end .left-col -->
+
+        <div class="right-col">
+
+        <!-- ═══════════════════════════════════════════════
+             PROMPT SECTION
+        ════════════════════════════════════════════════ -->
+        <section class="card" id="prompt-section">
+            <h2 class="section-title">✏️ Prompt</h2>
+
+            <div class="control-group">
+                <label for="prompt-examples">Example Prompts</label>
+                <select id="prompt-examples">
+                    <option value="">— load an example —</option>
+                    <option value="Give me a one-paragraph pitch for an original sci-fi movie set on Europa.">🎬 Movie pitch</option>
+                    <option value="Explain the chord progression and mood of a classic blues song in simple terms.">🎵 Song analysis</option>
+                    <option value="Explain CRISPR gene editing as if I'm a curious 12-year-old.">🧬 Science explainer</option>
+                    <option value="Make the case for why the regular season matters as much as the playoffs in the NBA.">🏀 Sports take</option>
+                    <option value="Write the opening paragraph of a mystery novel set in a rainy, neon-lit city.">✍️ Story starter</option>
+                    <option value="What's one AI risk that doesn't get enough public attention, and why?">🤖 AI ethics</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="prompt-input">Your Prompt</label>
+                <textarea
+                    id="prompt-input"
+                    rows="6"
+                    placeholder="Type your prompt here, or load an example above..."
+                ></textarea>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             SCHEMA SECTION (structured mode only)
+        ════════════════════════════════════════════════ -->
+        <section class="card hidden" id="schema-section">
+            <h2 class="section-title">📐 Output Schema</h2>
+
+            <div class="control-group">
+                <label for="schema-templates">Schema Templates</label>
+                <select id="schema-templates">
+                    <option value="">— load a template —</option>
+                    <option value="simple-qa">📋 Simple Q&A</option>
+                    <option value="movie-review">🎬 Movie Review</option>
+                    <option value="character-profile">🧑 Character Profile</option>
+                    <option value="pros-cons">📊 Pros &amp; Cons</option>
+                    <option value="action-plan">🗓️ Action Plan</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="schema-input">JSON Schema</label>
+                <textarea
+                    id="schema-input"
+                    rows="10"
+                    placeholder='{ "type": "object", "properties": { ... } }'
+                    spellcheck="false"
+                ></textarea>
+            </div>
+
+            <div class="schema-actions">
+                <button id="validate-schema-btn" class="btn btn-secondary">✔ Validate JSON</button>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             SEND BUTTON
+        ════════════════════════════════════════════════ -->
+        <div class="send-row">
+            <button id="send-btn" class="btn btn-primary">▶ Send</button>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════
+             SINGLE-MODE OUTPUT
+        ════════════════════════════════════════════════ -->
+        <section id="single-output-section" class="card output-card">
+            <h2 class="section-title">💬 Response</h2>
+
+            <div id="error-panel" class="error-panel hidden"></div>
+
+            <div id="metrics-panel" class="metrics-panel"></div>
+
+            <div id="output-panel" class="output-panel">
+                <span class="output-placeholder">Response will appear here...</span>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════
+             COMPARE-MODE OUTPUT (hidden by default)
+        ════════════════════════════════════════════════ -->
+        <section id="compare-output-section" class="card output-card hidden">
+            <h2 class="section-title">⚡ Compare Results</h2>
+
+            <div class="compare-output-columns">
+                <div class="compare-output-col">
+                    <h3 id="col-header-1" class="col-header">Model A</h3>
+                    <div id="error-1" class="error-panel hidden"></div>
+                    <div id="metrics-1" class="metrics-panel"></div>
+                    <div id="output-1" class="output-panel">
+                        <span class="output-placeholder">Response A will appear here...</span>
+                    </div>
+                </div>
+
+                <div class="compare-output-col">
+                    <h3 id="col-header-2" class="col-header">Model B</h3>
+                    <div id="error-2" class="error-panel hidden"></div>
+                    <div id="metrics-2" class="metrics-panel"></div>
+                    <div id="output-2" class="output-panel">
+                        <span class="output-placeholder">Response B will appear here...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        </div><!-- end .right-col -->
+
+    </main>
+
+    <footer>
+        <p>LLM Switchboard &mdash; AIML 1870</p>
+    </footer>
+
+    <!-- CORS explanation modal -->
+    <div id="cors-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h3 class="modal-title">Why is Anthropic disabled?</h3>
+            <p class="modal-body">Browsers have a built-in security rule called CORS (Cross-Origin Resource Sharing) that blocks web pages from making requests to a different domain than the one they loaded from. When your browser tries to call api.anthropic.com directly, it first sends a "preflight" check asking the API if cross-origin requests are allowed — and since Anthropic's API isn't configured to say yes to random websites, the browser shuts the request down before it even gets a response. But even if you somehow worked around that, there's a second problem: your API key would have to live inside your JavaScript code, which is fully visible to anyone who opens DevTools. That's like taping your credit card number to the outside of your laptop. The right solution is to put a backend server in the middle — your browser talks to your server, your server (which no one else can peek inside) holds the API key and makes the actual call to Anthropic, and the response gets passed back safely.</p>
+            <button class="btn-modal-close" id="cors-modal-close">Close</button>
+        </div>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="app.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReviewForge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- Background blobs -->
+  <div class="bg-blobs" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="app-wrapper">
+
+    <!-- Header -->
+    <header class="app-header fade-in" style="animation-delay: 0s;">
+      <h1 class="logo">ReviewForge</h1>
+      <p class="tagline">AI-powered reviews, engineered to your sentiment.</p>
+    </header>
+
+    <!-- API Key Section -->
+    <section class="card api-key-section fade-in" style="animation-delay: 0.1s;">
+      <div class="api-key-header" id="api-key-toggle">
+        <span class="section-label">API Key</span>
+        <span id="key-status" class="key-status no-key">🔴 No key loaded</span>
+        <span class="chevron" id="api-chevron">▼</span>
+      </div>
+      <div class="api-key-body" id="api-key-body">
+        <label class="field-label" for="env-input">Paste your <code>.env</code> file contents here</label>
+        <textarea id="env-input" class="env-textarea" placeholder="OPENAI_API_KEY=sk-..."></textarea>
+        <div class="api-key-actions">
+          <div id="load-key-btn" class="btn btn-secondary">Load Key</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+
+      <!-- Left Column: Inputs -->
+      <div class="left-col">
+
+        <!-- Input Panel -->
+        <section class="card input-panel fade-in" style="animation-delay: 0.2s;">
+          <h2 class="panel-title">Product Details</h2>
+
+          <div class="field-group">
+            <label class="field-label" for="product-name">Product Name</label>
+            <input type="text" id="product-name" class="text-input" placeholder="e.g., Sony WH-1000XM5" />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="product-desc">Product Description</label>
+            <textarea id="product-desc" class="text-input text-area" placeholder="Briefly describe the product..."></textarea>
+          </div>
+
+          <div class="selects-row">
+            <div class="field-group">
+              <label class="field-label" for="model-select">Model</label>
+              <select id="model-select" class="select-input">
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="gpt-4o-mini" selected>gpt-4o-mini</option>
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="tone-select">Tone</label>
+              <select id="tone-select" class="select-input">
+                <option value="Professional">Professional</option>
+                <option value="Casual">Casual</option>
+                <option value="Snarky">Snarky</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="length-select">Length</label>
+              <select id="length-select" class="select-input">
+                <option value="short">Short (~100 words)</option>
+                <option value="medium" selected>Medium (~250 words)</option>
+                <option value="long">Long (~500 words)</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sliders Panel -->
+        <section class="card sliders-panel fade-in" style="animation-delay: 0.3s;">
+          <h2 class="panel-title">Sentiment Scores</h2>
+
+          <div class="slider-group" id="slider-price-wrapper" data-slider="price">
+            <div class="slider-header">
+              <span class="slider-emoji">💰</span>
+              <span class="slider-name">Price</span>
+              <span class="slider-value" id="price-value">5</span>
+            </div>
+            <input type="range" id="slider-price" class="slider" min="1" max="10" value="5" />
+            <span class="slider-label" id="price-label">Good</span>
+          </div>
+
+          <div class="slider-group" id="slider-features-wrapper" data-slider="features">
+            <div class="slider-header">
+              <span class="slider-emoji">⚙️</span>
+              <span class="slider-name">Features</span>
+              <span class="slider-value" id="features-value">5</span>
+            </div>
+            <input type="range" id="slider-features" class="slider" min="1" max="10" value="5" />
+            <span class="slider-label" id="features-label">Good</span>
+          </div>
+
+          <div class="slider-group" id="slider-usability-wrapper" data-slider="usability">
+            <div class="slider-header">
+              <span class="slider-emoji">🖐️</span>
+              <span class="slider-name">Usability</span>
+              <span class="slider-value" id="usability-value">5</span>
+            </div>
+            <input type="range" id="slider-usability" class="slider" min="1" max="10" value="5" />
+            <span class="slider-label" id="usability-label">Good</span>
+          </div>
+
+          <div class="sentiment-summary" id="sentiment-summary">
+            Balanced — moderate scores across price, features, and usability.
+          </div>
+        </section>
+
+        <!-- Generate Button -->
+        <div id="generate-btn" class="btn btn-generate fade-in" style="animation-delay: 0.35s;">
+          Generate Review ✦
+        </div>
+
+      </div>
+
+      <!-- Right Column: Output -->
+      <div class="right-col fade-in" style="animation-delay: 0.4s;">
+        <section class="card output-panel-card">
+          <h2 class="panel-title">Generated Review</h2>
+
+          <div id="output-panel" class="output-panel">
+            <span class="output-placeholder">Your review will appear here...</span>
+          </div>
+
+          <div id="output-footer" class="output-footer hidden">
+            <span id="output-meta" class="output-meta"></span>
+            <div id="copy-btn" class="btn btn-secondary btn-sm">Copy to Clipboard</div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
