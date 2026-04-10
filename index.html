@@ -1220,6 +1220,35 @@
             50%       { filter: drop-shadow(0 0 14px rgba(199, 146, 234, 0.85)); }
         }
 
+        /* Product Review / star / document icon */
+        .project-card__icon--product-review {
+            background:
+                /* Star center */
+                radial-gradient(circle, #ffcb6b 50%, transparent 51%) 34px 26px / 12px 12px,
+                /* Star top point */
+                linear-gradient(#ffcb6b 0 0) 37px 10px / 6px 10px,
+                /* Star right point */
+                linear-gradient(#ffcb6b 0 0) 52px 24px / 10px 6px,
+                /* Star bottom-right point */
+                linear-gradient(45deg, transparent 40%, #ffcb6b 40%, #ffcb6b 60%, transparent 60%) 44px 38px / 10px 10px,
+                /* Star bottom-left point */
+                linear-gradient(-45deg, transparent 40%, #ffcb6b 40%, #ffcb6b 60%, transparent 60%) 24px 38px / 10px 10px,
+                /* Star left point */
+                linear-gradient(#ffcb6b 0 0) 16px 24px / 10px 6px,
+                /* Review lines */
+                linear-gradient(#82aaff 0 0) 14px 54px / 22px 3px,
+                linear-gradient(#82aaff 0 0) 14px 60px / 16px 3px,
+                /* Background */
+                linear-gradient(#0f172a 0 0) 0 0 / 100% 100%;
+            background-repeat: no-repeat;
+            animation: reviewGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes reviewGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 203, 107, 0.4)); }
+            50%       { filter: drop-shadow(0 0 14px rgba(255, 203, 107, 0.85)); }
+        }
+
         /* ============================================
            RESPONSIVE DESIGN
            ============================================ */
@@ -1555,6 +1584,20 @@
                             <div class="project-card__icon project-card__icon--llm-switchboard" role="img" aria-label="Pixel art AI node graph"></div>
                             <h3 class="project-card__title">LLM Switchboard</h3>
                             <a href="llm-switchboard/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Product Review Generator Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--product-review" role="img" aria-label="Pixel art star with review lines"></div>
+                            <h3 class="project-card__title">Product Review Generator</h3>
+                            <a href="product-review/index.html" class="project-card__link">View Project</a>
                         </div>
                     </article>
                 </div>
