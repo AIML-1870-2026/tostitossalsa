@@ -233,7 +233,19 @@ async function generateReview() {
         const errBody = await response.json();
         if (errBody?.error?.message) apiMsg = errBody.error.message;
       } catch (_) {}
-      throw new Error(`API error: ${apiMsg}`);
+
+      let friendlyMsg;
+      if (response.status === 401 || response.status === 403) {
+        friendlyMsg = 'Your API key is missing or invalid.';
+      } else if (response.status === 429) {
+        friendlyMsg = 'You\'ve hit the rate limit or your quota is exhausted.';
+      } else if (response.status >= 500) {
+        friendlyMsg = 'OpenAI\'s servers are having issues.';
+      } else {
+        friendlyMsg = 'The request was rejected by the API.';
+      }
+
+      throw new Error(`${friendlyMsg}\n\nDetails: ${apiMsg}`);
     }
 
     const data    = await response.json();
@@ -253,10 +265,20 @@ async function generateReview() {
 
   } catch (err) {
     clearTimeout(timeoutId);
-    const msg = err.name === 'AbortError'
-      ? 'Request timed out. The model may be busy — try again.'
-      : err.message;
-    outputPanel.innerHTML = `<span class="output-placeholder" style="color: #ff4d4d;">⚠ ${msg}</span>`;
+    let friendlyPart, detailPart;
+    if (err.name === 'AbortError') {
+      friendlyPart = 'Request timed out. The model may be busy — try again.';
+      detailPart = null;
+    } else {
+      const parts = err.message.split('\n\nDetails: ');
+      friendlyPart = parts[0];
+      detailPart = parts[1] || null;
+    }
+    outputPanel.innerHTML = `
+      <div style="color: #ff4d4d;">
+        <span style="font-size: 1.1em;">⚠ ${friendlyPart}</span>
+        ${detailPart ? `<div style="margin-top: 8px; font-size: 0.85em; opacity: 0.75; font-family: monospace;">${detailPart}</div>` : ''}
+      </div>`;
     console.error('[ReviewForge] API error:', err);
   } finally {
     generateBtn.classList.remove('loading');
