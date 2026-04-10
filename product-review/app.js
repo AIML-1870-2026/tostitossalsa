@@ -269,6 +269,9 @@ async function generateReview() {
     if (err.name === 'AbortError') {
       friendlyPart = 'Request timed out. The model may be busy — try again.';
       detailPart = null;
+    } else if (err instanceof TypeError && err.message.toLowerCase().includes('failed to fetch')) {
+      friendlyPart = 'Network error: could not reach the OpenAI API.';
+      detailPart = 'If you\'re opening this file directly (file://), try serving it through a local server instead (e.g. python3 -m http.server 8080).';
     } else {
       const parts = err.message.split('\n\nDetails: ');
       friendlyPart = parts[0];
