@@ -227,14 +227,13 @@ async function generateReview() {
 
     clearTimeout(timeoutId);
 
-    if (response.status === 401 || response.status === 403) {
-      throw new Error('API key missing or invalid. Check your key and try again.');
-    }
-    if (response.status === 429) {
-      throw new Error('Rate limit or quota exceeded. Wait a moment and try again.');
-    }
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+      let apiMsg = `${response.status} ${response.statusText}`;
+      try {
+        const errBody = await response.json();
+        if (errBody?.error?.message) apiMsg = errBody.error.message;
+      } catch (_) {}
+      throw new Error(`API error: ${apiMsg}`);
     }
 
     const data    = await response.json();
