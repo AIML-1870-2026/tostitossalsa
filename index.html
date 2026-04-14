@@ -1249,6 +1249,32 @@
             50%       { filter: drop-shadow(0 0 14px rgba(255, 203, 107, 0.85)); }
         }
 
+        /* Science Experiment Generator / flask / beaker icon */
+        .project-card__icon--science-experiment {
+            background:
+                /* Flask body */
+                linear-gradient(#82aaff 0 0) 24px 36px / 32px 22px,
+                /* Flask neck */
+                linear-gradient(#82aaff 0 0) 32px 18px / 16px 18px,
+                /* Flask rim */
+                linear-gradient(#82aaff 0 0) 28px 14px / 24px 6px,
+                /* Liquid inside flask */
+                linear-gradient(#ff6b9d 0 0) 24px 46px / 32px 12px,
+                /* Bubble 1 */
+                radial-gradient(circle, #ffcb6b 50%, transparent 51%) 30px 40px / 8px 8px,
+                /* Bubble 2 */
+                radial-gradient(circle, #c792ea 50%, transparent 51%) 42px 44px / 6px 6px,
+                /* Background */
+                linear-gradient(#0f172a 0 0) 0 0 / 100% 100%;
+            background-repeat: no-repeat;
+            animation: scienceGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes scienceGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(130, 170, 255, 0.4)); }
+            50%       { filter: drop-shadow(0 0 14px rgba(130, 170, 255, 0.85)); }
+        }
+
         /* ============================================
            RESPONSIVE DESIGN
            ============================================ */
@@ -1598,6 +1624,20 @@
                             <div class="project-card__icon project-card__icon--product-review" role="img" aria-label="Pixel art star with review lines"></div>
                             <h3 class="project-card__title">Product Review Generator</h3>
                             <a href="product-review/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Science Experiment Generator Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--science-experiment" role="img" aria-label="Pixel art flask with bubbles"></div>
+                            <h3 class="project-card__title">Science Experiment Generator</h3>
+                            <a href="science-experiment-generator/index.html" class="project-card__link">View Project</a>
                         </div>
                     </article>
                 </div>

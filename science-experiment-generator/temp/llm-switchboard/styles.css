@@ -1,0 +1,1025 @@
+/* ============================================================
+   LLM Switchboard — styles.css
+   Fonts: Press Start 2P (headings/labels), VT323 (body/inputs)
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Reset & CSS Custom Properties
+   ---------------------------------------------------------- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-deep:   #0f0e17;
+  --bg-mid:    #1a1626;
+  --bg-card:   #221e2e;
+  --pink:      #ff6b9d;
+  --purple:    #c792ea;
+  --cyan:      #82aaff;
+  --yellow:    #ffcb6b;
+  --green:     #c3e88d;
+  --red:       #ff5572;
+  --text-light:#fffffe;
+  --text-dim:  #a0a0b0;
+
+  --card-border: 1px solid rgba(130, 170, 255, 0.15);
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --radius: 12px;
+  --radius-sm: 6px;
+  --transition: 0.18s ease;
+}
+
+/* ----------------------------------------------------------
+   Base / Body
+   ---------------------------------------------------------- */
+body {
+  font-family: 'VT323', monospace;
+  font-size: 1.15rem;
+  line-height: 1.5;
+  background: var(--bg-deep);
+  color: var(--text-light);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 60px;
+}
+
+/* ----------------------------------------------------------
+   Main App Wrapper / Two-Column Grid
+   ---------------------------------------------------------- */
+#app {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  width: 100%;
+  max-width: 1400px;
+  align-items: start;
+}
+
+.left-col,
+.right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ----------------------------------------------------------
+   Header
+   ---------------------------------------------------------- */
+header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+header h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.4rem;
+  color: var(--cyan);
+  margin-bottom: 10px;
+  text-shadow: 0 0 18px rgba(130, 170, 255, 0.5);
+}
+
+header p {
+  font-size: 1.3rem;
+  color: var(--purple);
+}
+
+/* ----------------------------------------------------------
+   Card (shared for all sections)
+   ---------------------------------------------------------- */
+.card {
+  background: var(--bg-card);
+  border: var(--card-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--card-shadow);
+}
+
+/* Card section label / legend */
+.card-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+}
+
+/* ----------------------------------------------------------
+   Typography helpers
+   ---------------------------------------------------------- */
+h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.75rem;
+  color: var(--cyan);
+  margin-bottom: 16px;
+}
+
+label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--text-dim);
+  display: block;
+  margin-bottom: 6px;
+  letter-spacing: 0.06em;
+}
+
+/* ----------------------------------------------------------
+   Form Inputs, Textareas, Selects (shared base)
+   ---------------------------------------------------------- */
+input[type="text"],
+input[type="password"],
+textarea,
+select {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  background: var(--bg-mid);
+  color: var(--text-light);
+  border: 1px solid rgba(130, 170, 255, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  width: 100%;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(130, 170, 255, 0.2);
+}
+
+textarea {
+  resize: vertical;
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2382aaff' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+/* ----------------------------------------------------------
+   #key-section — API Key Inputs
+   ---------------------------------------------------------- */
+#key-section {
+  /* inherits .card */
+}
+
+.key-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.key-row input[type="text"],
+.key-row input[type="password"] {
+  border-color: var(--cyan);
+  font-family: 'VT323', monospace;
+  letter-spacing: 0.04em;
+  padding: 12px 14px;
+}
+
+.key-row input[type="text"]:focus,
+.key-row input[type="password"]:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(130, 170, 255, 0.2),
+              0 0 12px rgba(130, 170, 255, 0.15);
+}
+
+.key-actions {
+  margin-top: 8px;
+}
+
+/* Legacy class kept for compat */
+.key-inputs-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.key-inputs-row .key-field {
+  flex: 1;
+  min-width: 0;
+}
+
+/* File upload area */
+.file-upload-area {
+  border: 2px dashed rgba(130, 170, 255, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  margin-bottom: 14px;
+}
+
+.file-upload-area:hover,
+.file-upload-area.dragover {
+  border-color: var(--cyan);
+  background: rgba(130, 170, 255, 0.06);
+  color: var(--text-light);
+}
+
+.file-upload-area input[type="file"] {
+  display: none;
+}
+
+/* Clear keys button */
+#clear-keys-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
+  letter-spacing: 0.05em;
+}
+
+#clear-keys-btn:hover {
+  background: var(--red);
+  color: var(--bg-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(255, 85, 114, 0.35);
+}
+
+/* Privacy badge */
+#privacy-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  color: var(--green);
+  margin-top: 12px;
+  opacity: 0.85;
+}
+
+#privacy-badge::before {
+  content: '🔒';
+  font-size: 0.9rem;
+}
+
+/* ----------------------------------------------------------
+   Controls Section — Provider / Model selects
+   ---------------------------------------------------------- */
+.controls-row,
+.control-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.controls-row .control-field,
+.control-row .control-group,
+.control-group {
+  flex: 1;
+  min-width: 140px;
+}
+
+#provider-select {
+  border-color: var(--purple);
+}
+
+#provider-select:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 2px rgba(199, 146, 234, 0.2);
+}
+
+#model-select {
+  border-color: var(--cyan);
+}
+
+#model-select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(130, 170, 255, 0.2);
+}
+
+/* Compare toggle */
+.compare-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.compare-toggle-row label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--yellow);
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-mid);
+  border: 1px solid rgba(130, 170, 255, 0.3);
+  border-radius: 26px;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  background: var(--text-dim);
+  border-radius: 50%;
+  transition: transform var(--transition), background var(--transition);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: rgba(130, 170, 255, 0.2);
+  border-color: var(--cyan);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(24px);
+  background: var(--cyan);
+}
+
+/* Fallback for plain checkbox #compare-toggle */
+#compare-toggle[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+  accent-color: var(--cyan);
+  width: 20px;
+  height: 20px;
+}
+
+/* Compare sub-section (two-column provider/model pickers) */
+#compare-section {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(130, 170, 255, 0.1);
+}
+
+.compare-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Anthropic disabled banner */
+.anthropic-disabled-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: rgba(255, 85, 114, 0.1);
+  border: 1px solid rgba(255, 85, 114, 0.4);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--red);
+  font-family: 'VT323', monospace;
+  font-size: 1rem;
+  margin-top: 10px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.btn-why {
+  font-family: 'VT323', monospace;
+  font-size: 1rem;
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.btn-why:hover {
+  background: var(--red);
+  color: var(--bg-deep);
+}
+
+/* See more button */
+.btn-see-more {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  background: transparent;
+  color: var(--cyan);
+  border: 1px solid rgba(130, 170, 255, 0.4);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+  transition: background var(--transition), color var(--transition);
+}
+
+.btn-see-more:hover {
+  background: rgba(130, 170, 255, 0.12);
+  border-color: var(--cyan);
+}
+
+/* ----------------------------------------------------------
+   Modals
+   ---------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-box {
+  background: var(--bg-card);
+  border: var(--card-border);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  max-width: 580px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+.modal-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  color: var(--cyan);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.modal-body {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.btn-modal-close {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid rgba(130, 170, 255, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  cursor: pointer;
+  align-self: flex-end;
+  letter-spacing: 0.05em;
+  transition: background var(--transition), color var(--transition);
+}
+
+.btn-modal-close:hover {
+  background: rgba(130, 170, 255, 0.1);
+  color: var(--text-light);
+}
+
+/* Models list inside models modal */
+.models-modal-body {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.model-list-item {
+  font-family: 'VT323', monospace;
+  font-size: 1.05rem;
+  color: var(--text-light);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(130, 170, 255, 0.08);
+  background: var(--bg-mid);
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+}
+
+.model-list-item:hover {
+  border-color: rgba(130, 170, 255, 0.3);
+  color: var(--cyan);
+  background: rgba(130, 170, 255, 0.06);
+}
+
+.models-loading,
+.models-error {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  padding: 10px;
+}
+
+.models-error {
+  color: var(--red);
+}
+
+/* ----------------------------------------------------------
+   Mode Toggle (Unstructured / Structured tabs)
+   ---------------------------------------------------------- */
+#mode-toggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid rgba(130, 170, 255, 0.25);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 0;
+  width: fit-content;
+}
+
+#mode-toggle button {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  letter-spacing: 0.06em;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  position: relative;
+}
+
+#mode-toggle button:not(:last-child) {
+  border-right: 1px solid rgba(130, 170, 255, 0.2);
+}
+
+#mode-toggle button:hover {
+  background: rgba(130, 170, 255, 0.08);
+  color: var(--text-light);
+}
+
+#mode-toggle button.active,
+#btn-unstructured.active,
+#btn-structured.active {
+  background: var(--cyan);
+  color: var(--bg-deep);
+}
+
+/* ----------------------------------------------------------
+   Prompt Section
+   ---------------------------------------------------------- */
+#prompt-examples {
+  margin-bottom: 12px;
+  border-color: rgba(199, 146, 234, 0.35);
+}
+
+#prompt-examples:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 2px rgba(199, 146, 234, 0.2);
+}
+
+#prompt-input {
+  min-height: 120px;
+  border-color: rgba(199, 146, 234, 0.35);
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+
+#prompt-input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(199, 146, 234, 0.18),
+              0 0 16px rgba(199, 146, 234, 0.12);
+}
+
+/* ----------------------------------------------------------
+   Schema Section
+   ---------------------------------------------------------- */
+#schema-section {
+  /* visibility controlled by .hidden class */
+}
+
+#schema-input {
+  font-family: 'VT323', monospace;
+  min-height: 100px;
+  border-color: rgba(195, 232, 141, 0.4);
+  font-size: 1.05rem;
+}
+
+#schema-input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px rgba(195, 232, 141, 0.18),
+              0 0 12px rgba(195, 232, 141, 0.1);
+}
+
+#validate-schema-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  background: transparent;
+  color: var(--green);
+  border: 1px solid var(--green);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background var(--transition), color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
+  letter-spacing: 0.05em;
+}
+
+#validate-schema-btn:hover {
+  background: var(--green);
+  color: var(--bg-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(195, 232, 141, 0.3);
+}
+
+/* ----------------------------------------------------------
+   Send Button
+   ---------------------------------------------------------- */
+#send-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  color: var(--bg-deep);
+  background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
+  border: none;
+  border-radius: var(--radius);
+  padding: 18px 28px;
+  width: 100%;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: filter var(--transition), transform var(--transition),
+              box-shadow var(--transition);
+  box-shadow: 0 4px 18px rgba(255, 107, 157, 0.3);
+}
+
+#send-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+#send-btn:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(255, 107, 157, 0.45);
+}
+
+#send-btn:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+#send-btn:disabled,
+#send-btn.loading {
+  cursor: not-allowed;
+  opacity: 0.7;
+  filter: none;
+  transform: none;
+}
+
+/* Pulse animation when loading */
+@keyframes btn-pulse {
+  0%, 100% { box-shadow: 0 4px 18px rgba(255, 107, 157, 0.3); }
+  50%       { box-shadow: 0 4px 32px rgba(199, 146, 234, 0.6); }
+}
+
+#send-btn.loading {
+  animation: btn-pulse 1.2s ease-in-out infinite;
+}
+
+#send-btn.loading::after {
+  content: ' ⌛';
+}
+
+/* ----------------------------------------------------------
+   Output Panels
+   ---------------------------------------------------------- */
+#output-panel,
+#output-1,
+#output-2 {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  line-height: 1.55;
+  background: var(--bg-mid);
+  border: 1px solid rgba(130, 170, 255, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  min-height: 150px;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text-light);
+}
+
+/* Scrollbar styling */
+#output-panel::-webkit-scrollbar,
+#output-1::-webkit-scrollbar,
+#output-2::-webkit-scrollbar {
+  width: 6px;
+}
+
+#output-panel::-webkit-scrollbar-track,
+#output-1::-webkit-scrollbar-track,
+#output-2::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#output-panel::-webkit-scrollbar-thumb,
+#output-1::-webkit-scrollbar-thumb,
+#output-2::-webkit-scrollbar-thumb {
+  background: rgba(130, 170, 255, 0.3);
+  border-radius: 3px;
+}
+
+/* Code blocks inside output */
+#output-panel code,
+#output-1 code,
+#output-2 code,
+#output-panel pre,
+#output-1 pre,
+#output-2 pre {
+  font-family: 'VT323', monospace;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: var(--green);
+}
+
+#output-panel pre,
+#output-1 pre,
+#output-2 pre {
+  display: block;
+  padding: 10px 14px;
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-left: 3px solid var(--cyan);
+  margin: 6px 0;
+}
+
+/* ----------------------------------------------------------
+   Metrics Panels
+   ---------------------------------------------------------- */
+#metrics-panel,
+#metrics-1,
+#metrics-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+/* Metric chip/badge */
+.metric-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.9rem;
+  font-family: 'VT323', monospace;
+  border: 1px solid transparent;
+}
+
+.metric-chip.time {
+  background: rgba(130, 170, 255, 0.12);
+  border-color: rgba(130, 170, 255, 0.35);
+  color: var(--cyan);
+}
+
+.metric-chip.tokens {
+  background: rgba(199, 146, 234, 0.12);
+  border-color: rgba(199, 146, 234, 0.35);
+  color: var(--purple);
+}
+
+.metric-chip.length {
+  background: rgba(255, 203, 107, 0.12);
+  border-color: rgba(255, 203, 107, 0.35);
+  color: var(--yellow);
+}
+
+/* ----------------------------------------------------------
+   Error Panels
+   ---------------------------------------------------------- */
+#error-panel,
+#error-1,
+#error-2 {
+  display: none;
+  background: rgba(255, 85, 114, 0.1);
+  border: 1px solid rgba(255, 85, 114, 0.4);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: var(--red);
+  font-size: 1rem;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+#error-panel.visible,
+#error-1.visible,
+#error-2.visible {
+  display: block !important;
+}
+
+/* ----------------------------------------------------------
+   Compare Mode Output — Two-Column Grid
+   ---------------------------------------------------------- */
+#compare-output-section {
+  /* visibility controlled by .hidden class */
+}
+
+.compare-grid,
+.compare-output-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.compare-col,
+.compare-output-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Column headers */
+#col-header-1,
+#col-header-2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.06em;
+  padding: 8px 0 10px;
+  border-bottom: 2px solid transparent;
+}
+
+#col-header-1 {
+  color: var(--pink);
+  border-bottom-color: var(--pink);
+}
+
+#col-header-2 {
+  color: var(--yellow);
+  border-bottom-color: var(--yellow);
+}
+
+/* ----------------------------------------------------------
+   Utility Classes
+   ---------------------------------------------------------- */
+.hidden {
+  display: none !important;
+}
+
+.visible {
+  display: block !important;
+}
+
+/* Divider */
+.divider {
+  border: none;
+  border-top: 1px solid rgba(130, 170, 255, 0.1);
+  margin: 10px 0;
+}
+
+/* Small helper text */
+.help-text {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+/* ----------------------------------------------------------
+   Focus Glow Animations
+   ---------------------------------------------------------- */
+@keyframes glow-cyan {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(130, 170, 255, 0.15); }
+  50%       { box-shadow: 0 0 0 4px rgba(130, 170, 255, 0.3); }
+}
+
+@keyframes glow-purple {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(199, 146, 234, 0.15); }
+  50%       { box-shadow: 0 0 0 4px rgba(199, 146, 234, 0.3); }
+}
+
+/* ----------------------------------------------------------
+   Back Link
+   ---------------------------------------------------------- */
+a.back {
+  display: inline-block;
+  margin-top: 40px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.06em;
+  color: var(--pink);
+  text-decoration: none;
+  border: 1px solid var(--pink);
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  transition: background var(--transition), color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
+}
+
+a.back:hover {
+  background: var(--pink);
+  color: var(--bg-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(255, 107, 157, 0.35);
+}
+
+/* ----------------------------------------------------------
+   Responsive — collapse to single column at 900px
+   ---------------------------------------------------------- */
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 24px 14px 48px;
+  }
+
+  header h1 {
+    font-size: 1rem;
+  }
+
+  .key-inputs-row {
+    flex-direction: column;
+  }
+
+  .controls-row,
+  .control-row {
+    flex-direction: column;
+  }
+
+  .compare-columns,
+  .compare-grid,
+  .compare-output-columns {
+    grid-template-columns: 1fr;
+  }
+
+  #mode-toggle {
+    width: 100%;
+  }
+
+  #mode-toggle button {
+    flex: 1;
+    text-align: center;
+    padding: 10px 8px;
+  }
+
+  #send-btn {
+    font-size: 0.5rem;
+    padding: 16px 20px;
+  }
+}

@@ -1,0 +1,643 @@
+/* ============================================================
+   Science Experiment Generator — style.css
+   Fonts: Press Start 2P (headings/labels), VT323 (body/inputs)
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Reset & CSS Custom Properties
+   ---------------------------------------------------------- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-deep:   #0f0e17;
+  --bg-mid:    #1a1626;
+  --bg-card:   #221e2e;
+  --pink:      #ff6b9d;
+  --purple:    #c792ea;
+  --cyan:      #82aaff;
+  --yellow:    #ffcb6b;
+  --green:     #c3e88d;
+  --red:       #ff5572;
+  --text-light:#fffffe;
+  --text-dim:  #a0a0b0;
+
+  --card-border: 1px solid rgba(130, 170, 255, 0.15);
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --radius: 12px;
+  --radius-sm: 6px;
+  --transition: 0.18s ease;
+}
+
+/* ----------------------------------------------------------
+   Base / Body
+   ---------------------------------------------------------- */
+body {
+  font-family: 'VT323', monospace;
+  font-size: 1.15rem;
+  line-height: 1.5;
+  background: var(--bg-deep);
+  color: var(--text-light);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 60px;
+}
+
+/* ----------------------------------------------------------
+   Header
+   ---------------------------------------------------------- */
+header {
+  text-align: center;
+  margin-bottom: 32px;
+  width: 100%;
+  max-width: 760px;
+}
+
+header h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.1rem;
+  color: var(--cyan);
+  margin-bottom: 12px;
+  line-height: 1.7;
+  text-shadow: 0 0 18px rgba(130, 170, 255, 0.5);
+}
+
+.subtitle {
+  font-size: 1.3rem;
+  color: var(--purple);
+}
+
+/* ----------------------------------------------------------
+   Main content wrapper
+   ---------------------------------------------------------- */
+main {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ----------------------------------------------------------
+   Card
+   ---------------------------------------------------------- */
+.card {
+  background: var(--bg-card);
+  border: var(--card-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--card-shadow);
+}
+
+.section-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  color: var(--cyan);
+  margin-bottom: 18px;
+  letter-spacing: 0.06em;
+}
+
+/* ----------------------------------------------------------
+   Labels
+   ---------------------------------------------------------- */
+label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--text-dim);
+  display: block;
+  margin-bottom: 6px;
+  letter-spacing: 0.06em;
+}
+
+/* ----------------------------------------------------------
+   Inputs, selects
+   ---------------------------------------------------------- */
+input[type="text"],
+input[type="password"],
+select {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  background: var(--bg-mid);
+  color: var(--text-light);
+  border: 1px solid rgba(130, 170, 255, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  width: 100%;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(130, 170, 255, 0.2);
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2382aaff' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-color: var(--bg-mid);
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+/* ----------------------------------------------------------
+   Field groups & layout
+   ---------------------------------------------------------- */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.field-group:last-child {
+  margin-bottom: 0;
+}
+
+.controls-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.help-text {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* ----------------------------------------------------------
+   Privacy note
+   ---------------------------------------------------------- */
+.privacy-note {
+  font-size: 0.95rem;
+  color: var(--green);
+  margin-top: 12px;
+  opacity: 0.85;
+}
+
+/* ----------------------------------------------------------
+   Generate button
+   ---------------------------------------------------------- */
+.generate-row {
+  width: 100%;
+}
+
+#generate-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--bg-deep);
+  background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
+  border: none;
+  border-radius: var(--radius);
+  padding: 18px 28px;
+  width: 100%;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: filter var(--transition), transform var(--transition),
+              box-shadow var(--transition);
+  box-shadow: 0 4px 18px rgba(255, 107, 157, 0.3);
+}
+
+#generate-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+#generate-btn:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(255, 107, 157, 0.45);
+}
+
+#generate-btn:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+#generate-btn:disabled,
+#generate-btn.loading {
+  cursor: not-allowed;
+  opacity: 0.7;
+  filter: none;
+  transform: none;
+}
+
+@keyframes btn-pulse {
+  0%, 100% { box-shadow: 0 4px 18px rgba(255, 107, 157, 0.3); }
+  50%       { box-shadow: 0 4px 32px rgba(199, 146, 234, 0.6); }
+}
+
+#generate-btn.loading {
+  animation: btn-pulse 1.2s ease-in-out infinite;
+}
+
+/* ----------------------------------------------------------
+   Output card
+   ---------------------------------------------------------- */
+.output-card {
+  min-height: 180px;
+}
+
+/* ----------------------------------------------------------
+   Difficulty badge
+   ---------------------------------------------------------- */
+#difficulty-badge-container {
+  margin-bottom: 14px;
+}
+
+.difficulty-badge {
+  display: inline-block;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+}
+
+.difficulty-easy {
+  background: rgba(195, 232, 141, 0.15);
+  border-color: rgba(195, 232, 141, 0.5);
+  color: var(--green);
+}
+
+.difficulty-medium {
+  background: rgba(255, 203, 107, 0.15);
+  border-color: rgba(255, 203, 107, 0.5);
+  color: var(--yellow);
+}
+
+.difficulty-hard {
+  background: rgba(255, 85, 114, 0.15);
+  border-color: rgba(255, 85, 114, 0.5);
+  color: var(--red);
+}
+
+/* ----------------------------------------------------------
+   Error panel
+   ---------------------------------------------------------- */
+.error-panel {
+  background: rgba(255, 85, 114, 0.1);
+  border: 1px solid rgba(255, 85, 114, 0.4);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: var(--red);
+  font-size: 1rem;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+/* ----------------------------------------------------------
+   Loading indicator
+   ---------------------------------------------------------- */
+.loading-indicator {
+  font-family: 'VT323', monospace;
+  font-size: 1.2rem;
+  color: var(--cyan);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@keyframes dots {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+  100% { content: ''; }
+}
+
+.loading-dots::after {
+  content: '';
+  animation: dots 1.2s steps(1) infinite;
+}
+
+/* ----------------------------------------------------------
+   Output panel (markdown rendered)
+   ---------------------------------------------------------- */
+.output-panel {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  background: var(--bg-mid);
+  border: 1px solid rgba(130, 170, 255, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  min-height: 100px;
+  word-break: break-word;
+  color: var(--text-light);
+}
+
+.output-placeholder {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* Markdown typography inside output */
+.output-panel h1,
+.output-panel h2,
+.output-panel h3,
+.output-panel h4 {
+  font-family: 'Press Start 2P', monospace;
+  color: var(--pink);
+  margin: 16px 0 8px;
+  line-height: 1.6;
+}
+
+.output-panel h1 { font-size: 0.75rem; }
+.output-panel h2 { font-size: 0.65rem; color: var(--purple); }
+.output-panel h3 { font-size: 0.55rem; color: var(--cyan); }
+
+.output-panel p {
+  margin-bottom: 10px;
+}
+
+.output-panel ul,
+.output-panel ol {
+  padding-left: 22px;
+  margin-bottom: 10px;
+}
+
+.output-panel li {
+  margin-bottom: 4px;
+}
+
+.output-panel strong {
+  color: var(--yellow);
+}
+
+.output-panel em {
+  color: var(--purple);
+}
+
+.output-panel code {
+  font-family: 'VT323', monospace;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--green);
+  font-size: 1.05rem;
+}
+
+.output-panel pre {
+  background: rgba(0, 0, 0, 0.35);
+  border-left: 3px solid var(--cyan);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin: 8px 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.output-panel pre code {
+  background: none;
+  padding: 0;
+}
+
+.output-panel hr {
+  border: none;
+  border-top: 1px solid rgba(130, 170, 255, 0.15);
+  margin: 14px 0;
+}
+
+/* ----------------------------------------------------------
+   History section
+   ---------------------------------------------------------- */
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.history-header .section-title {
+  margin-bottom: 0;
+}
+
+.btn-danger {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
+  letter-spacing: 0.05em;
+}
+
+.btn-danger:hover {
+  background: var(--red);
+  color: var(--bg-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(255, 85, 114, 0.35);
+}
+
+#history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  border: 1px solid rgba(130, 170, 255, 0.15);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.history-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-mid);
+  border: none;
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition);
+  color: var(--text-light);
+  font-family: 'VT323', monospace;
+}
+
+.history-toggle:hover {
+  background: rgba(130, 170, 255, 0.08);
+}
+
+.history-title {
+  flex: 1;
+  font-size: 1.1rem;
+  color: var(--cyan);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-meta {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.history-chevron {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+
+.history-toggle.open .history-chevron {
+  transform: rotate(180deg);
+}
+
+.history-content {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(130, 170, 255, 0.1);
+  background: var(--bg-card);
+}
+
+.history-supplies {
+  font-size: 1rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.history-supplies strong {
+  color: var(--yellow);
+}
+
+/* Reuse output-panel markdown styles for history content */
+.history-markdown {
+  font-family: 'VT323', monospace;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--text-light);
+}
+
+.history-markdown h1,
+.history-markdown h2,
+.history-markdown h3,
+.history-markdown h4 {
+  font-family: 'Press Start 2P', monospace;
+  color: var(--pink);
+  margin: 14px 0 6px;
+  line-height: 1.6;
+}
+
+.history-markdown h1 { font-size: 0.65rem; }
+.history-markdown h2 { font-size: 0.55rem; color: var(--purple); }
+.history-markdown h3 { font-size: 0.48rem; color: var(--cyan); }
+
+.history-markdown p { margin-bottom: 8px; }
+.history-markdown ul,
+.history-markdown ol { padding-left: 20px; margin-bottom: 8px; }
+.history-markdown li { margin-bottom: 3px; }
+.history-markdown strong { color: var(--yellow); }
+.history-markdown em { color: var(--purple); }
+.history-markdown code {
+  font-family: 'VT323', monospace;
+  background: rgba(0,0,0,0.35);
+  border-radius: 3px;
+  padding: 1px 4px;
+  color: var(--green);
+}
+.history-markdown hr {
+  border: none;
+  border-top: 1px solid rgba(130, 170, 255, 0.12);
+  margin: 10px 0;
+}
+
+/* ----------------------------------------------------------
+   Utility
+   ---------------------------------------------------------- */
+.hidden {
+  display: none !important;
+}
+
+/* ----------------------------------------------------------
+   Footer
+   ---------------------------------------------------------- */
+footer {
+  margin-top: 32px;
+  text-align: center;
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+footer p {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.back-link {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  letter-spacing: 0.06em;
+  color: var(--pink);
+  text-decoration: none;
+  border: 1px solid var(--pink);
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  transition: background var(--transition), color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
+}
+
+.back-link:hover {
+  background: var(--pink);
+  color: var(--bg-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(255, 107, 157, 0.35);
+}
+
+/* ----------------------------------------------------------
+   Responsive
+   ---------------------------------------------------------- */
+@media (max-width: 560px) {
+  body {
+    padding: 24px 14px 48px;
+  }
+
+  header h1 {
+    font-size: 0.85rem;
+  }
+
+  .controls-row {
+    grid-template-columns: 1fr;
+  }
+
+  #generate-btn {
+    font-size: 0.5rem;
+    padding: 16px 20px;
+  }
+
+  .history-meta {
+    display: none;
+  }
+}
