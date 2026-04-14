@@ -12,6 +12,7 @@ const apiKeyInput         = $('api-key');
 const modelSelect         = $('model-select');
 const gradeSelect         = $('grade-select');
 const suppliesInput       = $('supplies-input');
+const topicInput          = $('topic-input');
 const generateBtn         = $('generate-btn');
 const outputPanel         = $('output-panel');
 const errorPanel          = $('error-panel');
@@ -39,7 +40,7 @@ const DEFAULT_SYSTEM_PROMPT =
   'Use clear markdown formatting.';
 
 const DEFAULT_USER_PROMPT =
-  'Grade level: {grade}\nAvailable supplies: {supplies}\n\nPlease suggest a science experiment I can do with these materials.';
+  'Grade level: {grade}\nAvailable supplies: {supplies}\n{topic}\nPlease suggest a science experiment I can do with these materials.';
 
 // ── Utility helpers ─────────────────────────────
 function show(el) { el.classList.remove('hidden'); }
@@ -95,14 +96,17 @@ function setGenerating(isGenerating) {
 }
 
 // ── API call ─────────────────────────────────────
-async function callOpenAI(key, model, gradeLevel, supplies) {
+async function callOpenAI(key, model, gradeLevel, supplies, topic) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+  const topicLine = topic ? `Target concept/end result: ${topic}` : '';
 
   const systemPrompt = systemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
   const userPrompt = (userPromptInput.value.trim() || DEFAULT_USER_PROMPT)
     .replace(/\{grade\}/g, gradeLevel)
-    .replace(/\{supplies\}/g, supplies);
+    .replace(/\{supplies\}/g, supplies)
+    .replace(/\{topic\}/g, topicLine);
 
   let response;
   try {
@@ -162,12 +166,13 @@ function saveHistory(history) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
 }
 
-function addToHistory(gradeLevel, supplies, markdown) {
+function addToHistory(gradeLevel, supplies, topic, markdown) {
   const history = loadHistory();
   history.unshift({
     timestamp: new Date().toISOString(),
     gradeLevel,
     supplies,
+    topic,
     markdown
   });
   saveHistory(history);
@@ -200,6 +205,7 @@ function renderHistory() {
           <p class="history-supplies">
             <strong>Supplies:</strong> ${escapeHtml(entry.supplies)}
           </p>
+          ${entry.topic ? `<p class="history-supplies"><strong>Topic/Concept:</strong> ${escapeHtml(entry.topic)}</p>` : ''}
           <div class="history-markdown">${marked.parse(entry.markdown)}</div>
         </div>
       </div>
@@ -235,6 +241,7 @@ async function handleGenerate() {
 
   const model      = modelSelect.value;
   const gradeLevel = gradeSelect.value;
+  const topic      = topicInput.value.trim();
 
   clearError();
   hide(difficultyContainer);
@@ -243,14 +250,14 @@ async function handleGenerate() {
   setGenerating(true);
 
   try {
-    const markdown = await callOpenAI(apiKey, model, gradeLevel, supplies);
+    const markdown = await callOpenAI(apiKey, model, gradeLevel, supplies, topic);
 
     outputPanel.innerHTML = marked.parse(markdown);
 
     const difficulty = parseDifficulty(markdown);
     renderDifficultyBadge(difficulty);
 
-    addToHistory(gradeLevel, supplies, markdown);
+    addToHistory(gradeLevel, supplies, topic, markdown);
   } catch (err) {
     outputPanel.innerHTML =
       '<span class="output-placeholder">Your experiment will appear here...</span>';

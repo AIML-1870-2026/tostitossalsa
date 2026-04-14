@@ -60,6 +60,13 @@
           placeholder="baking soda, vinegar, food coloring, plastic bottles" />
         <p class="help-text">Comma-separated list of what you have on hand</p>
       </div>
+
+      <div class="field-group">
+        <label for="topic-input">Topic / Concept <span class="optional-label">(optional)</span></label>
+        <input type="text" id="topic-input"
+          placeholder="e.g. osmosis, Newton's third law, acid-base reactions" />
+        <p class="help-text">Tell the AI exactly what concept or learning outcome the experiment should demonstrate</p>
+      </div>
     </section>
 
     <!-- Prompt Editor -->
@@ -76,7 +83,7 @@
         <div class="field-group">
           <label for="user-prompt-input">User Prompt Template</label>
           <textarea id="user-prompt-input" rows="4" spellcheck="false"></textarea>
-          <p class="help-text">Use <code>{grade}</code> and <code>{supplies}</code> as placeholders.</p>
+          <p class="help-text">Use <code>{grade}</code>, <code>{supplies}</code>, and <code>{topic}</code> as placeholders.</p>
         </div>
         <button id="reset-prompts-btn" class="btn-ghost">↺ Reset to Defaults</button>
       </div>
