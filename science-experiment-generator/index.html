@@ -37,6 +37,8 @@
             <option value="gpt-4o">gpt-4o</option>
             <option value="gpt-4o-mini">gpt-4o-mini</option>
             <option value="gpt-4-turbo">gpt-4-turbo</option>
+            <option value="gpt-4">gpt-4</option>
+            <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
           </select>
         </div>
 
@@ -57,6 +59,26 @@
         <input type="text" id="supplies-input"
           placeholder="baking soda, vinegar, food coloring, plastic bottles" />
         <p class="help-text">Comma-separated list of what you have on hand</p>
+      </div>
+    </section>
+
+    <!-- Prompt Editor -->
+    <section class="card" id="prompt-editor-section">
+      <div class="prompt-editor-header">
+        <h2 class="section-title">✏️ Edit Prompt</h2>
+        <button id="prompt-toggle-btn" class="btn-secondary" aria-expanded="false">Show</button>
+      </div>
+      <div id="prompt-editor-body" class="hidden">
+        <div class="field-group">
+          <label for="system-prompt-input">System Prompt</label>
+          <textarea id="system-prompt-input" rows="7" spellcheck="false"></textarea>
+        </div>
+        <div class="field-group">
+          <label for="user-prompt-input">User Prompt Template</label>
+          <textarea id="user-prompt-input" rows="4" spellcheck="false"></textarea>
+          <p class="help-text">Use <code>{grade}</code> and <code>{supplies}</code> as placeholders.</p>
+        </div>
+        <button id="reset-prompts-btn" class="btn-ghost">↺ Reset to Defaults</button>
       </div>
     </section>
 

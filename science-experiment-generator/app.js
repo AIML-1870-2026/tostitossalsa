@@ -19,11 +19,16 @@ const loadingIndicator    = $('loading-indicator');
 const difficultyContainer = $('difficulty-badge-container');
 const historyList         = $('history-list');
 const clearHistoryBtn     = $('clear-history-btn');
+const promptToggleBtn     = $('prompt-toggle-btn');
+const promptEditorBody    = $('prompt-editor-body');
+const systemPromptInput   = $('system-prompt-input');
+const userPromptInput     = $('user-prompt-input');
+const resetPromptsBtn     = $('reset-prompts-btn');
 
 // ── Constants ──────────────────────────────────
 const STORAGE_KEY = 'science-experiment-history';
 
-const SYSTEM_PROMPT =
+const DEFAULT_SYSTEM_PROMPT =
   'You are a helpful science teacher assistant. When given a grade level and a list of available supplies, ' +
   'suggest a creative, safe, and grade-appropriate science experiment. Format your response with:\n' +
   '- A title\n' +
@@ -32,6 +37,9 @@ const SYSTEM_PROMPT =
   '- Step-by-step instructions\n' +
   '- The scientific concept being demonstrated\n' +
   'Use clear markdown formatting.';
+
+const DEFAULT_USER_PROMPT =
+  'Grade level: {grade}\nAvailable supplies: {supplies}\n\nPlease suggest a science experiment I can do with these materials.';
 
 // ── Utility helpers ─────────────────────────────
 function show(el) { el.classList.remove('hidden'); }
@@ -91,9 +99,10 @@ async function callOpenAI(key, model, gradeLevel, supplies) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-  const userPrompt =
-    `Grade level: ${gradeLevel}\nAvailable supplies: ${supplies}\n\n` +
-    'Please suggest a science experiment I can do with these materials.';
+  const systemPrompt = systemPromptInput.value.trim() || DEFAULT_SYSTEM_PROMPT;
+  const userPrompt = (userPromptInput.value.trim() || DEFAULT_USER_PROMPT)
+    .replace(/\{grade\}/g, gradeLevel)
+    .replace(/\{supplies\}/g, supplies);
 
   let response;
   try {
@@ -106,7 +115,7 @@ async function callOpenAI(key, model, gradeLevel, supplies) {
       body: JSON.stringify({
         model,
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: systemPrompt },
           { role: 'user',   content: userPrompt }
         ],
         max_tokens: 1500
@@ -253,6 +262,24 @@ async function handleGenerate() {
 
 // ── Init ─────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Populate prompt textareas with defaults
+  systemPromptInput.value = DEFAULT_SYSTEM_PROMPT;
+  userPromptInput.value   = DEFAULT_USER_PROMPT;
+
+  // Prompt editor toggle
+  promptToggleBtn.addEventListener('click', () => {
+    const isHidden = promptEditorBody.classList.contains('hidden');
+    promptEditorBody.classList.toggle('hidden', !isHidden);
+    promptToggleBtn.textContent = isHidden ? 'Hide' : 'Show';
+    promptToggleBtn.setAttribute('aria-expanded', String(isHidden));
+  });
+
+  // Reset prompts to defaults
+  resetPromptsBtn.addEventListener('click', () => {
+    systemPromptInput.value = DEFAULT_SYSTEM_PROMPT;
+    userPromptInput.value   = DEFAULT_USER_PROMPT;
+  });
+
   apiKeyInput.addEventListener('input', () => {
     apiKey = apiKeyInput.value.trim();
   });
