@@ -778,6 +778,7 @@ document.addEventListener('DOMContentLoaded', () => {
       $('key-status').className = 'key-status ok';
       status.textContent = `Key saved: ${key.slice(0, 5)}...${key.slice(-4)}`;
       status.className = 'key-status ok';
+      $('start-btn').disabled = false;
       $('api-key-input').value = '';
     } else {
       status.textContent = 'Invalid key format';
