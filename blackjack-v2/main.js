@@ -4,7 +4,7 @@ import {
   createDeck, shuffleDeck, handTotal, isSoft,
   isBust, isBlackjack, isPair, handLabel, cardDisplay
 } from './blackjack.js';
-import { setApiKey, getApiKey, getBetDecision, getInsuranceDecision, getActionDecision } from './llm.js';
+import { setApiKey, getBetDecision, getInsuranceDecision, getActionDecision } from './llm.js';
 import { Analytics } from './analytics.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -18,30 +18,23 @@ let deck = [];
 let analytics = null;
 
 const state = {
-  phase: 'setup', // setup | betting | dealing | insurance | action | resolution
-  players: [],    // [{ id, name, model, bankroll, hands, bet, history, isHuman, isDealer }]
+  phase: 'setup',
+  players: [],
   dealer: null,
-  activePlayerIdx: 0,
-  activeHandIdx: 0,
-  insurancePhaseIdx: 0,
   log: []
 };
 
 // ── DOM helpers ────────────────────────────────────────────────────────────
 
 const $ = id => document.getElementById(id);
-const el = (tag, cls, text) => {
-  const e = document.createElement(tag);
-  if (cls) e.className = cls;
-  if (text !== undefined) e.textContent = text;
-  return e;
-};
 
 function addLog(msg) {
   state.log.push(msg);
   const logEl = $('game-log');
   if (!logEl) return;
-  const line = el('div', 'log-line', msg);
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.textContent = msg;
   logEl.appendChild(line);
   logEl.scrollTop = logEl.scrollHeight;
 }
@@ -51,127 +44,97 @@ function showPhase(phase) {
     const e = $(id);
     if (e) e.classList.add('hidden');
   });
-  if (phase === 'setup') $('setup-panel').classList.remove('hidden');
-  if (phase === 'game') $('game-area').classList.remove('hidden');
-  if (phase === 'betting') {
-    $('game-area').classList.remove('hidden');
-    $('bet-controls').classList.remove('hidden');
-  }
-  if (phase === 'action') {
-    $('game-area').classList.remove('hidden');
-    $('action-controls').classList.remove('hidden');
-  }
-  if (phase === 'insurance') {
-    $('game-area').classList.remove('hidden');
-    $('insurance-controls').classList.remove('hidden');
-  }
+  if (phase === 'setup')     $('setup-panel').classList.remove('hidden');
+  if (phase === 'game')      $('game-area').classList.remove('hidden');
+  if (phase === 'betting') { $('game-area').classList.remove('hidden'); $('bet-controls').classList.remove('hidden'); }
+  if (phase === 'action')  { $('game-area').classList.remove('hidden'); $('action-controls').classList.remove('hidden'); }
+  if (phase === 'insurance') { $('game-area').classList.remove('hidden'); $('insurance-controls').classList.remove('hidden'); }
 }
 
 // ── Card rendering ─────────────────────────────────────────────────────────
 
-function suitColor(suit) {
-  return (suit === '♥' || suit === '♦') ? 'red' : 'black';
-}
-
 function renderCard(card, faceDown = false) {
-  const div = el('div', 'card');
-  if (faceDown) {
-    div.classList.add('face-down');
-    div.textContent = '🂠';
-    return div;
-  }
-  div.classList.add(suitColor(card.suit));
+  const div = document.createElement('div');
+  div.className = 'card';
+  if (faceDown) { div.classList.add('face-down'); div.textContent = '🂠'; return div; }
+  div.classList.add((card.suit === '♥' || card.suit === '♦') ? 'red' : 'black');
   div.innerHTML = `<span class="rank">${card.rank}</span><span class="suit">${card.suit}</span>`;
   return div;
 }
 
-function renderHand(hand, faceDownIdx = -1) {
-  const wrap = el('div', 'hand');
-  hand.cards.forEach((card, i) => {
-    wrap.appendChild(renderCard(card, i === faceDownIdx));
-  });
-  return wrap;
-}
-
 // ── Player zone rendering ──────────────────────────────────────────────────
 
-function getStatusClass(status) {
-  const map = {
-    'Thinking...': 'status-thinking',
-    'Blackjack': 'status-blackjack',
-    'Bust': 'status-bust',
-    'Win': 'status-win',
-    'Loss': 'status-loss',
-    'Push': 'status-push',
-    'Bust Out': 'status-bustout',
-    'Surrender': 'status-surrender'
-  };
-  return map[status] || 'status-neutral';
-}
+const STATUS_CLASSES = {
+  'Thinking...': 'status-thinking', 'Blackjack': 'status-blackjack',
+  'Bust': 'status-bust', 'Win': 'status-win', 'Loss': 'status-loss',
+  'Push': 'status-push', 'Bust Out': 'status-bustout', 'Surrender': 'status-surrender'
+};
 
 function renderPlayerZone(player) {
   const zone = $(`zone-${player.id}`);
   if (!zone) return;
 
   const handsEl = zone.querySelector('.player-hands');
-  if (!handsEl) return;
-  handsEl.innerHTML = '';
+  if (handsEl) handsEl.innerHTML = '';
 
-  // Bankroll
   const brEl = zone.querySelector('.bankroll');
-  if (brEl) brEl.textContent = `$${player.bankroll}`;
+  if (brEl && player.bankroll !== null) brEl.textContent = `$${player.bankroll}`;
 
-  // Each hand
   player.hands.forEach((hand, hIdx) => {
-    const handWrap = el('div', 'hand-wrap');
+    const handWrap = document.createElement('div');
+    handWrap.className = 'hand-wrap';
 
     // Cards
-    const isDealer = player.isDealer;
-    const faceDown = isDealer && state.phase !== 'resolution' ? 1 : -1;
-    handWrap.appendChild(renderHand(hand, faceDown));
+    const handDiv = document.createElement('div');
+    handDiv.className = 'hand';
+    const faceDown = player.isDealer && state.phase !== 'resolution' ? 1 : -1;
+    hand.cards.forEach((card, i) => handDiv.appendChild(renderCard(card, i === faceDown)));
+    handWrap.appendChild(handDiv);
 
-    // Total + status
-    const info = el('div', 'hand-info');
-    const total = el('span', 'hand-total', hand.label || handLabel(hand.cards));
-    const statusBadge = el('span', `status-badge ${getStatusClass(hand.status || '')}`, hand.status || '');
-    info.appendChild(total);
-    info.appendChild(statusBadge);
+    // Info row
+    const info = document.createElement('div');
+    info.className = 'hand-info';
+    const totalEl = document.createElement('span');
+    totalEl.className = 'hand-total';
+    totalEl.textContent = hand.label || handLabel(hand.cards);
+    info.appendChild(totalEl);
 
-    // Bet
-    if (!isDealer && hand.bet !== undefined) {
-      const betEl = el('span', 'hand-bet', `Bet: $${hand.bet}`);
-      info.appendChild(betEl);
+    if (hand.status) {
+      const badge = document.createElement('span');
+      badge.className = `status-badge ${STATUS_CLASSES[hand.status] || 'status-neutral'}`;
+      badge.textContent = hand.status;
+      info.appendChild(badge);
     }
 
+    if (!player.isDealer && hand.bet) {
+      const betEl = document.createElement('span');
+      betEl.className = 'hand-bet';
+      betEl.textContent = `Bet: $${hand.bet}`;
+      info.appendChild(betEl);
+    }
     handWrap.appendChild(info);
 
-    // Split label
     if (player.hands.length > 1) {
-      const lbl = el('div', 'split-label', `Hand ${hIdx + 1}`);
+      const lbl = document.createElement('div');
+      lbl.className = 'split-label';
+      lbl.textContent = `Hand ${hIdx + 1}`;
       handWrap.prepend(lbl);
     }
 
-    handsEl.appendChild(handWrap);
+    if (handsEl) handsEl.appendChild(handWrap);
   });
 
-  // AI reasoning
   if (!player.isHuman && !player.isDealer) {
-    const reasoning = zone.querySelector('.ai-reasoning-text');
-    if (reasoning && player.lastReasoning) {
-      reasoning.textContent = player.lastReasoning;
-    }
-  }
+    const reasoningEl = zone.querySelector('.ai-reasoning-text');
+    if (reasoningEl && player.lastReasoning) reasoningEl.textContent = player.lastReasoning;
 
-  // Stats
-  if (!player.isDealer && analytics) {
-    const stats = analytics.getStats(player.name);
-    const statsEl = zone.querySelector('.player-stats');
-    if (stats && statsEl) {
-      statsEl.textContent = `W: ${stats.wins} L: ${stats.losses} P: ${stats.pushes} (${stats.winRate}% WR)`;
+    if (analytics) {
+      const statsEl = zone.querySelector('.player-stats');
+      const stats = analytics.getStats(player.name);
+      if (stats && statsEl) statsEl.textContent = `W:${stats.wins} L:${stats.losses} P:${stats.pushes} (${stats.winRate}% WR)`;
+      const colors = { ai1: '#60a5fa', ai2: '#f472b6' };
+      analytics.renderChart(`chart-${player.id}`, player.name, colors[player.id]);
     }
-    const chartId = `chart-${player.id}`;
-    const chartColors = { ai1: '#60a5fa', ai2: '#f472b6', human: '#4ade80' };
-    analytics.renderChart(chartId, player.name, chartColors[player.id]);
   }
 }
 
@@ -183,126 +146,100 @@ function renderAll() {
 // ── Setup panel ────────────────────────────────────────────────────────────
 
 function buildSetupPanel() {
-  const ai1Model = $('ai1-model');
-  const ai2Model = $('ai2-model');
-  [ai1Model, ai2Model].forEach(sel => {
+  [$('ai1-model'), $('ai2-model')].forEach((sel, i) => {
     sel.innerHTML = '';
     OPENAI_MODELS.forEach(m => {
       const opt = document.createElement('option');
-      opt.value = m;
-      opt.textContent = m;
+      opt.value = m; opt.textContent = m;
       sel.appendChild(opt);
     });
+    sel.value = OPENAI_MODELS[i];
   });
-  ai1Model.value = OPENAI_MODELS[0];
-  ai2Model.value = OPENAI_MODELS[1];
 }
 
 function buildGameArea() {
-  const gameArea = $('game-area');
-
-  // Build player zones if not already present
   if ($('zone-dealer')) return;
-
-  // Dealer zone
-  gameArea.innerHTML = `
+  $('game-area').innerHTML = `
     <div class="table-layout">
-      <div class="dealer-row">
-        ${playerZoneHTML({ id: 'dealer', name: 'Dealer', isDealer: true })}
-      </div>
+      <div class="dealer-row">${playerZoneHTML({ id: 'dealer', isDealer: true })}</div>
       <div class="ai-row">
-        ${playerZoneHTML({ id: 'ai1', name: 'AI Player 1', isAI: true })}
-        ${playerZoneHTML({ id: 'ai2', name: 'AI Player 2', isAI: true })}
+        ${playerZoneHTML({ id: 'ai1', isAI: true })}
+        ${playerZoneHTML({ id: 'ai2', isAI: true })}
       </div>
-      <div class="human-row">
-        ${playerZoneHTML({ id: 'human', name: 'You', isHuman: true })}
-      </div>
-    </div>
-  `;
+      <div class="human-row">${playerZoneHTML({ id: 'human', isHuman: true })}</div>
+    </div>`;
 }
 
-function playerZoneHTML({ id, name, isDealer, isAI, isHuman }) {
+function playerZoneHTML({ id, isDealer, isAI, isHuman }) {
   const aiExtras = isAI ? `
-    <details class="ai-reasoning">
-      <summary>Reasoning</summary>
-      <p class="ai-reasoning-text">—</p>
-    </details>
-    <canvas id="chart-${id}" class="bankroll-chart" width="120" height="40"></canvas>
-  ` : '';
+    <details class="ai-reasoning"><summary>Reasoning</summary><p class="ai-reasoning-text">—</p></details>
+    <canvas id="chart-${id}" class="bankroll-chart" width="120" height="40"></canvas>` : '';
   return `
     <div class="player-zone" id="zone-${id}">
       <div class="player-header">
-        <span class="player-name" id="name-${id}">${name}</span>
+        <span class="player-name" id="name-${id}">—</span>
         ${!isDealer ? '<span class="bankroll">$1000</span>' : ''}
-        ${!isDealer ? '<span class="player-stats"></span>' : ''}
+        ${isAI ? '<span class="player-stats"></span>' : ''}
       </div>
       <div class="player-hands"></div>
       ${aiExtras}
-    </div>
-  `;
+    </div>`;
 }
 
-function updatePlayerZoneNames() {
+function updateZoneNames() {
   state.players.forEach(p => {
     const nameEl = $(`name-${p.id}`);
-    if (nameEl) nameEl.textContent = p.isHuman ? 'You' : `${p.name}${p.model ? ` (${p.model})` : ''}`;
+    if (nameEl) nameEl.textContent = p.isHuman ? 'You' : `${p.name} (${p.model})`;
   });
-  const dealerName = $('name-dealer');
-  if (dealerName) dealerName.textContent = 'Dealer';
+  const dn = $('name-dealer'); if (dn) dn.textContent = 'Dealer';
 }
 
 // ── Game setup ─────────────────────────────────────────────────────────────
 
 function startGame() {
-  const ai1Name = $('ai1-name').value.trim() || 'Agent Alpha';
-  const ai2Name = $('ai2-name').value.trim() || 'Agent Beta';
+  const ai1Name  = $('ai1-name').value.trim() || 'Agent Alpha';
+  const ai2Name  = $('ai2-name').value.trim() || 'Agent Beta';
   const ai1Model = $('ai1-model').value;
   const ai2Model = $('ai2-model').value;
   const bankroll = parseInt($('starting-bankroll').value, 10) || 1000;
 
-  if (ai1Model === ai2Model) {
-    $('model-warning').classList.remove('hidden');
-    return;
-  }
+  if (ai1Model === ai2Model) { $('model-warning').classList.remove('hidden'); return; }
   $('model-warning').classList.add('hidden');
 
   state.players = [
-    { id: 'ai1', name: ai1Name, model: ai1Model, bankroll, hands: [], history: [], isHuman: false, isDealer: false },
-    { id: 'ai2', name: ai2Name, model: ai2Model, bankroll, hands: [], history: [], isHuman: false, isDealer: false },
-    { id: 'human', name: 'You', model: null, bankroll, hands: [], history: [], isHuman: true, isDealer: false }
+    { id: 'ai1',   name: ai1Name, model: ai1Model, bankroll, hands: [], history: [], isHuman: false, isDealer: false },
+    { id: 'ai2',   name: ai2Name, model: ai2Model, bankroll, hands: [], history: [], isHuman: false, isDealer: false },
+    { id: 'human', name: 'You',   model: null,      bankroll, hands: [], history: [], isHuman: true,  isDealer: false }
   ];
-  state.dealer = { id: 'dealer', name: 'Dealer', model: null, bankroll: null, hands: [], isDealer: true };
+  state.dealer = { id: 'dealer', name: 'Dealer', model: null, bankroll: null, hands: [], isDealer: true, history: [] };
 
   analytics = new Analytics([ai1Name, ai2Name, 'You']);
-
   buildGameArea();
-  updatePlayerZoneNames();
+  updateZoneNames();
   showPhase('game');
-  addLog('--- Game started ---');
-
+  addLog('=== Game started ===');
   startHand();
 }
 
-// ── Hand flow ──────────────────────────────────────────────────────────────
+// ── Hand setup ─────────────────────────────────────────────────────────────
 
-function newHand(player) {
-  player.hands = [{ cards: [], bet: 0, status: '', label: '', splitCount: 0, fromSplit: false }];
+function freshHand() {
+  return { cards: [], bet: 0, status: '', label: '', splitCount: 0, fromSplit: false, _aceSplit: false };
 }
 
 async function startHand() {
   deck = shuffleDeck(createDeck());
 
   state.players.forEach(p => {
-    newHand(p);
+    p.hands = [freshHand()];
     if (p.bankroll <= 0) p.hands[0].status = 'Bust Out';
   });
-  newHand(state.dealer);
-
-  renderAll();
-
-  // Betting phase
+  state.dealer.hands = [freshHand()];
   state.phase = 'betting';
-  addLog('--- Betting phase ---');
+
+  $('next-hand-btn').classList.add('hidden');
+  renderAll();
+  addLog('--- Betting ---');
 
   // AI bets
   for (const p of state.players.filter(p => !p.isHuman && p.bankroll > 0)) {
@@ -311,62 +248,61 @@ async function startHand() {
     try {
       const { amount, reasoning } = await getBetDecision(p.name, p.model, p.bankroll, MIN_BET, p.history.slice(-3));
       p.hands[0].bet = amount;
+      p.bankroll -= amount;          // deduct bet immediately
       p.lastReasoning = reasoning;
-      p.hands[0].status = '';
       addLog(`${p.name} bets $${amount}`);
-    } catch (err) {
-      p.hands[0].bet = MIN_BET;
-      addLog(`${p.name} bets $${MIN_BET} (fallback)`);
+    } catch {
+      const amount = MIN_BET;
+      p.hands[0].bet = amount;
+      p.bankroll -= amount;
+      addLog(`${p.name} bets $${amount} (fallback)`);
     }
+    p.hands[0].status = '';
     renderPlayerZone(p);
   }
 
   // Human bet
+  const human = state.players.find(p => p.isHuman);
+  if (human.bankroll <= 0) {
+    dealCards();
+    return;
+  }
+  $('bet-input').max   = human.bankroll;
+  $('bet-input').value = Math.min(MIN_BET, human.bankroll);
   showPhase('betting');
-  const humanPlayer = state.players.find(p => p.isHuman);
-  $('bet-input').max = humanPlayer.bankroll;
-  $('bet-input').value = Math.min(MIN_BET, humanPlayer.bankroll);
   renderAll();
 }
 
 function confirmHumanBet() {
-  const humanPlayer = state.players.find(p => p.isHuman);
-  if (humanPlayer.bankroll <= 0) {
-    dealCards();
-    return;
-  }
+  const human = state.players.find(p => p.isHuman);
   const bet = parseInt($('bet-input').value, 10);
-  if (isNaN(bet) || bet < MIN_BET || bet > humanPlayer.bankroll) {
-    alert(`Bet must be between $${MIN_BET} and $${humanPlayer.bankroll}`);
+  if (isNaN(bet) || bet < MIN_BET || bet > human.bankroll) {
+    alert(`Bet must be between $${MIN_BET} and $${human.bankroll}`);
     return;
   }
-  humanPlayer.hands[0].bet = bet;
+  human.hands[0].bet = bet;
+  human.bankroll -= bet;             // deduct bet immediately
   addLog(`You bet $${bet}`);
+  showPhase('game');
   dealCards();
 }
 
+// ── Deal ───────────────────────────────────────────────────────────────────
+
 function dealCards() {
-  showPhase('game');
   addLog('--- Dealing ---');
+  const allPlayers = [...state.players.filter(p => p.bankroll >= 0 && p.hands[0].status !== 'Bust Out'), state.dealer];
 
-  const allPlayers = [...state.players.filter(p => p.bankroll > 0), state.dealer];
-
-  // Two cards each
   for (let i = 0; i < 2; i++) {
-    for (const p of allPlayers) {
-      const card = deck.pop();
-      p.hands[0].cards.push(card);
-    }
+    for (const p of allPlayers) p.hands[0].cards.push(deck.pop());
   }
 
-  // Update labels
   [...state.players, state.dealer].forEach(p => {
     p.hands.forEach(h => { h.label = handLabel(h.cards); });
   });
 
-  // Log dealt hands
-  state.players.filter(p => p.bankroll > 0).forEach(p => {
-    addLog(`${p.name}: ${p.hands[0].cards.map(cardDisplay).join(' ')} (${handLabel(p.hands[0].cards)})`);
+  state.players.filter(p => p.hands[0].status !== 'Bust Out').forEach(p => {
+    addLog(`${p.name}: ${p.hands[0].cards.map(cardDisplay).join(' ')} (${p.hands[0].label})`);
   });
   addLog(`Dealer shows: ${cardDisplay(state.dealer.hands[0].cards[0])}`);
 
@@ -378,16 +314,10 @@ function dealCards() {
 
 async function checkInsurance() {
   const dealerUp = state.dealer.hands[0].cards[0];
-  if (dealerUp.rank !== 'A') {
-    checkDealerBlackjack();
-    return;
-  }
+  if (dealerUp.rank !== 'A') { checkDealerBlackjack(); return; }
 
   addLog('Dealer shows Ace — insurance offered');
-  state.phase = 'insurance';
-  state.insurancePhaseIdx = 0;
 
-  // AI insurance decisions
   for (const p of state.players.filter(p => !p.isHuman && p.bankroll > 0)) {
     p.hands[0].status = 'Thinking...';
     renderPlayerZone(p);
@@ -397,35 +327,35 @@ async function checkInsurance() {
       );
       p.lastReasoning = reasoning;
       if (take && amount > 0) {
-        p.hands[0].insuranceBet = amount;
-        p.bankroll -= amount;
-        addLog(`${p.name} takes insurance: $${amount}`);
+        const ins = Math.min(amount, Math.floor(p.hands[0].bet / 2), p.bankroll);
+        p.hands[0].insuranceBet = ins;
+        p.bankroll -= ins;
+        addLog(`${p.name} takes insurance: $${ins}`);
       } else {
         addLog(`${p.name} declines insurance`);
       }
-    } catch {
-      addLog(`${p.name} declines insurance (error)`);
-    }
+    } catch { addLog(`${p.name} declines insurance (error)`); }
     p.hands[0].status = '';
     renderPlayerZone(p);
   }
 
-  // Human insurance
-  const humanPlayer = state.players.find(p => p.isHuman);
-  if (humanPlayer.bankroll > 0) {
+  const human = state.players.find(p => p.isHuman);
+  if (human.bankroll > 0) {
+    $('insurance-max').textContent = Math.floor(human.hands[0].bet / 2);
     showPhase('insurance');
-    $('insurance-max').textContent = Math.floor(humanPlayer.hands[0].bet / 2);
   } else {
     checkDealerBlackjack();
   }
 }
 
 function humanInsuranceYes() {
-  const humanPlayer = state.players.find(p => p.isHuman);
-  const maxIns = Math.floor(humanPlayer.hands[0].bet / 2);
-  humanPlayer.hands[0].insuranceBet = maxIns;
-  humanPlayer.bankroll -= maxIns;
-  addLog(`You take insurance: $${maxIns}`);
+  const human = state.players.find(p => p.isHuman);
+  const maxIns = Math.floor(human.hands[0].bet / 2);
+  if (maxIns > 0 && human.bankroll >= maxIns) {
+    human.hands[0].insuranceBet = maxIns;
+    human.bankroll -= maxIns;
+    addLog(`You take insurance: $${maxIns}`);
+  }
   showPhase('game');
   checkDealerBlackjack();
 }
@@ -440,45 +370,44 @@ function humanInsuranceNo() {
 
 function checkDealerBlackjack() {
   const dealerHand = state.dealer.hands[0];
-  if (isBlackjack(dealerHand.cards)) {
+  const dealerBJ = isBlackjack(dealerHand.cards);
+
+  if (dealerBJ) {
     dealerHand.status = 'Blackjack';
+    state.phase = 'resolution';
     addLog('Dealer has Blackjack!');
 
-    // Resolve insurance and hands
-    state.players.filter(p => p.bankroll > 0 || p.hands[0].insuranceBet).forEach(p => {
-      const hand = p.hands[0];
-
-      // Insurance payout
-      if (hand.insuranceBet) {
-        const win = hand.insuranceBet * 2;
-        p.bankroll += win + hand.insuranceBet;
-        addLog(`${p.name} insurance wins $${win}`);
+    state.players.forEach(p => {
+      // Insurance payout on main hand
+      const ins = p.hands[0].insuranceBet;
+      if (ins) {
+        p.bankroll += ins * 3;  // return insurance bet + 2:1 win
+        addLog(`${p.name} insurance wins $${ins * 2}`);
       }
-
-      // Hand resolution
-      if (isBlackjack(hand.cards)) {
-        hand.status = 'Push';
-        p.bankroll += hand.bet;
-        addLog(`${p.name}: Push (both Blackjack)`);
-        recordHistory(p, 'push', 0);
-      } else {
-        hand.status = 'Loss';
-        addLog(`${p.name}: Loss`);
-        recordHistory(p, 'loss', -hand.bet);
-      }
+      // Resolve every hand
+      p.hands.forEach(hand => {
+        if (hand.status === 'Bust Out') return;
+        if (isBlackjack(hand.cards)) {
+          hand.status = 'Push';
+          p.bankroll += hand.bet;  // return bet (was deducted at placement)
+          addLog(`${p.name}: Push (both Blackjack)`);
+          recordHistory(p, 'push', 0);
+        } else {
+          hand.status = 'Loss';
+          addLog(`${p.name}: Loss`);
+          recordHistory(p, 'loss', -hand.bet);
+        }
+      });
     });
 
-    state.phase = 'resolution';
     renderAll();
     endHand();
     return;
   }
 
-  // No dealer blackjack — insurance bets lost
+  // No dealer BJ — insurance bets are lost (already deducted on placement)
   state.players.forEach(p => {
-    if (p.hands[0].insuranceBet) {
-      addLog(`${p.name} insurance loses $${p.hands[0].insuranceBet}`);
-    }
+    if (p.hands[0].insuranceBet) addLog(`${p.name} insurance loses $${p.hands[0].insuranceBet}`);
   });
 
   startActionPhase();
@@ -494,28 +423,35 @@ function recordHistory(player, outcome, delta) {
 
 function getLegalActions(hand, bankroll, firstAction) {
   const actions = ['hit', 'stand'];
-  if (firstAction && bankroll >= hand.bet) actions.push('double');
-  const canResplit = hand.cards[0].rank !== 'A' && (hand.splitCount || 0) < 3;
+  if (firstAction && bankroll >= hand.bet)                                             actions.push('double');
+  const canResplit = hand.cards[0]?.rank !== 'A' && (hand.splitCount || 0) < 3;
   if (firstAction && isPair(hand.cards) && bankroll >= hand.bet && (!hand.fromSplit || canResplit)) actions.push('split');
-  if (firstAction && !hand.fromSplit) actions.push('surrender');
+  if (firstAction && !hand.fromSplit)                                                  actions.push('surrender');
   return actions;
 }
 
 async function startActionPhase() {
   state.phase = 'action';
-  addLog('--- Action phase ---');
+  addLog('--- Actions ---');
 
-  const activePlayers = state.players.filter(p => p.bankroll > 0);
-
-  for (const p of activePlayers) {
-    for (let hIdx = 0; hIdx < p.hands.length; hIdx++) {
+  for (const p of state.players.filter(p => p.hands[0].status !== 'Bust Out')) {
+    // Use index-based while loop so newly inserted split hands are played automatically
+    let hIdx = 0;
+    while (hIdx < p.hands.length) {
       const hand = p.hands[hIdx];
-      if (hand.status === 'Bust Out') continue;
 
-      // Check for natural blackjack (non-split hand)
+      // Natural blackjack (non-split) — no action needed
       if (!hand.fromSplit && isBlackjack(hand.cards)) {
         hand.status = 'Blackjack';
         addLog(`${p.name}: Blackjack!`);
+        hIdx++;
+        continue;
+      }
+
+      // Ace-split hand: one card already dealt, cannot hit
+      if (hand._aceSplit) {
+        hand.label = handLabel(hand.cards);
+        hIdx++;
         continue;
       }
 
@@ -524,20 +460,54 @@ async function startActionPhase() {
       } else {
         await aiTurn(p, hIdx);
       }
+      hIdx++;
     }
   }
 
   dealerTurn();
 }
 
-async function aiTurn(player, handIdx) {
+// ── Split ──────────────────────────────────────────────────────────────────
+
+async function doSplit(player, handIdx) {
   const hand = player.hands[handIdx];
+  const isAceSplit = hand.cards[0].rank === 'A';
+
+  // Take second card from hand, deal each hand a new card
+  const card2 = hand.cards.pop();
+  hand.cards.push(deck.pop());
+  hand.fromSplit = true;
+  hand.splitCount = (hand.splitCount || 0) + 1;
+  hand._aceSplit = isAceSplit;
+
+  const newHand = {
+    cards: [card2, deck.pop()],
+    bet: hand.bet,
+    status: '',
+    label: '',
+    splitCount: hand.splitCount,
+    fromSplit: true,
+    _aceSplit: isAceSplit
+  };
+
+  player.bankroll -= hand.bet;      // deduct second bet
+  player.hands.splice(handIdx + 1, 0, newHand);
+
+  hand.label    = handLabel(hand.cards);
+  newHand.label = handLabel(newHand.cards);
+  addLog(`${player.name} splits — now ${player.hands.length} hands`);
+  renderPlayerZone(player);
+}
+
+// ── AI turn ────────────────────────────────────────────────────────────────
+
+async function aiTurn(player, handIdx) {
+  const hand     = player.hands[handIdx];
   const dealerUp = state.dealer.hands[0].cards[0];
   let firstAction = true;
 
   while (true) {
     if (isBust(hand.cards)) { hand.status = 'Bust'; break; }
-
     hand.label = handLabel(hand.cards);
     const legalActions = getLegalActions(hand, player.bankroll, firstAction);
 
@@ -546,120 +516,22 @@ async function aiTurn(player, handIdx) {
 
     let action, reasoning;
     try {
-      const splitInfo = hand.fromSplit
-        ? { index: handIdx, total: player.hands.length }
-        : null;
+      const splitInfo = hand.fromSplit ? { index: handIdx, total: player.hands.length } : null;
       ({ action, reasoning } = await getActionDecision(
         player.name, player.model, player.bankroll,
         { cards: hand.cards, label: hand.label },
         dealerUp, legalActions, hand.bet, splitInfo
       ));
-    } catch {
-      action = 'stand';
-      reasoning = 'Error — defaulting to stand';
-    }
+    } catch { action = 'stand'; reasoning = 'Error — defaulting to stand'; }
 
     player.lastReasoning = reasoning;
-    hand.status = action.charAt(0).toUpperCase() + action.slice(1);
     addLog(`${player.name} hand ${handIdx + 1}: ${action}`);
 
     if (action === 'hit') {
       hand.cards.push(deck.pop());
       hand.label = handLabel(hand.cards);
+      hand.status = '';
       firstAction = false;
-      renderPlayerZone(player);
-    } else if (action === 'stand') {
-      break;
-    } else if (action === 'double') {
-      player.bankroll -= hand.bet;
-      hand.bet *= 2;
-      hand.cards.push(deck.pop());
-      hand.label = handLabel(hand.cards);
-      if (isBust(hand.cards)) hand.status = 'Bust';
-      renderPlayerZone(player);
-      break;
-    } else if (action === 'split') {
-      await doSplit(player, handIdx);
-      return;
-    } else if (action === 'surrender') {
-      const refund = Math.floor(hand.bet / 2);
-      player.bankroll += refund;
-      hand.status = 'Surrender';
-      addLog(`${player.name} surrenders, recovers $${refund}`);
-      renderPlayerZone(player);
-      return;
-    } else {
-      break;
-    }
-  }
-
-  renderPlayerZone(player);
-}
-
-async function doSplit(player, handIdx) {
-  const hand = player.hands[handIdx];
-  const card2 = hand.cards.pop();
-  const newHand = {
-    cards: [card2, deck.pop()],
-    bet: hand.bet,
-    status: '',
-    label: '',
-    splitCount: (hand.splitCount || 0) + 1,
-    fromSplit: true
-  };
-  hand.cards.push(deck.pop());
-  hand.fromSplit = true;
-  player.bankroll -= hand.bet;
-
-  player.hands.splice(handIdx + 1, 0, newHand);
-  addLog(`${player.name} splits hand ${handIdx + 1}`);
-
-  // Aces split: one card each, cannot hit
-  const isAceSplit = hand.cards[0].rank === 'A';
-
-  hand.label = handLabel(hand.cards);
-  newHand.label = handLabel(newHand.cards);
-  renderPlayerZone(player);
-
-  // Play each split hand
-  if (!isAceSplit) {
-    if (player.isHuman) {
-      await humanTurn(player, handIdx);
-      await humanTurn(player, handIdx + 1);
-    } else {
-      await aiTurn(player, handIdx);
-      await aiTurn(player, handIdx + 1);
-    }
-  }
-}
-
-// ── Human turn ─────────────────────────────────────────────────────────────
-
-let humanResolve = null;
-
-async function humanTurn(player, handIdx) {
-  const hand = player.hands[handIdx];
-  const dealerUp = state.dealer.hands[0].cards[0];
-
-  while (true) {
-    if (isBust(hand.cards)) { hand.status = 'Bust'; renderPlayerZone(player); return; }
-    hand.label = handLabel(hand.cards);
-
-    const firstAction = !hand._acted;
-    const legalActions = getLegalActions(hand, player.bankroll, firstAction);
-
-    setHumanButtons(legalActions);
-    showPhase('action');
-    renderAll();
-
-    const action = await waitForHumanAction();
-    hand._acted = true;
-
-    addLog(`You hand ${handIdx + 1}: ${action}`);
-
-    if (action === 'hit') {
-      hand.cards.push(deck.pop());
-      hand.label = handLabel(hand.cards);
       renderPlayerZone(player);
     } else if (action === 'stand') {
       hand.status = 'Stand';
@@ -669,21 +541,74 @@ async function humanTurn(player, handIdx) {
       hand.bet *= 2;
       hand.cards.push(deck.pop());
       hand.label = handLabel(hand.cards);
-      if (isBust(hand.cards)) hand.status = 'Bust';
+      hand.status = isBust(hand.cards) ? 'Bust' : 'Double';
       renderPlayerZone(player);
       break;
     } else if (action === 'split') {
       await doSplit(player, handIdx);
-      return;
+      if (hand._aceSplit) return;   // ace split: this hand is done
+      firstAction = true;           // new 2-card hand, can double/split again
     } else if (action === 'surrender') {
-      const refund = Math.floor(hand.bet / 2);
-      player.bankroll += refund;
+      player.bankroll += Math.floor(hand.bet / 2);
+      hand.status = 'Surrender';
+      addLog(`${player.name} surrenders, recovers $${Math.floor(hand.bet / 2)}`);
+      renderPlayerZone(player);
+      return;
+    } else {
+      break;
+    }
+  }
+  renderPlayerZone(player);
+}
+
+// ── Human turn ─────────────────────────────────────────────────────────────
+
+let humanResolve = null;
+
+async function humanTurn(player, handIdx) {
+  const hand = player.hands[handIdx];
+  let firstAction = true;
+
+  while (true) {
+    if (isBust(hand.cards)) { hand.status = 'Bust'; renderPlayerZone(player); return; }
+    hand.label = handLabel(hand.cards);
+    const legalActions = getLegalActions(hand, player.bankroll, firstAction);
+
+    setHumanButtons(legalActions);
+    showPhase('action');
+    renderAll();
+
+    const action = await waitForHumanAction();
+    addLog(`You hand ${handIdx + 1}: ${action}`);
+
+    if (action === 'hit') {
+      hand.cards.push(deck.pop());
+      hand.label = handLabel(hand.cards);
+      hand.status = '';
+      firstAction = false;
+      renderPlayerZone(player);
+    } else if (action === 'stand') {
+      hand.status = 'Stand';
+      break;
+    } else if (action === 'double') {
+      player.bankroll -= hand.bet;
+      hand.bet *= 2;
+      hand.cards.push(deck.pop());
+      hand.label = handLabel(hand.cards);
+      hand.status = isBust(hand.cards) ? 'Bust' : 'Double';
+      renderPlayerZone(player);
+      break;
+    } else if (action === 'split') {
+      await doSplit(player, handIdx);
+      if (hand._aceSplit) return;   // ace split: this hand is done
+      firstAction = true;
+    } else if (action === 'surrender') {
+      player.bankroll += Math.floor(hand.bet / 2);
       hand.status = 'Surrender';
       renderPlayerZone(player);
       return;
     }
   }
-
   renderPlayerZone(player);
   showPhase('game');
 }
@@ -700,44 +625,36 @@ function setHumanButtons(legalActions) {
 }
 
 function humanAction(action) {
-  if (humanResolve) {
-    const resolve = humanResolve;
-    humanResolve = null;
-    resolve(action);
-  }
+  if (humanResolve) { const r = humanResolve; humanResolve = null; r(action); }
 }
 
 // ── Dealer turn ────────────────────────────────────────────────────────────
 
 function dealerTurn() {
-  const hand = state.dealer.hands[0];
-  addLog('--- Dealer turn ---');
-
-  // Reveal hole card
   state.phase = 'resolution';
-  renderAll();
+  const hand = state.dealer.hands[0];
+  addLog('--- Dealer ---');
+  renderAll();  // reveal hole card
 
   while (true) {
     const total = handTotal(hand.cards);
-    const soft = isSoft(hand.cards);
-    // Hit on 16 or below, and soft 17
+    const soft  = isSoft(hand.cards);
     if (total < 17 || (total === 17 && soft)) {
-      hand.cards.push(deck.pop());
+      const card = deck.pop();
+      hand.cards.push(card);
       hand.label = handLabel(hand.cards);
-      addLog(`Dealer hits: ${cardDisplay(hand.cards[hand.cards.length - 1])} (${hand.label})`);
+      addLog(`Dealer hits: ${cardDisplay(card)} (${hand.label})`);
     } else {
       break;
     }
   }
 
-  const dealerTotal = handTotal(hand.cards);
   hand.label = handLabel(hand.cards);
   if (isBust(hand.cards)) {
     hand.status = 'Bust';
-    addLog(`Dealer busts at ${dealerTotal}`);
+    addLog(`Dealer busts at ${handTotal(hand.cards)}`);
   } else {
-    hand.status = '';
-    addLog(`Dealer stands at ${dealerTotal}`);
+    addLog(`Dealer stands at ${handTotal(hand.cards)}`);
   }
 
   resolveHands();
@@ -747,48 +664,48 @@ function dealerTurn() {
 
 function resolveHands() {
   const dealerTotal = handTotal(state.dealer.hands[0].cards);
-  const dealerBust = isBust(state.dealer.hands[0].cards);
+  const dealerBust  = isBust(state.dealer.hands[0].cards);
+  const dealerBJ    = isBlackjack(state.dealer.hands[0].cards);
 
-  state.players.filter(p => p.bankroll !== null).forEach(p => {
+  state.players.forEach(p => {
     p.hands.forEach(hand => {
-      if (hand.status === 'Bust Out' || hand.status === 'Surrender' || hand.status === 'Loss') return;
+      if (['Bust Out', 'Surrender', 'Loss', 'Push', 'Win', 'Blackjack'].includes(hand.status)) return;
+
+      if (hand.status === 'Bust' || isBust(hand.cards)) {
+        hand.status = 'Bust';
+        addLog(`${p.name} hand: Bust — loses $${hand.bet}`);
+        recordHistory(p, 'bust', -hand.bet);
+        return;
+      }
 
       const playerTotal = handTotal(hand.cards);
-      const playerBust = isBust(hand.cards);
-      const playerBJ = !hand.fromSplit && isBlackjack(hand.cards);
-      const dealerBJ = isBlackjack(state.dealer.hands[0].cards);
-
-      if (hand.status === 'Bust') {
-        addLog(`${p.name}: Bust — loses $${hand.bet}`);
-        recordHistory(p, 'bust', -hand.bet);
-        return;
-      }
-
-      if (playerBust) {
-        hand.status = 'Bust';
-        addLog(`${p.name}: Bust`);
-        recordHistory(p, 'bust', -hand.bet);
-        return;
-      }
+      const playerBJ    = !hand.fromSplit && isBlackjack(hand.cards);
 
       if (playerBJ && !dealerBJ) {
+        // Natural blackjack: 3:2. Split blackjack already handled as regular win (fromSplit blocks this).
         const winAmt = Math.floor(hand.bet * 1.5);
-        p.bankroll += hand.bet + winAmt;
+        p.bankroll += hand.bet + winAmt;   // return deducted bet + 3:2 profit
         hand.status = 'Blackjack';
-        addLog(`${p.name}: Blackjack! Wins $${winAmt}`);
+        addLog(`${p.name}: Blackjack! +$${winAmt}`);
         recordHistory(p, 'blackjack', winAmt);
-      } else if (dealerBust || playerTotal > dealerTotal) {
+      } else if (hand.fromSplit && isBlackjack(hand.cards) && !dealerBJ) {
+        // Split blackjack: 1:1 (not natural)
         p.bankroll += hand.bet * 2;
+        hand.status = 'Win';
+        addLog(`${p.name} (split BJ 1:1): +$${hand.bet}`);
+        recordHistory(p, 'win', hand.bet);
+      } else if (dealerBust || playerTotal > dealerTotal) {
+        p.bankroll += hand.bet * 2;        // return deducted bet + 1:1 profit
         hand.status = 'Win';
         addLog(`${p.name}: Win! +$${hand.bet}`);
         recordHistory(p, 'win', hand.bet);
       } else if (playerTotal === dealerTotal) {
-        p.bankroll += hand.bet;
+        p.bankroll += hand.bet;            // return deducted bet (push)
         hand.status = 'Push';
         addLog(`${p.name}: Push`);
         recordHistory(p, 'push', 0);
       } else {
-        hand.status = 'Loss';
+        hand.status = 'Loss';              // bet already deducted, nothing to return
         addLog(`${p.name}: Loss -$${hand.bet}`);
         recordHistory(p, 'loss', -hand.bet);
       }
@@ -801,20 +718,14 @@ function resolveHands() {
 
 function endHand() {
   const allBust = state.players.every(p => p.bankroll <= 0);
-  if (allBust) {
-    addLog('--- All players bust out. Game over. ---');
-    $('next-hand-btn').textContent = 'Restart';
-  }
+  $('next-hand-btn').textContent = allBust ? 'Restart' : 'Next Hand';
   $('next-hand-btn').classList.remove('hidden');
   $('next-hand-btn').disabled = false;
+  if (allBust) addLog('=== All players bust out. Game over. ===');
 }
 
 function nextHand() {
-  const allBust = state.players.every(p => p.bankroll <= 0);
-  if (allBust) {
-    location.reload();
-    return;
-  }
+  if (state.players.every(p => p.bankroll <= 0)) { location.reload(); return; }
   $('next-hand-btn').classList.add('hidden');
   startHand();
 }
@@ -840,8 +751,7 @@ function handleEnvUpload(file) {
     const apiKey = parseEnvFile(e.target.result);
     if (apiKey) {
       setApiKey(apiKey);
-      const masked = apiKey.slice(0, 5) + '...' + apiKey.slice(-4);
-      $('key-status').textContent = `Key loaded: ${masked}`;
+      $('key-status').textContent = `Key loaded: ${apiKey.slice(0, 5)}...${apiKey.slice(-4)}`;
       $('key-status').className = 'key-status ok';
       $('start-btn').disabled = false;
     } else {
@@ -858,18 +768,14 @@ document.addEventListener('DOMContentLoaded', () => {
   buildSetupPanel();
   showPhase('setup');
 
-  $('env-upload').addEventListener('change', e => {
-    if (e.target.files[0]) handleEnvUpload(e.target.files[0]);
-  });
-
-  $('ai1-model').addEventListener('change', validateModels);
-  $('ai2-model').addEventListener('change', validateModels);
-
-  $('start-btn').addEventListener('click', startGame);
+  $('env-upload').addEventListener('change',    e => { if (e.target.files[0]) handleEnvUpload(e.target.files[0]); });
+  $('ai1-model').addEventListener('change',     validateModels);
+  $('ai2-model').addEventListener('change',     validateModels);
+  $('start-btn').addEventListener('click',      startGame);
   $('confirm-bet-btn').addEventListener('click', confirmHumanBet);
-  $('insurance-yes').addEventListener('click', humanInsuranceYes);
-  $('insurance-no').addEventListener('click', humanInsuranceNo);
-  $('next-hand-btn').addEventListener('click', nextHand);
+  $('insurance-yes').addEventListener('click',  humanInsuranceYes);
+  $('insurance-no').addEventListener('click',   humanInsuranceNo);
+  $('next-hand-btn').addEventListener('click',  nextHand);
 
   ['hit', 'stand', 'double', 'split', 'surrender'].forEach(a => {
     const btn = $(`btn-${a}`);
@@ -878,7 +784,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function validateModels() {
-  const m1 = $('ai1-model').value;
-  const m2 = $('ai2-model').value;
-  $('model-warning').classList.toggle('hidden', m1 !== m2);
+  $('model-warning').classList.toggle('hidden', $('ai1-model').value !== $('ai2-model').value);
 }

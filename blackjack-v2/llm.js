@@ -92,7 +92,7 @@ export async function getInsuranceDecision(playerName, model, bankroll, bet, han
     {
       role: 'user',
       content: `Dealer shows an Ace. Do you want insurance?
-Your hand: ${hand.cards.map(c => c.rank + c.suit).join(', ')} (${hand.total})
+Your hand: ${hand.cards.map(c => c.rank + c.suit).join(', ')} (${hand.label})
 Your bet: $${bet}
 Max insurance bet: $${maxInsurance}
 Bankroll: $${bankroll}
