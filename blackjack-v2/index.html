@@ -1,12 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blackjack V2</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blackjack AI Agent</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Blackjack V2</h1>
-    <p>Coming soon...</p>
+
+  <!-- Header -->
+  <header>
+    <h1>Blackjack AI Agent</h1>
+    <div class="key-row">
+      <label class="upload-btn">
+        Upload .env
+        <input type="file" id="env-upload" accept=".env,.txt" hidden>
+      </label>
+      <span id="key-status" class="key-status">No key loaded</span>
+    </div>
+  </header>
+
+  <!-- Setup Panel -->
+  <section id="setup-panel">
+    <div class="setup-card">
+      <h2>Configure Players</h2>
+
+      <div class="setup-row">
+        <label>AI Player 1 Name</label>
+        <input type="text" id="ai1-name" value="Agent Alpha">
+      </div>
+      <div class="setup-row">
+        <label>AI Player 1 Model</label>
+        <select id="ai1-model"></select>
+      </div>
+
+      <div class="setup-row">
+        <label>AI Player 2 Name</label>
+        <input type="text" id="ai2-name" value="Agent Beta">
+      </div>
+      <div class="setup-row">
+        <label>AI Player 2 Model</label>
+        <select id="ai2-model"></select>
+      </div>
+
+      <p id="model-warning" class="warning hidden">AI players must use different models.</p>
+
+      <div class="setup-row">
+        <label>Starting Bankroll</label>
+        <input type="number" id="starting-bankroll" value="1000" min="100" step="100">
+      </div>
+
+      <button id="start-btn" class="btn btn-primary" disabled>Start Game</button>
+    </div>
+  </section>
+
+  <!-- Game Area -->
+  <div id="game-area" class="hidden">
+    <!-- Dynamically built by main.js -->
+  </div>
+
+  <!-- Bet Controls -->
+  <div id="bet-controls" class="controls hidden">
+    <h3>Place Your Bet</h3>
+    <input type="number" id="bet-input" min="10" value="10">
+    <button id="confirm-bet-btn" class="btn btn-primary">Confirm Bet</button>
+  </div>
+
+  <!-- Insurance Controls -->
+  <div id="insurance-controls" class="controls hidden">
+    <h3>Insurance? (Dealer shows Ace)</h3>
+    <p>Max insurance: $<span id="insurance-max">0</span></p>
+    <button id="insurance-yes" class="btn btn-secondary">Yes, take insurance</button>
+    <button id="insurance-no" class="btn">No thanks</button>
+  </div>
+
+  <!-- Action Controls -->
+  <div id="action-controls" class="controls hidden">
+    <h3>Your Turn</h3>
+    <div class="action-btns">
+      <button id="btn-hit"       class="btn btn-action">Hit</button>
+      <button id="btn-stand"     class="btn btn-action">Stand</button>
+      <button id="btn-double"    class="btn btn-action">Double Down</button>
+      <button id="btn-split"     class="btn btn-action">Split</button>
+      <button id="btn-surrender" class="btn btn-action">Surrender</button>
+    </div>
+  </div>
+
+  <!-- Next Hand -->
+  <div class="controls">
+    <button id="next-hand-btn" class="btn btn-primary hidden">Next Hand</button>
+  </div>
+
+  <!-- Game Log -->
+  <aside>
+    <h3>Game Log</h3>
+    <div id="game-log"></div>
+  </aside>
+
+  <script type="module" src="main.js"></script>
 </body>
 </html>
