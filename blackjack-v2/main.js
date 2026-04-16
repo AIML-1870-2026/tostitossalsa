@@ -769,6 +769,21 @@ document.addEventListener('DOMContentLoaded', () => {
   showPhase('setup');
 
   $('env-upload').addEventListener('change',    e => { if (e.target.files[0]) handleEnvUpload(e.target.files[0]); });
+  $('api-key-btn').addEventListener('click', () => {
+    const key = $('api-key-input').value.trim();
+    const status = $('api-key-status');
+    if (key.startsWith('sk-') && key.length > 20) {
+      setApiKey(key);
+      $('key-status').textContent = `Key loaded: ${key.slice(0, 5)}...${key.slice(-4)}`;
+      $('key-status').className = 'key-status ok';
+      status.textContent = `Key saved: ${key.slice(0, 5)}...${key.slice(-4)}`;
+      status.className = 'key-status ok';
+      $('api-key-input').value = '';
+    } else {
+      status.textContent = 'Invalid key format';
+      status.className = 'key-status err';
+    }
+  });
   $('ai1-model').addEventListener('change',     validateModels);
   $('ai2-model').addEventListener('change',     validateModels);
   $('start-btn').addEventListener('click',      startGame);

@@ -93,6 +93,7 @@ header h1 { font-size: 1.4rem; color: var(--accent); letter-spacing: 1px; }
   font-size: 0.9rem;
 }
 .warning { color: #fbbf24; font-size: 0.85rem; }
+.setup-divider { border: none; border-top: 1px solid #334155; margin: 20px 0; }
 
 /* ── Game Area ── */
 #game-area {
