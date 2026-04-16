@@ -1071,6 +1071,37 @@
             50%       { filter: drop-shadow(0 0 14px rgba(240, 208, 96, 0.9)); }
         }
 
+        /* Blackjack V2 / two-cards icon */
+        .project-card__icon--blackjack-v2 {
+            background:
+                /* Back card (slightly offset) */
+                linear-gradient(#cccccc 0 0) 18px 10px / 36px 48px,
+                linear-gradient(#eeeeee 0 0) 20px 12px / 32px 44px,
+                /* Front card */
+                linear-gradient(#ccc 0 0) 26px 6px / 36px 48px,
+                linear-gradient(#fffffe 0 0) 28px 8px / 32px 44px,
+                /* Spade top circles */
+                radial-gradient(circle, #1a1a2e 50%, transparent 51%) 34px 18px / 8px 8px,
+                radial-gradient(circle, #1a1a2e 50%, transparent 51%) 42px 18px / 8px 8px,
+                /* Spade peak */
+                linear-gradient(#1a1a2e 0 0) 37px 12px / 10px 10px,
+                /* Spade stem */
+                linear-gradient(#1a1a2e 0 0) 39px 28px / 6px 6px,
+                /* Spade base */
+                linear-gradient(#1a1a2e 0 0) 34px 34px / 16px 4px,
+                /* "2" rank mark top-left (red) */
+                linear-gradient(#c0392b 0 0) 30px 12px / 6px 8px,
+                /* Background */
+                linear-gradient(#1a1626 0 0) 0 0 / 100% 100%;
+            background-repeat: no-repeat;
+            animation: blackjackV2Glow 2.5s ease-in-out infinite;
+        }
+
+        @keyframes blackjackV2Glow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(240, 208, 96, 0.4)); }
+            50%       { filter: drop-shadow(0 0 14px rgba(240, 208, 96, 0.9)); }
+        }
+
         /* Readable / book icon */
         .project-card__icon--readable {
             background:
@@ -1638,6 +1669,20 @@
                             <div class="project-card__icon project-card__icon--science-experiment" role="img" aria-label="Pixel art flask with bubbles"></div>
                             <h3 class="project-card__title">Science Experiment Generator</h3>
                             <a href="science-experiment-generator/index.html" class="project-card__link">View Project</a>
+                        </div>
+                    </article>
+
+                    <!-- Blackjack V2 Project -->
+                    <article class="project-card">
+                        <div class="project-card__header">
+                            <span class="project-card__dot project-card__dot--red"></span>
+                            <span class="project-card__dot project-card__dot--yellow"></span>
+                            <span class="project-card__dot project-card__dot--green"></span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__icon project-card__icon--blackjack-v2" role="img" aria-label="Pixel art two playing cards"></div>
+                            <h3 class="project-card__title">Blackjack V2</h3>
+                            <a href="blackjack-v2/index.html" class="project-card__link">Play Game</a>
                         </div>
                     </article>
                 </div>
