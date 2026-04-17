@@ -40,7 +40,7 @@ function addLog(msg) {
 }
 
 function showPhase(phase) {
-  ['setup-panel', 'game-area', 'bet-controls', 'action-controls', 'insurance-controls'].forEach(id => {
+  ['setup-panel', 'game-area', 'bet-controls', 'action-controls', 'insurance-controls', 'next-hand-controls'].forEach(id => {
     const e = $(id);
     if (e) e.classList.add('hidden');
   });
@@ -237,7 +237,7 @@ async function startHand() {
   state.dealer.hands = [freshHand()];
   state.phase = 'betting';
 
-  $('next-hand-btn').classList.add('hidden');
+  $('next-hand-controls').classList.add('hidden');
   renderAll();
   addLog('--- Betting ---');
 
@@ -255,6 +255,7 @@ async function startHand() {
       const amount = MIN_BET;
       p.hands[0].bet = amount;
       p.bankroll -= amount;
+      p.lastReasoning = 'No API response — placing minimum bet';
       addLog(`${p.name} bets $${amount} (fallback)`);
     }
     p.hands[0].status = '';
@@ -334,7 +335,7 @@ async function checkInsurance() {
       } else {
         addLog(`${p.name} declines insurance`);
       }
-    } catch { addLog(`${p.name} declines insurance (error)`); }
+    } catch { p.lastReasoning = 'No API response — declining insurance'; addLog(`${p.name} declines insurance (error)`); }
     p.hands[0].status = '';
     renderPlayerZone(p);
   }
@@ -719,7 +720,7 @@ function resolveHands() {
 function endHand() {
   const allBust = state.players.every(p => p.bankroll <= 0);
   $('next-hand-btn').textContent = allBust ? 'Restart' : 'Next Hand';
-  $('next-hand-btn').classList.remove('hidden');
+  $('next-hand-controls').classList.remove('hidden');
   $('next-hand-btn').disabled = false;
   if (allBust) addLog('=== All players bust out. Game over. ===');
 }
