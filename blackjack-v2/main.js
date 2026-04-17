@@ -4,7 +4,7 @@ import {
   createDeck, shuffleDeck, handTotal, isSoft,
   isBust, isBlackjack, isPair, handLabel, cardDisplay
 } from './blackjack.js';
-import { setApiKey, getBetDecision, getInsuranceDecision, getActionDecision } from './llm.js';
+import { setApiKey, getBetDecision, getInsuranceDecision, getActionDecision, getAdvisorRecommendation } from './llm.js';
 import { Analytics } from './analytics.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -20,8 +20,7 @@ let analytics = null;
 const state = {
   phase: 'setup',
   players: [],
-  dealer: null,
-  log: []
+  dealer: null
 };
 
 // ── DOM helpers ────────────────────────────────────────────────────────────
@@ -29,14 +28,44 @@ const state = {
 const $ = id => document.getElementById(id);
 
 function addLog(msg) {
-  state.log.push(msg);
-  const logEl = $('game-log');
-  if (!logEl) return;
-  const line = document.createElement('div');
-  line.className = 'log-line';
-  line.textContent = msg;
-  logEl.appendChild(line);
-  logEl.scrollTop = logEl.scrollHeight;
+  // Logging to console only — game log panel replaced by AI Advisor
+  console.log('[GameLog]', msg);
+}
+
+function updateAdvisor(recommendation) {
+  const contentEl = $('advisor-content');
+  if (!contentEl) return;
+  const div = document.createElement('div');
+  div.className = 'advisor-recommendation';
+  div.innerHTML = `<div class="rec-header">Advisor</div><div class="rec-body">${recommendation}</div>`;
+  contentEl.replaceChildren(div);
+}
+
+async function requestAdvisorUpdate() {
+  const human = state.players.find(p => p.isHuman);
+  if (!human) return;
+
+  const dealerUp = state.dealer?.hands?.[0]?.cards?.[0] || null;
+  const playerHands = human.hands || [];
+  const currentBet = playerHands[0]?.bet || 0;
+
+  // Use the first AI player's model for the advisor, or fall back to gpt-4o-mini
+  const advisorModel = state.players.find(p => !p.isHuman && !p.isDealer)?.model || 'gpt-4o-mini';
+
+  const gameState = {
+    dealerUpCard: dealerUp,
+    playerHands,
+    currentBankroll: human.bankroll,
+    currentBet,
+    deckCount: 1
+  };
+
+  try {
+    const recommendation = await getAdvisorRecommendation(gameState, null, advisorModel);
+    updateAdvisor(recommendation);
+  } catch (e) {
+    console.error('[Advisor] requestAdvisorUpdate error:', e);
+  }
 }
 
 function showPhase(phase) {
@@ -172,7 +201,7 @@ function buildGameArea() {
 
 function playerZoneHTML({ id, isDealer, isAI, isHuman }) {
   const aiExtras = isAI ? `
-    <details class="ai-reasoning"><summary>Reasoning</summary><p class="ai-reasoning-text">—</p></details>
+    <details class="ai-reasoning" open><summary>Reasoning</summary><p class="ai-reasoning-text">—</p></details>
     <canvas id="chart-${id}" class="bankroll-chart" width="120" height="40"></canvas>` : '';
   return `
     <div class="player-zone" id="zone-${id}">
@@ -308,6 +337,7 @@ function dealCards() {
   addLog(`Dealer shows: ${cardDisplay(state.dealer.hands[0].cards[0])}`);
 
   renderAll();
+  requestAdvisorUpdate();
   checkInsurance();
 }
 
@@ -434,6 +464,7 @@ function getLegalActions(hand, bankroll, firstAction) {
 async function startActionPhase() {
   state.phase = 'action';
   addLog('--- Actions ---');
+  requestAdvisorUpdate();
 
   for (const p of state.players.filter(p => p.hands[0].status !== 'Bust Out')) {
     // Use index-based while loop so newly inserted split hands are played automatically

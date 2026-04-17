@@ -131,3 +131,66 @@ Respond with JSON: {"action":"<one of: ${legalActions.join('|')}>","reasoning":"
   console.log('[LLM] Action decision:', action, '-', parsed.reasoning);
   return { action, reasoning: parsed.reasoning || '' };
 }
+
+export async function getAdvisorRecommendation(gameState, apiKey, model) {
+  const { dealerUpCard, playerHands, currentBankroll, currentBet, deckCount } = gameState;
+
+  const systemPrompt = 'You are a blackjack strategy advisor. Given the current game state, provide a concise strategic recommendation (2-4 sentences). Focus on the optimal play and why. Be direct and actionable.';
+
+  const handsText = playerHands.map((h, i) => {
+    const label = h.label || '';
+    const cards = (h.cards || []).map(c => c.rank + c.suit).join(', ');
+    return `Hand ${i + 1}: ${cards} (${label})`;
+  }).join('; ');
+
+  const userPrompt = `Current blackjack game state:
+Dealer up card: ${dealerUpCard ? dealerUpCard.rank + dealerUpCard.suit : 'Unknown'}
+Your hand(s): ${handsText || 'No hands yet'}
+Current bet: $${currentBet || 0}
+Bankroll: $${currentBankroll || 0}
+Decks in play: ${deckCount || 1}
+
+What is the optimal strategy right now? Provide a direct recommendation.`;
+
+  if (!openaiKey && !apiKey) {
+    return 'No API key available — cannot fetch advisor recommendation.';
+  }
+
+  const savedKey = openaiKey;
+  if (apiKey && apiKey !== openaiKey) openaiKey = apiKey;
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + openaiKey
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        max_tokens: 200
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const msg = err.error?.message || `HTTP ${res.status}`;
+      console.error('[Advisor] Error:', msg);
+      return `Advisor unavailable: ${msg}`;
+    }
+
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content?.trim() || '';
+    console.log('[Advisor] Recommendation:', text);
+    return text || 'No recommendation returned.';
+  } catch (e) {
+    console.error('[Advisor] Fetch error:', e);
+    return 'Advisor unavailable — network error.';
+  } finally {
+    openaiKey = savedKey;
+  }
+}
