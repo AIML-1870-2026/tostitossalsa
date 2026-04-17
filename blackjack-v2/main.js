@@ -190,12 +190,10 @@ function buildGameArea() {
   if ($('zone-dealer')) return;
   $('game-area').innerHTML = `
     <div class="table-layout">
-      <div class="dealer-row">${playerZoneHTML({ id: 'dealer', isDealer: true })}</div>
-      <div class="ai-row">
-        ${playerZoneHTML({ id: 'ai1', isAI: true })}
-        ${playerZoneHTML({ id: 'ai2', isAI: true })}
-      </div>
-      <div class="human-row">${playerZoneHTML({ id: 'human', isHuman: true })}</div>
+      ${playerZoneHTML({ id: 'dealer', isDealer: true })}
+      ${playerZoneHTML({ id: 'ai1', isAI: true })}
+      ${playerZoneHTML({ id: 'ai2', isAI: true })}
+      ${playerZoneHTML({ id: 'human', isHuman: true })}
     </div>`;
 }
 
