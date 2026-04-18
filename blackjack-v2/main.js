@@ -6,7 +6,7 @@ import {
 } from './blackjack.js';
 import { setApiKey, getBetDecision, getInsuranceDecision, getActionDecision, getAdvisorRecommendation } from './llm.js';
 import { Analytics } from './analytics.js';
-import { renderHeatmap } from './strategy.js';
+
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -126,7 +126,10 @@ function renderPlayerZone(player) {
     info.className = 'hand-info';
     const totalEl = document.createElement('span');
     totalEl.className = 'hand-total';
-    totalEl.textContent = hand.label || handLabel(hand.cards);
+    const holeHidden = player.isDealer && state.phase !== 'resolution';
+    totalEl.textContent = holeHidden
+      ? handLabel([hand.cards[0]])
+      : (hand.label || handLabel(hand.cards));
     info.appendChild(totalEl);
 
     if (hand.status) {
@@ -211,8 +214,7 @@ function playerZoneHTML({ id, isDealer, isAI, isHuman }) {
       <button class="explain-btn" data-level="in-depth" data-player="${id}">In-depth</button>
     </div>
     <details class="ai-reasoning" open><summary>Reasoning</summary><p class="ai-reasoning-text">—</p></details>
-    <canvas id="chart-${id}" class="bankroll-chart" width="120" height="40"></canvas>
-    <canvas id="heatmap-${id}" class="strategy-heatmap hidden" width="220" height="120"></canvas>` : '';
+    <canvas id="chart-${id}" class="bankroll-chart" width="120" height="40"></canvas>` : '';
   return `
     <div class="player-zone" id="zone-${id}">
       <div class="player-header">
@@ -578,10 +580,6 @@ async function aiTurn(player, handIdx) {
     }
 
     addLog(`${player.name} hand ${handIdx + 1}: ${action}`);
-
-    const _ht = hand.fromSplit ? 'hard' : (isPair(hand.cards) ? 'pair' : (isSoft(hand.cards) ? 'soft' : 'hard'));
-    const _totalOrRank = _ht === 'pair' ? hand.cards[0].rank : handTotal(hand.cards);
-    renderHeatmap(`heatmap-${player.id}`, _totalOrRank, state.dealer.hands[0].cards[0].rank, action, _ht);
 
     if (action === 'hit') {
       hand.cards.push(deck.pop());
