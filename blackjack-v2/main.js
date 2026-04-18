@@ -6,6 +6,7 @@ import {
 } from './blackjack.js';
 import { setApiKey, getBetDecision, getInsuranceDecision, getActionDecision, getAdvisorRecommendation } from './llm.js';
 import { Analytics } from './analytics.js';
+import { renderHeatmap } from './strategy.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -161,6 +162,11 @@ function renderPlayerZone(player) {
       const statsEl = zone.querySelector('.player-stats');
       const stats = analytics.getStats(player.name);
       if (stats && statsEl) statsEl.textContent = `W:${stats.wins} L:${stats.losses} P:${stats.pushes} (${stats.winRate}% WR)`;
+      const dq = analytics.getDecisionQuality(player.name);
+      if (dq && dq.total > 0) {
+        const dqEl = zone.querySelector('.decision-quality');
+        if (dqEl) dqEl.textContent = `Strategy: ${dq.correct}/${dq.total} (${dq.accuracy})`;
+      }
       const colors = { ai1: '#60a5fa', ai2: '#f472b6' };
       analytics.renderChart(`chart-${player.id}`, player.name, colors[player.id]);
     }
@@ -199,14 +205,20 @@ function buildGameArea() {
 
 function playerZoneHTML({ id, isDealer, isAI, isHuman }) {
   const aiExtras = isAI ? `
+    <div class="explain-toggle" id="explain-toggle-${id}">
+      <button class="explain-btn active" data-level="basic" data-player="${id}">Basic</button>
+      <button class="explain-btn" data-level="statistical" data-player="${id}">Statistical</button>
+      <button class="explain-btn" data-level="in-depth" data-player="${id}">In-depth</button>
+    </div>
     <details class="ai-reasoning" open><summary>Reasoning</summary><p class="ai-reasoning-text">—</p></details>
-    <canvas id="chart-${id}" class="bankroll-chart" width="120" height="40"></canvas>` : '';
+    <canvas id="chart-${id}" class="bankroll-chart" width="120" height="40"></canvas>
+    <canvas id="heatmap-${id}" class="strategy-heatmap" width="220" height="120"></canvas>` : '';
   return `
     <div class="player-zone" id="zone-${id}">
       <div class="player-header">
         <span class="player-name" id="name-${id}">—</span>
         ${!isDealer ? '<span class="bankroll">$1000</span>' : ''}
-        ${isAI ? '<span class="player-stats"></span>' : ''}
+        ${isAI ? '<span class="player-stats"></span><span class="decision-quality"></span>' : ''}
       </div>
       <div class="player-hands"></div>
       ${aiExtras}
@@ -234,8 +246,8 @@ function startGame() {
   $('model-warning').classList.add('hidden');
 
   state.players = [
-    { id: 'ai1',   name: ai1Name, model: ai1Model, bankroll, hands: [], history: [], isHuman: false, isDealer: false },
-    { id: 'ai2',   name: ai2Name, model: ai2Model, bankroll, hands: [], history: [], isHuman: false, isDealer: false },
+    { id: 'ai1',   name: ai1Name, model: ai1Model, bankroll, hands: [], history: [], isHuman: false, isDealer: false, explainLevel: 'basic' },
+    { id: 'ai2',   name: ai2Name, model: ai2Model, bankroll, hands: [], history: [], isHuman: false, isDealer: false, explainLevel: 'basic' },
     { id: 'human', name: 'You',   model: null,      bankroll, hands: [], history: [], isHuman: true,  isDealer: false }
   ];
   state.dealer = { id: 'dealer', name: 'Dealer', model: null, bankroll: null, hands: [], isDealer: true, history: [] };
@@ -273,7 +285,7 @@ async function startHand() {
     p.hands[0].status = 'Thinking...';
     renderPlayerZone(p);
     try {
-      const { amount, reasoning } = await getBetDecision(p.name, p.model, p.bankroll, MIN_BET, p.history.slice(-3));
+      const { amount, reasoning } = await getBetDecision(p.name, p.model, p.bankroll, MIN_BET, p.history.slice(-3), p.explainLevel || 'basic');
       p.hands[0].bet = amount;
       p.bankroll -= amount;          // deduct bet immediately
       p.lastReasoning = reasoning;
@@ -352,7 +364,7 @@ async function checkInsurance() {
     renderPlayerZone(p);
     try {
       const { take, amount, reasoning } = await getInsuranceDecision(
-        p.name, p.model, p.bankroll, p.hands[0].bet, p.hands[0], p.history.slice(-3)
+        p.name, p.model, p.bankroll, p.hands[0].bet, p.hands[0], p.history.slice(-3), p.explainLevel || 'basic'
       );
       p.lastReasoning = reasoning;
       if (take && amount > 0) {
@@ -550,12 +562,26 @@ async function aiTurn(player, handIdx) {
       ({ action, reasoning } = await getActionDecision(
         player.name, player.model, player.bankroll,
         { cards: hand.cards, label: hand.label },
-        dealerUp, legalActions, hand.bet, splitInfo
+        dealerUp, legalActions, hand.bet, splitInfo, player.explainLevel || 'basic'
       ));
     } catch { action = 'stand'; reasoning = 'Error — defaulting to stand'; }
 
     player.lastReasoning = reasoning;
+
+    if (analytics) {
+      const total = handTotal(hand.cards);
+      const soft = isSoft(hand.cards);
+      const pair = isPair(hand.cards);
+      const handType = pair ? 'pair' : soft ? 'soft' : 'hard';
+      const pairRank = pair ? hand.cards[0].rank : undefined;
+      analytics.recordDecision(player.name, total, dealerUp.rank, action, handType, pairRank);
+    }
+
     addLog(`${player.name} hand ${handIdx + 1}: ${action}`);
+
+    const _ht = hand.fromSplit ? 'hard' : (isPair(hand.cards) ? 'pair' : (isSoft(hand.cards) ? 'soft' : 'hard'));
+    const _totalOrRank = _ht === 'pair' ? hand.cards[0].rank : handTotal(hand.cards);
+    renderHeatmap(`heatmap-${player.id}`, _totalOrRank, state.dealer.hands[0].cards[0].rank, action, _ht);
 
     if (action === 'hit') {
       hand.cards.push(deck.pop());
@@ -826,6 +852,19 @@ document.addEventListener('DOMContentLoaded', () => {
   ['hit', 'stand', 'double', 'split', 'surrender'].forEach(a => {
     const btn = $(`btn-${a}`);
     if (btn) btn.addEventListener('click', () => humanAction(a));
+  });
+
+  document.addEventListener('click', e => {
+    if (e.target.classList.contains('explain-btn')) {
+      const level = e.target.dataset.level;
+      const playerId = e.target.dataset.player;
+      const player = state.players.find(p => p.id === playerId);
+      if (player) player.explainLevel = level;
+      const group = document.getElementById(`explain-toggle-${playerId}`);
+      if (group) group.querySelectorAll('.explain-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.level === level);
+      });
+    }
   });
 });
 

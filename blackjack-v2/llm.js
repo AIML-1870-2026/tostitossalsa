@@ -54,21 +54,25 @@ async function callOpenAI(model, messages) {
   return parsed;
 }
 
-function buildSystemPrompt(playerName, model, bankroll, minBet) {
-  return `You are ${playerName}, an AI Blackjack player using the ${model} model.
+function buildSystemPrompt(playerName, model, bankroll, minBet, explainLevel = 'basic') {
+  let prompt = `You are ${playerName}, an AI Blackjack player using the ${model} model.
 Respond ONLY with valid JSON in the exact format requested.
 Your current bankroll: $${bankroll}
 Minimum bet: $${minBet}
 Play strategically to maximize long-term winnings.`;
+  if (explainLevel === 'basic') prompt += '\nKeep your reasoning to one sentence maximum.';
+  else if (explainLevel === 'statistical') prompt += '\nInclude brief probability and odds reasoning in 2-3 sentences.';
+  else if (explainLevel === 'in-depth') prompt += '\nProvide a full chain-of-thought explanation covering all factors.';
+  return prompt;
 }
 
-export async function getBetDecision(playerName, model, bankroll, minBet, handHistory) {
+export async function getBetDecision(playerName, model, bankroll, minBet, handHistory, explainLevel = 'basic') {
   const historyText = handHistory.length
     ? handHistory.map(h => `${h.outcome} $${h.amount}`).join(', ')
     : 'No previous hands';
 
   const messages = [
-    { role: 'system', content: buildSystemPrompt(playerName, model, bankroll, minBet) },
+    { role: 'system', content: buildSystemPrompt(playerName, model, bankroll, minBet, explainLevel) },
     {
       role: 'user',
       content: `Place your bet for this hand.
@@ -85,10 +89,10 @@ Respond with JSON: {"action":"bet","amount":<integer between ${minBet} and ${ban
   return { amount, reasoning: parsed.reasoning || '' };
 }
 
-export async function getInsuranceDecision(playerName, model, bankroll, bet, hand, handHistory) {
+export async function getInsuranceDecision(playerName, model, bankroll, bet, hand, handHistory, explainLevel = 'basic') {
   const maxInsurance = Math.floor(bet / 2);
   const messages = [
-    { role: 'system', content: buildSystemPrompt(playerName, model, bankroll, 10) },
+    { role: 'system', content: buildSystemPrompt(playerName, model, bankroll, 10, explainLevel) },
     {
       role: 'user',
       content: `Dealer shows an Ace. Do you want insurance?
@@ -107,10 +111,10 @@ Respond with JSON: {"action":"insurance","take":true|false,"amount":<integer up 
   return { take, amount, reasoning: parsed.reasoning || '' };
 }
 
-export async function getActionDecision(playerName, model, bankroll, hand, dealerUpCard, legalActions, bet, splitInfo) {
+export async function getActionDecision(playerName, model, bankroll, hand, dealerUpCard, legalActions, bet, splitInfo, explainLevel = 'basic') {
   const splitText = splitInfo ? ` (Split hand ${splitInfo.index + 1} of ${splitInfo.total})` : '';
   const messages = [
-    { role: 'system', content: buildSystemPrompt(playerName, model, bankroll, 10) },
+    { role: 'system', content: buildSystemPrompt(playerName, model, bankroll, 10, explainLevel) },
     {
       role: 'user',
       content: `Your turn${splitText}.
