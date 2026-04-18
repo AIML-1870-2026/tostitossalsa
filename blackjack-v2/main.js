@@ -212,7 +212,7 @@ function playerZoneHTML({ id, isDealer, isAI, isHuman }) {
     </div>
     <details class="ai-reasoning" open><summary>Reasoning</summary><p class="ai-reasoning-text">—</p></details>
     <canvas id="chart-${id}" class="bankroll-chart" width="120" height="40"></canvas>
-    <canvas id="heatmap-${id}" class="strategy-heatmap" width="220" height="120"></canvas>` : '';
+    <canvas id="heatmap-${id}" class="strategy-heatmap hidden" width="220" height="120"></canvas>` : '';
   return `
     <div class="player-zone" id="zone-${id}">
       <div class="player-header">
@@ -782,7 +782,7 @@ function endHand() {
 
 function nextHand() {
   if (state.players.every(p => p.bankroll <= 0)) { location.reload(); return; }
-  $('next-hand-btn').classList.add('hidden');
+  $('next-hand-controls').classList.add('hidden');
   startHand();
 }
 

@@ -80,6 +80,7 @@ function rowMatchesTotal(row, currentTotal, handType) {
 export function renderHeatmap(canvasId, currentTotal, currentDealerUp, aiAction, handType) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
+  canvas.classList.remove('hidden');
   const ctx = canvas.getContext('2d');
   const W = canvas.width;
   const H = canvas.height;

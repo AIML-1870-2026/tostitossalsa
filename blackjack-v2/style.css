@@ -217,7 +217,7 @@ header h1 { font-size: 1.4rem; color: var(--accent); letter-spacing: 1px; }
   overflow-x: hidden;
   word-break: break-word;
 }
-.bankroll-chart { display: block; margin-top: 4px; border-radius: 4px; background: rgba(0,0,0,0.2); }
+.bankroll-chart { display: block; margin-top: 4px; border-radius: 4px; }
 
 /* ── Controls ── */
 .controls {
@@ -316,7 +316,7 @@ aside h3 { padding: 12px 16px; font-size: 0.85rem; color: var(--muted); border-b
   display: block;
   margin-top: 4px;
   border-radius: 3px;
-  background: #0f172a;
+  max-width: 100%;
 }
 
 /* ── Responsive ── */
