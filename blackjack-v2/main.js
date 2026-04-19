@@ -128,7 +128,7 @@ function renderPlayerZone(player) {
     totalEl.className = 'hand-total';
     const holeHidden = player.isDealer && state.phase !== 'resolution';
     totalEl.textContent = holeHidden
-      ? handLabel([hand.cards[0]])
+      ? (hand.cards.length > 0 ? handLabel([hand.cards[0]]) : '')
       : (hand.label || handLabel(hand.cards));
     info.appendChild(totalEl);
 
