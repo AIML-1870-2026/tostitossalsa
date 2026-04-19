@@ -807,7 +807,6 @@ function handleEnvUpload(file) {
       setApiKey(apiKey);
       $('key-status').textContent = `Key loaded: ${apiKey.slice(0, 5)}...${apiKey.slice(-4)}`;
       $('key-status').className = 'key-status ok';
-      $('start-btn').disabled = false;
     } else {
       $('key-status').textContent = 'No OPENAI_API_KEY found in file';
       $('key-status').className = 'key-status err';
@@ -832,7 +831,6 @@ document.addEventListener('DOMContentLoaded', () => {
       $('key-status').className = 'key-status ok';
       status.textContent = `Key saved: ${key.slice(0, 5)}...${key.slice(-4)}`;
       status.className = 'key-status ok';
-      $('start-btn').disabled = false;
       $('api-key-input').value = '';
     } else {
       status.textContent = 'Invalid key format';
